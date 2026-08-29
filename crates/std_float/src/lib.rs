@@ -97,7 +97,7 @@ pub impl(self) trait StdFloat: Sized {
     }
 
     /// Produces a vector where every element has the logarithm with respect to an arbitrary
-    /// in the equivalently-indexed elements in `self` and `base`.
+    /// base, using the equivalently-indexed elements in `self` and `base`.
     #[inline]
     #[must_use = "method returns a new vector and does not mutate the original value"]
     fn log(self, base: Self) -> Self {
@@ -134,7 +134,11 @@ pub impl(self) trait StdFloat: Sized {
         unsafe { intrinsics::simd_floor(self) }
     }
 
-    /// Rounds to the nearest integer value. Ties round toward zero.
+    /// Rounds to the nearest integer value, with halfway cases rounded away from zero.
+    ///
+    /// This matches the behavior of [`f32::round`] and [`f64::round`]. Use
+    /// [`round_ties_even`](Self::round_ties_even) to round halfway cases to the nearest even
+    /// integer instead.
     #[must_use = "method returns a new vector and does not mutate the original value"]
     #[inline]
     fn round(self) -> Self {
