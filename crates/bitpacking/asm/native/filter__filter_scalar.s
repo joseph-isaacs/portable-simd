@@ -1,4 +1,3 @@
- `release` profile [optimized + debuginfo] target(s) in 0.04s
 bitpacking::filter::filter_scalar:
 	push rbp
 	push r15
@@ -239,18 +238,18 @@ bitpacking::filter::filter_scalar:
 	pop rbp
 	ret
 .LBB19_15:
-	lea r9, [rip + .Lanon.b4b483a0d84f5ce4c05f22c05dbde6d1.1]
+	lea r9, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.1]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB19_14:
-	lea rdx, [rip + .Lanon.b4b483a0d84f5ce4c05f22c05dbde6d1.3]
+	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
 	mov rdi, rax
 	mov rsi, qword ptr [rsp]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
 .LBB19_13:
-	lea rdx, [rip + .Lanon.b4b483a0d84f5ce4c05f22c05dbde6d1.2]
+	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.2]
 	mov rdi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

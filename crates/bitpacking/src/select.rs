@@ -103,6 +103,24 @@ fn scan_scalar(bits: &[u64], mut n: usize, in_word: impl Fn(u64, u32) -> u32) ->
     None
 }
 
+/// Scalar word scan unrolled by 8: sums eight independent `popcnt`s before testing, so the
+/// per-word compare/branch of `scan_scalar` is amortised and popcnt throughput is the limit.
+#[inline(always)]
+fn scan_scalar8(bits: &[u64], mut n: usize, in_word: impl Fn(u64, u32) -> u32) -> Option<usize> {
+    let (chunks, rem) = bits.as_chunks::<8>();
+    for (ci, c) in chunks.iter().enumerate() {
+        let mut total = 0usize;
+        for &w in c {
+            total += w.count_ones() as usize;
+        }
+        if n < total {
+            return scan_scalar(c, n, in_word).map(|p| ci * 512 + p);
+        }
+        n -= total;
+    }
+    scan_scalar(rem, n, in_word).map(|p| chunks.len() * 512 + p)
+}
+
 /// Portable SIMD word scan: popcount 8 words at a time, skip whole chunks by their total,
 /// locate the word inside a chunk with a lane prefix-sum + compare.
 #[inline(always)]
@@ -141,6 +159,12 @@ pub fn select_portable(bits: &[u64], n: usize) -> Option<usize> {
 #[cfg(target_feature = "bmi2")]
 pub fn select_pdep(bits: &[u64], n: usize) -> Option<usize> {
     scan_scalar(bits, n, select64_pdep)
+}
+
+/// Unrolled scalar scan, PDEP in-word.
+#[cfg(target_feature = "bmi2")]
+pub fn select_scan8_pdep(bits: &[u64], n: usize) -> Option<usize> {
+    scan_scalar8(bits, n, select64_pdep)
 }
 
 /// Mixed: vector scan, PDEP in-word.
@@ -219,6 +243,7 @@ mod tests {
     #[test]
     fn pdep() {
         check(select_pdep);
+        check(select_scan8_pdep);
         check(select_portable_scan_pdep);
     }
 }

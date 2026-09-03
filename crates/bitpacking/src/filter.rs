@@ -35,6 +35,20 @@ impl<'a> BitWriter<'a> {
         }
     }
 
+    /// Same as `push` but without the data-dependent flush branch: the low word is stored
+    /// unconditionally (so `out` needs one spare word of capacity) and the bookkeeping is
+    /// done with arithmetic that LLVM turns into `cmov`/`shrd`.
+    #[inline(always)]
+    fn push_branchless(&mut self, bits: u64, n: u32) {
+        self.acc |= (bits as u128) << self.fill;
+        self.fill += n;
+        self.out[self.idx] = self.acc as u64;
+        let full = self.fill >> 6; // 0 or 1, since fill <= 127
+        self.idx += full as usize;
+        self.acc >>= full * 64;
+        self.fill &= 63;
+    }
+
     /// Flushes the partial word and returns the total number of bits written.
     #[inline(always)]
     fn finish(self) -> usize {
@@ -119,31 +133,46 @@ pub fn pext_bmi2(x: u64, m: u64) -> u64 {
 }
 
 #[inline(always)]
-fn filter_with(values: &[u64], mask: &[u64], out: &mut [u64], pext: impl Fn(u64, u64) -> u64) -> usize {
+fn filter_with<const BRANCHLESS: bool>(
+    values: &[u64],
+    mask: &[u64],
+    out: &mut [u64],
+    pext: impl Fn(u64, u64) -> u64,
+) -> usize {
     assert_eq!(values.len(), mask.len());
     let mut w = BitWriter::new(out);
     for (&v, &m) in values.iter().zip(mask) {
-        w.push(pext(v, m), m.count_ones());
+        if BRANCHLESS {
+            w.push_branchless(pext(v, m), m.count_ones());
+        } else {
+            w.push(pext(v, m), m.count_ones());
+        }
     }
     w.finish()
 }
 
 /// Returns the number of output bits; `out` needs `values.len()` words of capacity.
 pub fn filter_naive(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
-    filter_with(values, mask, out, pext_naive)
+    filter_with::<false>(values, mask, out, pext_naive)
 }
 
 pub fn filter_scalar(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
-    filter_with(values, mask, out, pext_hd)
+    filter_with::<false>(values, mask, out, pext_hd)
 }
 
 #[cfg(target_feature = "bmi2")]
 pub fn filter_bmi2(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
-    filter_with(values, mask, out, pext_bmi2)
+    filter_with::<false>(values, mask, out, pext_bmi2)
 }
 
-/// Portable SIMD: compress and popcount 8 words per step, then append the 8 results.
-pub fn filter_portable(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+/// `pext` + branchless writer. `out` needs `values.len() + 1` words of capacity.
+#[cfg(target_feature = "bmi2")]
+pub fn filter_bmi2_branchless(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_with::<true>(values, mask, out, pext_bmi2)
+}
+
+#[inline(always)]
+fn filter_portable_impl<const BRANCHLESS: bool>(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
     assert_eq!(values.len(), mask.len());
     let (vc, vr) = values.as_chunks::<8>();
     let (mc, mr) = mask.as_chunks::<8>();
@@ -153,13 +182,27 @@ pub fn filter_portable(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
         let packed = pext_hd_simd(Simd::from_array(*v), m).to_array();
         let counts = m.count_ones().to_array();
         for j in 0..8 {
-            w.push(packed[j], counts[j] as u32);
+            if BRANCHLESS {
+                w.push_branchless(packed[j], counts[j] as u32);
+            } else {
+                w.push(packed[j], counts[j] as u32);
+            }
         }
     }
     for (&v, &m) in vr.iter().zip(mr) {
         w.push(pext_hd(v, m), m.count_ones());
     }
     w.finish()
+}
+
+/// Portable SIMD: compress and popcount 8 words per step, then append the 8 results.
+pub fn filter_portable(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_portable_impl::<false>(values, mask, out)
+}
+
+/// Portable SIMD + branchless writer. `out` needs `values.len() + 1` words of capacity.
+pub fn filter_portable_branchless(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_portable_impl::<true>(values, mask, out)
 }
 
 /// Portable SIMD with 4 lanes (one AVX2 register) for comparison.
@@ -218,7 +261,7 @@ mod tests {
                 let values = rng.words(len, 4);
                 let mask = rng.words(len, density);
                 let (expect, n) = reference(&values, &mask);
-                let mut got = vec![0u64; len];
+                let mut got = vec![0u64; len + 1];
                 let got_n = f(&values, &mask, &mut got);
                 assert_eq!(n, got_n, "len={len} density={density}");
                 assert_eq!(expect[..n.div_ceil(64)], got[..n.div_ceil(64)], "len={len} density={density}");
@@ -251,10 +294,12 @@ mod tests {
     fn portable() {
         check(filter_portable);
         check(filter_portable4);
+        check(filter_portable_branchless);
     }
     #[cfg(target_feature = "bmi2")]
     #[test]
     fn bmi2() {
         check(filter_bmi2);
+        check(filter_bmi2_branchless);
     }
 }

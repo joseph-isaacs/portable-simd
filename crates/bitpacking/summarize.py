@@ -28,7 +28,9 @@ def parse(cfg):
         key = (group, name)
         if key not in rows:
             rows[key] = {}
-            order.append(key)
+            # keep a group's rows together even when a variant only exists in one config
+            last = max((i for i, k in enumerate(order) if k[0] == group), default=None)
+            order.insert(len(order) if last is None else last + 1, key)
         rows[key][cfg] = (ns, thr)
 
 for c in cfgs:

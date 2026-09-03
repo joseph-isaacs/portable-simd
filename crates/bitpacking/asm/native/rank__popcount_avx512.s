@@ -1,3 +1,4 @@
+ `release` profile [optimized + debuginfo] target(s) in 0.02s
 bitpacking::rank::popcount_avx512:
 	mov eax, esi
 	and eax, 7

@@ -108,6 +108,8 @@ fn bench_select(c: &mut Criterion) {
     #[cfg(target_feature = "bmi2")]
     b!("scalar_scan+pdep", select::select_pdep);
     #[cfg(target_feature = "bmi2")]
+    b!("scalar_scan8+pdep", select::select_scan8_pdep);
+    #[cfg(target_feature = "bmi2")]
     b!("portable_scan+pdep", select::select_portable_scan_pdep);
     g.finish();
 }
@@ -116,7 +118,7 @@ fn bench_filter(c: &mut Criterion) {
     let mut rng = Rng::new(4);
     let words = 1usize << 12; // 32 KiB values + 32 KiB mask
     let values = rng.words(words, 4);
-    let mut out = vec![0u64; words];
+    let mut out = vec![0u64; words + 1]; // +1: the branchless writers store one word ahead
     let mut g = c.benchmark_group("filter");
     g.throughput(Throughput::Bytes((words * 16) as u64));
     for density in [1u32, 4, 7] {
@@ -133,8 +135,11 @@ fn bench_filter(c: &mut Criterion) {
         b!("scalar_hd", filter::filter_scalar);
         b!("portable_u64x4", filter::filter_portable4);
         b!("portable_u64x8", filter::filter_portable);
+        b!("portable_u64x8_branchless", filter::filter_portable_branchless);
         #[cfg(target_feature = "bmi2")]
         b!("bmi2_pext", filter::filter_bmi2);
+        #[cfg(target_feature = "bmi2")]
+        b!("bmi2_pext_branchless", filter::filter_bmi2_branchless);
     }
     g.finish();
 }

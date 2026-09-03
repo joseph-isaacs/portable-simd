@@ -12,7 +12,8 @@ and against the best hand-picked x86 intrinsics:
 | `filter` | bits of `values` where `mask` is set, packed | Hacker's Delight compress per word | HD compress on `u64x8` / `u64x4` lanes | `pext` per word |
 
 All bitmaps are little-endian `&[u64]` (bit `i` is `words[i/64] >> (i%64) & 1`).
-`filter` returns the number of output bits and needs `values.len()` words of output capacity.
+`filter` returns the number of output bits and needs `values.len()` words of output capacity
+(`values.len() + 1` for the `_branchless` writers, which store one word ahead).
 
 The intrinsic variants are gated on compile-time `target_feature`s, so build with
 `-C target-cpu=...`; running from this directory picks up the repo's pinned nightly.

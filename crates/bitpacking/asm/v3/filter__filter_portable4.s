@@ -256,7 +256,7 @@ bitpacking::filter::filter_portable4:
 	jb .LBB18_28
 .LBB18_11:
 	mov rsi, r9
-	lea rdx, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.3]
+	lea rdx, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.3]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
 .LBB18_2:
@@ -490,18 +490,18 @@ bitpacking::filter::filter_portable4:
 	vzeroupper
 	ret
 .LBB18_30:
-	lea r9, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.15]
+	lea r9, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.16]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB18_7:
-	lea rdx, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.3]
+	lea rdx, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.3]
 	mov rsi, qword ptr [rsp + 8]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
 .LBB18_16:
-	lea rdx, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.2]
+	lea rdx, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.2]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

@@ -225,7 +225,7 @@ bitpacking::byte_to_bit::bytes_to_bits_portable32:
 	lea rsi, [r9 + r10]
 	jmp .LBB6_19
 .LBB6_24:
-	lea rdx, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.8]
+	lea rdx, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.10]
 	mov rsi, rcx
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

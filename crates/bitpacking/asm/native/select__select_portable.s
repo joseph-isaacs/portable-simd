@@ -5,17 +5,17 @@ bitpacking::select::select_portable:
 	sub rsp, 128
 	mov rcx, rsi
 	shr rcx, 3
-	je .LBB24_1
+	je .LBB26_1
 	mov r10, rcx
 	shl r10, 6
 	xor eax, eax
-	vpbroadcastd zmm0, dword ptr [rip + .LCPI24_4]
-	vbroadcasti32x4 zmm1, xmmword ptr [rip + .LCPI24_3]
+	vpbroadcastd zmm0, dword ptr [rip + .LCPI26_4]
+	vbroadcasti32x4 zmm1, xmmword ptr [rip + .LCPI26_3]
 	vpxor xmm2, xmm2, xmm2
 	vpxor xmm3, xmm3, xmm3
 	mov r9, rdi
 	mov r8, rdx
-.LBB24_5:
+.LBB26_5:
 	vmovdqu64 zmm4, zmmword ptr [r9]
 	vpandq zmm5, zmm4, zmm0
 	vpshufb zmm5, zmm1, zmm5
@@ -28,16 +28,16 @@ bitpacking::select::select_portable:
 	vpsadbw xmm5, xmm5, xmm3
 	vmovq r11, xmm5
 	sub r8, r11
-	jb .LBB24_12
+	jb .LBB26_12
 	add r9, 64
 	add rax, -512
 	mov rdx, r8
 	add r10, -64
-	jne .LBB24_5
+	jne .LBB26_5
 	lea r9d, [8*rsi]
 	and r9d, 56
-	je .LBB24_3
-.LBB24_7:
+	je .LBB26_3
+.LBB26_7:
 	movabs rax, 1152921504606846968
 	and rsi, rax
 	lea rsi, [rdi + 8*rsi]
@@ -46,33 +46,33 @@ bitpacking::select::select_portable:
 	xor eax, eax
 	xor edi, edi
 	mov r10, r8
-.LBB24_8:
+.LBB26_8:
 	mov rdx, qword ptr [rsi + rdi]
 	xor r11d, r11d
 	popcnt r11, rdx
 	sub r10, r11
-	jb .LBB24_11
+	jb .LBB26_11
 	add rcx, -64
 	add rdi, 8
 	mov r8, r10
 	cmp r9, rdi
-	jne .LBB24_8
+	jne .LBB26_8
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB24_1:
+.LBB26_1:
 	mov r8, rdx
 	lea r9d, [8*rsi]
 	and r9d, 56
-	jne .LBB24_7
-.LBB24_3:
+	jne .LBB26_7
+.LBB26_3:
 	xor eax, eax
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB24_12:
+.LBB26_12:
 	vpxor xmm0, xmm0, xmm0
 	valignq zmm1, zmm4, zmm0, 7
 	vpaddq zmm1, zmm1, zmm4
@@ -91,9 +91,9 @@ bitpacking::select::select_portable:
 	sub edx, dword ptr [rsp + rsi]
 	mov rsi, qword ptr [r9 + rsi]
 	vmovq xmm0, rsi
-	vpbroadcastd xmm1, dword ptr [rip + .LCPI24_4]
+	vpbroadcastd xmm1, dword ptr [rip + .LCPI26_4]
 	vpand xmm2, xmm0, xmm1
-	vmovdqa xmm3, xmmword ptr [rip + .LCPI24_3]
+	vmovdqa xmm3, xmmword ptr [rip + .LCPI26_3]
 	vpshufb xmm2, xmm3, xmm2
 	vpsrlw xmm0, xmm0, 4
 	vpand xmm0, xmm0, xmm1
@@ -134,10 +134,10 @@ bitpacking::select::select_portable:
 	pop rbp
 	vzeroupper
 	ret
-.LBB24_11:
+.LBB26_11:
 	vmovq xmm0, rdx
-	vpbroadcastd xmm1, dword ptr [rip + .LCPI24_4]
-	vmovdqa xmm2, xmmword ptr [rip + .LCPI24_3]
+	vpbroadcastd xmm1, dword ptr [rip + .LCPI26_4]
+	vmovdqa xmm2, xmmword ptr [rip + .LCPI26_3]
 	vpand xmm3, xmm0, xmm1
 	vpshufb xmm3, xmm2, xmm3
 	vpsrlw xmm0, xmm0, 4

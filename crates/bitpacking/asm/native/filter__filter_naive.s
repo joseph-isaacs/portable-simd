@@ -73,7 +73,7 @@ bitpacking::filter::filter_naive:
 	jbe .LBB18_11
 	cmp rax, qword ptr [rsp]
 	jb .LBB18_10
-	lea rdx, [rip + .Lanon.b4b483a0d84f5ce4c05f22c05dbde6d1.3]
+	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
 	mov rdi, rax
 	mov rsi, qword ptr [rsp]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
@@ -104,13 +104,13 @@ bitpacking::filter::filter_naive:
 	pop rbp
 	ret
 .LBB18_19:
-	lea r9, [rip + .Lanon.b4b483a0d84f5ce4c05f22c05dbde6d1.1]
+	lea r9, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.1]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB18_17:
-	lea rdx, [rip + .Lanon.b4b483a0d84f5ce4c05f22c05dbde6d1.2]
+	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.2]
 	mov rdi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
