@@ -42,6 +42,29 @@ impl Rng {
         (0..n).map(|_| self.word_with_density(ones_out_of_8)).collect()
     }
 
+    /// Bitmap of alternating true/false runs with geometrically distributed lengths
+    /// (mean `avg_run`), like vortex's `make_correlated_runs` mask: many all-ones and
+    /// all-zero words.
+    pub fn words_runs(&mut self, n: usize, avg_run: f64) -> Vec<u64> {
+        let mut out = vec![0u64; n];
+        let mut pos = 0usize;
+        let mut current = true;
+        let total = n * 64;
+        while pos < total {
+            let u = (self.next_u64() >> 11) as f64 / (1u64 << 53) as f64;
+            let run = ((u.max(1e-12)).ln() / (1.0 - 1.0 / avg_run).ln()) as usize + 1;
+            let end = (pos + run).min(total);
+            if current {
+                for i in pos..end {
+                    out[i / 64] |= 1 << (i % 64);
+                }
+            }
+            pos = end;
+            current = !current;
+        }
+        out
+    }
+
     /// Random byte array of `n` elements, each nonzero with probability ~`p_num/8`.
     /// Non-zero values are arbitrary bytes (not just 1) to exercise the `!= 0` semantics.
     pub fn bytes(&mut self, n: usize, ones_out_of_8: u32) -> Vec<u8> {

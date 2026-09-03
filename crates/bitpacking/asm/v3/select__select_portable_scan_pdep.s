@@ -1,4 +1,3 @@
- `release` profile [optimized + debuginfo] target(s) in 0.02s
 bitpacking::select::select_portable_scan_pdep:
 	push rbp
 	mov rbp, rsp
@@ -6,16 +5,16 @@ bitpacking::select::select_portable_scan_pdep:
 	sub rsp, 128
 	mov r8, rsi
 	shr r8, 3
-	je .LBB26_9
+	je .LBB30_9
 	mov rax, r8
 	shl rax, 6
 	xor r9d, r9d
-	vpbroadcastd ymm1, dword ptr [rip + .LCPI26_3]
-	vbroadcasti128 ymm2, xmmword ptr [rip + .LCPI26_4]
+	vpbroadcastd ymm1, dword ptr [rip + .LCPI30_3]
+	vbroadcasti128 ymm2, xmmword ptr [rip + .LCPI30_4]
 	vpxor xmm0, xmm0, xmm0
 	mov r10, rdi
 	mov rcx, rdx
-.LBB26_2:
+.LBB30_2:
 	vmovdqu ymm4, ymmword ptr [r10]
 	vmovdqu ymm3, ymmword ptr [r10 + 32]
 	vpand ymm5, ymm3, ymm1
@@ -38,16 +37,16 @@ bitpacking::select::select_portable_scan_pdep:
 	vpaddq xmm5, xmm5, xmm6
 	vmovq r11, xmm5
 	sub rcx, r11
-	jb .LBB26_11
+	jb .LBB30_11
 	add r10, 64
 	add r9, -512
 	mov rdx, rcx
 	add rax, -64
-	jne .LBB26_2
+	jne .LBB30_2
 	lea edx, [8*rsi]
 	and edx, 56
-	je .LBB26_10
-.LBB26_5:
+	je .LBB30_10
+.LBB30_5:
 	movabs rax, 1152921504606846968
 	and rsi, rax
 	lea rsi, [rdi + 8*rsi]
@@ -56,35 +55,35 @@ bitpacking::select::select_portable_scan_pdep:
 	xor eax, eax
 	xor edi, edi
 	mov r9, rcx
-.LBB26_6:
+.LBB30_6:
 	mov r10, qword ptr [rsi + rdi]
 	xor r11d, r11d
 	popcnt r11, r10
 	sub r9, r11
-	jb .LBB26_12
+	jb .LBB30_12
 	add r8, -64
 	add rdi, 8
 	mov rcx, r9
 	cmp rdx, rdi
-	jne .LBB26_6
+	jne .LBB30_6
 	mov rdx, rcx
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB26_9:
+.LBB30_9:
 	mov rcx, rdx
 	lea edx, [8*rsi]
 	and edx, 56
-	jne .LBB26_5
-.LBB26_10:
+	jne .LBB30_5
+.LBB30_10:
 	xor eax, eax
 	mov rdx, rcx
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB26_11:
+.LBB30_11:
 	vpsadbw ymm1, ymm3, ymm0
 	vpsadbw ymm0, ymm4, ymm0
 	vpblendd ymm2, ymm1, ymm0, 192
@@ -101,7 +100,7 @@ bitpacking::select::select_portable_scan_pdep:
 	vpaddq ymm1, ymm0, ymm1
 	vmovq xmm2, rdx
 	vpbroadcastq ymm2, xmm2
-	vpbroadcastq ymm3, qword ptr [rip + .LCPI26_2]
+	vpbroadcastq ymm3, qword ptr [rip + .LCPI30_2]
 	vpor ymm5, ymm1, ymm3
 	vpxor ymm2, ymm2, ymm3
 	vpcmpgtq ymm5, ymm5, ymm2
@@ -134,7 +133,7 @@ bitpacking::select::select_portable_scan_pdep:
 	pop rbp
 	vzeroupper
 	ret
-.LBB26_12:
+.LBB30_12:
 	mov eax, 1
 	shlx rcx, rax, rcx
 	pdep rcx, rcx, r10

@@ -10,22 +10,22 @@ bitpacking::filter::filter_bmi2:
 	mov qword ptr [rsp + 8], rsi
 	mov qword ptr [rsp + 16], rcx
 	cmp rsi, rcx
-	jne .LBB14_16
+	jne .LBB15_16
 	xor r8d, r8d
 	test rsi, rsi
-	je .LBB14_2
+	je .LBB15_2
 	xor ebx, ebx
 	xor eax, eax
 	xor r11d, r11d
 	xor r12d, r12d
 	xor r14d, r14d
-	jmp .LBB14_4
-.LBB14_7:
+	jmp .LBB15_4
+.LBB15_7:
 	inc r14
 	mov r12, r15
 	cmp rsi, r14
-	je .LBB14_8
-.LBB14_4:
+	je .LBB15_8
+.LBB15_4:
 	mov ecx, ebx
 	mov rbx, qword ptr [rdi + 8*r14]
 	mov r13, qword ptr [rdx + 8*r14]
@@ -43,31 +43,31 @@ bitpacking::filter::filter_bmi2:
 	or r11, r10
 	add ebx, ecx
 	cmp ebx, 63
-	jbe .LBB14_7
+	jbe .LBB15_7
 	cmp rax, r9
-	jae .LBB14_15
+	jae .LBB15_15
 	mov rcx, qword ptr [rsp]
 	mov qword ptr [rcx + 8*rax], r11
 	inc rax
 	add ebx, -64
 	mov r11, r15
 	xor r15d, r15d
-	jmp .LBB14_7
-.LBB14_8:
+	jmp .LBB15_7
+.LBB15_8:
 	test ebx, ebx
-	je .LBB14_9
+	je .LBB15_9
 	cmp rax, r9
-	jae .LBB14_13
+	jae .LBB15_13
 	mov rcx, qword ptr [rsp]
 	mov qword ptr [rcx + 8*rax], r11
 	mov r8d, ebx
-	jmp .LBB14_12
-.LBB14_2:
+	jmp .LBB15_12
+.LBB15_2:
 	xor eax, eax
-	jmp .LBB14_12
-.LBB14_9:
+	jmp .LBB15_12
+.LBB15_9:
 	xor r8d, r8d
-.LBB14_12:
+.LBB15_12:
 	shl rax, 6
 	add rax, r8
 	add rsp, 24
@@ -78,20 +78,20 @@ bitpacking::filter::filter_bmi2:
 	pop r15
 	pop rbp
 	ret
-.LBB14_16:
-	lea r9, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.1]
+.LBB15_16:
+	lea r9, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.1]
 	lea rsi, [rsp + 8]
 	lea rdx, [rsp + 16]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB14_15:
-	lea rdx, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.3]
+.LBB15_15:
+	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.3]
 	mov rdi, rax
 	mov rsi, r9
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB14_13:
-	lea rdx, [rip + .Lanon.7aebbe0b8f2c1738ea529ab66bab80d6.2]
+.LBB15_13:
+	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.2]
 	mov rdi, rax
 	mov rsi, r9
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

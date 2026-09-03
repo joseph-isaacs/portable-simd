@@ -5,77 +5,66 @@ bitpacking::select::select_portable:
 	sub rsp, 128
 	mov rcx, rsi
 	shr rcx, 3
-	je .LBB26_1
+	je .LBB30_1
 	mov r10, rcx
 	shl r10, 6
 	xor eax, eax
-	vpbroadcastd zmm0, dword ptr [rip + .LCPI26_4]
-	vbroadcasti32x4 zmm1, xmmword ptr [rip + .LCPI26_3]
-	vpxor xmm2, xmm2, xmm2
-	vpxor xmm3, xmm3, xmm3
+	vpxor xmm0, xmm0, xmm0
 	mov r9, rdi
 	mov r8, rdx
-.LBB26_5:
-	vmovdqu64 zmm4, zmmword ptr [r9]
-	vpandq zmm5, zmm4, zmm0
-	vpshufb zmm5, zmm1, zmm5
-	vpsrlw zmm4, zmm4, 4
-	vpandq zmm4, zmm4, zmm0
-	vpshufb zmm4, zmm1, zmm4
-	vpaddb zmm4, zmm4, zmm5
-	vpsadbw zmm4, zmm4, zmm2
-	vpmovqb xmm5, zmm4
-	vpsadbw xmm5, xmm5, xmm3
-	vmovq r11, xmm5
+.LBB30_5:
+	vpopcntq zmm1, zmmword ptr [r9]
+	vpmovqb xmm2, zmm1
+	vpsadbw xmm2, xmm2, xmm0
+	vmovq r11, xmm2
 	sub r8, r11
-	jb .LBB26_12
+	jb .LBB30_12
 	add r9, 64
 	add rax, -512
 	mov rdx, r8
 	add r10, -64
-	jne .LBB26_5
-	lea r9d, [8*rsi]
-	and r9d, 56
-	je .LBB26_3
-.LBB26_7:
+	jne .LBB30_5
+	lea edx, [8*rsi]
+	and edx, 56
+	je .LBB30_3
+.LBB30_7:
 	movabs rax, 1152921504606846968
 	and rsi, rax
-	lea rsi, [rdi + 8*rsi]
+	lea rdi, [rdi + 8*rsi]
 	shl rcx, 9
 	neg rcx
 	xor eax, eax
-	xor edi, edi
+	xor r9d, r9d
 	mov r10, r8
-.LBB26_8:
-	mov rdx, qword ptr [rsi + rdi]
-	xor r11d, r11d
-	popcnt r11, rdx
+.LBB30_8:
+	mov rsi, qword ptr [rdi + r9]
+	popcnt r11, rsi
 	sub r10, r11
-	jb .LBB26_11
+	jb .LBB30_11
 	add rcx, -64
-	add rdi, 8
+	add r9, 8
 	mov r8, r10
-	cmp r9, rdi
-	jne .LBB26_8
+	cmp rdx, r9
+	jne .LBB30_8
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB26_1:
+.LBB30_1:
 	mov r8, rdx
-	lea r9d, [8*rsi]
-	and r9d, 56
-	jne .LBB26_7
-.LBB26_3:
+	lea edx, [8*rsi]
+	and edx, 56
+	jne .LBB30_7
+.LBB30_3:
 	xor eax, eax
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB26_12:
+.LBB30_12:
 	vpxor xmm0, xmm0, xmm0
-	valignq zmm1, zmm4, zmm0, 7
-	vpaddq zmm1, zmm1, zmm4
+	valignq zmm2, zmm1, zmm0, 7
+	vpaddq zmm1, zmm2, zmm1
 	valignq zmm2, zmm1, zmm0, 6
 	vpaddq zmm1, zmm2, zmm1
 	valignq zmm2, zmm1, zmm0, 4
@@ -91,14 +80,7 @@ bitpacking::select::select_portable:
 	sub edx, dword ptr [rsp + rsi]
 	mov rsi, qword ptr [r9 + rsi]
 	vmovq xmm0, rsi
-	vpbroadcastd xmm1, dword ptr [rip + .LCPI26_4]
-	vpand xmm2, xmm0, xmm1
-	vmovdqa xmm3, xmmword ptr [rip + .LCPI26_3]
-	vpshufb xmm2, xmm3, xmm2
-	vpsrlw xmm0, xmm0, 4
-	vpand xmm0, xmm0, xmm1
-	vpshufb xmm0, xmm3, xmm0
-	vpaddb xmm0, xmm0, xmm2
+	vpopcntb xmm0, xmm0
 	vpsllq xmm1, xmm0, 8
 	vpaddb xmm0, xmm1, xmm0
 	vpsllq xmm1, xmm0, 16
@@ -106,9 +88,9 @@ bitpacking::select::select_portable:
 	vpsllq xmm1, xmm0, 32
 	vpaddb xmm0, xmm1, xmm0
 	vpbroadcastb xmm1, edx
+	vpsllq xmm2, xmm0, 8
+	vmovq qword ptr [rsp], xmm2
 	vpcmpleub k0, xmm0, xmm1
-	vpsllq xmm0, xmm0, 8
-	vmovq qword ptr [rsp], xmm0
 	kmovb edi, k0
 	popcnt edi, edi
 	mov r8d, edi
@@ -134,16 +116,9 @@ bitpacking::select::select_portable:
 	pop rbp
 	vzeroupper
 	ret
-.LBB26_11:
-	vmovq xmm0, rdx
-	vpbroadcastd xmm1, dword ptr [rip + .LCPI26_4]
-	vmovdqa xmm2, xmmword ptr [rip + .LCPI26_3]
-	vpand xmm3, xmm0, xmm1
-	vpshufb xmm3, xmm2, xmm3
-	vpsrlw xmm0, xmm0, 4
-	vpand xmm0, xmm0, xmm1
-	vpshufb xmm0, xmm2, xmm0
-	vpaddb xmm0, xmm0, xmm3
+.LBB30_11:
+	vmovq xmm0, rsi
+	vpopcntb xmm0, xmm0
 	vpsllq xmm1, xmm0, 8
 	vpaddb xmm0, xmm1, xmm0
 	vpsllq xmm1, xmm0, 16
@@ -156,15 +131,15 @@ bitpacking::select::select_portable:
 	vmovq qword ptr [rsp], xmm0
 	kmovb eax, k0
 	popcnt eax, eax
-	mov esi, eax
-	and esi, 7
-	movzx edi, byte ptr [rsp + rsi]
+	mov edx, eax
+	and edx, 7
+	movzx edi, byte ptr [rsp + rdx]
 	sub r8b, dil
 	and r8b, 7
 	movzx edi, r8b
 	shl edi, 8
-	shl esi, 3
-	shrx rdx, rdx, rsi
+	shl edx, 3
+	shrx rdx, rsi, rdx
 	movzx edx, dl
 	and al, 7
 	movzx eax, al

@@ -3,20 +3,20 @@ bitpacking::rank::popcount_avx2:
 	and ecx, 3
 	mov rax, rsi
 	shr rax, 2
-	je .LBB10_1
+	je .LBB11_1
 	push rbx
 	vpxor xmm0, xmm0, xmm0
-	vpbroadcastd ymm1, dword ptr [rip + .LCPI10_3]
-	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI10_4]
+	vpbroadcastd ymm1, dword ptr [rip + .LCPI11_3]
+	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI11_4]
 	mov rdx, rdi
 	vpxor xmm2, xmm2, xmm2
-	jmp .LBB10_3
-.LBB10_8:
+	jmp .LBB11_3
+.LBB11_8:
 	vpsadbw ymm4, ymm4, ymm0
 	vpaddq ymm2, ymm4, ymm2
 	sub rax, r8
-	je .LBB10_9
-.LBB10_3:
+	je .LBB11_9
+.LBB11_3:
 	cmp rax, 31
 	mov r8d, 31
 	cmovb r8, rax
@@ -27,14 +27,14 @@ bitpacking::rank::popcount_avx2:
 	not ebx
 	mov r9, rdx
 	vpxor xmm4, xmm4, xmm4
-	test bl, 96
-	je .LBB10_6
+	test bl, -32
+	je .LBB11_6
 	mov ebx, r11d
 	shr ebx, 5
 	inc ebx
-	and ebx, 3
+	and ebx, 7
 	mov r9, rdx
-.LBB10_5:
+.LBB11_5:
 	vmovdqu ymm5, ymmword ptr [r9]
 	add r9, 32
 	vpsrlw ymm6, ymm5, 4
@@ -45,12 +45,12 @@ bitpacking::rank::popcount_avx2:
 	vpshufb ymm5, ymm3, ymm5
 	vpaddb ymm4, ymm4, ymm5
 	dec rbx
-	jne .LBB10_5
-.LBB10_6:
+	jne .LBB11_5
+.LBB11_6:
 	add rdx, r10
-	cmp r11, 96
-	jb .LBB10_8
-.LBB10_7:
+	cmp r11, 224
+	jb .LBB11_8
+.LBB11_7:
 	vmovdqu ymm5, ymmword ptr [r9]
 	vmovdqu ymm6, ymmword ptr [r9 + 32]
 	vmovdqu ymm7, ymmword ptr [r9 + 64]
@@ -82,12 +82,44 @@ bitpacking::rank::popcount_avx2:
 	vpaddb ymm4, ymm5, ymm4
 	vpand ymm5, ymm6, ymm1
 	vpshufb ymm5, ymm3, ymm5
-	vpaddb ymm4, ymm4, ymm5
-	sub r9, -128
+	vmovdqu ymm6, ymmword ptr [r9 + 128]
+	vpsrlw ymm7, ymm6, 4
+	vpand ymm6, ymm6, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm6, ymm5
+	vpand ymm6, ymm7, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm5, ymm6
+	vmovdqu ymm6, ymmword ptr [r9 + 160]
+	vpsrlw ymm7, ymm6, 4
+	vpand ymm6, ymm6, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm6, ymm5
+	vpaddb ymm4, ymm5, ymm4
+	vpand ymm5, ymm7, ymm1
+	vpshufb ymm5, ymm3, ymm5
+	vmovdqu ymm6, ymmword ptr [r9 + 192]
+	vpsrlw ymm7, ymm6, 4
+	vpand ymm6, ymm6, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm6, ymm5
+	vpand ymm6, ymm7, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm5, ymm6
+	vmovdqu ymm6, ymmword ptr [r9 + 224]
+	vpsrlw ymm7, ymm6, 4
+	vpand ymm6, ymm6, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm6, ymm5
+	vpand ymm6, ymm7, ymm1
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm5, ymm6
+	vpaddb ymm4, ymm5, ymm4
+	add r9, 256
 	cmp r9, rdx
-	jne .LBB10_7
-	jmp .LBB10_8
-.LBB10_9:
+	jne .LBB11_7
+	jmp .LBB11_8
+.LBB11_9:
 	vextracti128 xmm0, ymm2, 1
 	vpaddq xmm0, xmm2, xmm0
 	vpshufd xmm1, xmm0, 238
@@ -95,8 +127,8 @@ bitpacking::rank::popcount_avx2:
 	vmovq rax, xmm0
 	pop rbx
 	test rcx, rcx
-	je .LBB10_11
-.LBB10_12:
+	je .LBB11_11
+.LBB11_12:
 	movabs rdx, 1152921504606846972
 	and rsi, rdx
 	lea rdx, [rdi + 8*rsi]
@@ -106,46 +138,36 @@ bitpacking::rank::popcount_avx2:
 	bzhi rsi, rcx, rsi
 	and ecx, 3
 	neg rcx
-	add rcx, rsi
-	add rcx, 4
+	lea rcx, [rsi + rcx + 4]
 	vpbroadcastq ymm0, rsi
-	vpxor xmm1, xmm1, xmm1
-	vmovdqa ymm2, ymmword ptr [rip + .LCPI10_2]
+	vpxor xmm3, xmm3, xmm3
 	xor esi, esi
-	vpbroadcastd ymm4, dword ptr [rip + .LCPI10_3]
-	vbroadcasti128 ymm5, xmmword ptr [rip + .LCPI10_4]
-	vpxor xmm6, xmm6, xmm6
-.LBB10_13:
-	vmovdqa ymm3, ymm6
-	vpbroadcastq ymm6, rsi
-	vpor ymm6, ymm6, ymm2
-	vpcmpleuq k1, ymm6, ymm0
-	vmovdqu64 ymm6 {k1} {z}, ymmword ptr [rdx + 8*rsi]
-	vpand ymm7, ymm6, ymm4
-	vpshufb ymm7, ymm5, ymm7
-	vpsrlw ymm6, ymm6, 4
-	vpand ymm6, ymm6, ymm4
-	vpshufb ymm6, ymm5, ymm6
-	vpaddb ymm6, ymm6, ymm7
-	vpsadbw ymm6, ymm6, ymm1
-	vpaddq ymm6, ymm6, ymm3
+	vmovdqa ymm2, ymmword ptr [rip + .LCPI11_2]
+.LBB11_13:
+	vmovdqa ymm1, ymm3
+	vpbroadcastq ymm3, rsi
+	vpor ymm3, ymm3, ymm2
+	vpcmpleuq k1, ymm3, ymm0
+	vmovdqu64 ymm3 {k1} {z}, ymmword ptr [rdx + 8*rsi]
+	vpopcntq ymm3, ymm3
+	vpaddq ymm3, ymm3, ymm1
 	add rsi, 4
 	cmp rcx, rsi
-	jne .LBB10_13
-	vmovdqa64 ymm3 {k1}, ymm6
-	vextracti128 xmm0, ymm3, 1
-	vpaddq xmm0, xmm3, xmm0
+	jne .LBB11_13
+	vmovdqa64 ymm1 {k1}, ymm3
+	vextracti128 xmm0, ymm1, 1
+	vpaddq xmm0, xmm1, xmm0
 	vpshufd xmm1, xmm0, 238
 	vpaddq xmm0, xmm0, xmm1
 	vmovq rcx, xmm0
 	add rax, rcx
 	vzeroupper
 	ret
-.LBB10_1:
+.LBB11_1:
 	xor eax, eax
 	test rcx, rcx
-	jne .LBB10_12
-.LBB10_11:
+	jne .LBB11_12
+.LBB11_11:
 	xor ecx, ecx
 	add rax, rcx
 	vzeroupper

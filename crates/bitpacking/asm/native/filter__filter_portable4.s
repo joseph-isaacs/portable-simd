@@ -10,159 +10,150 @@ bitpacking::filter::filter_portable4:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB21_30
+	jne .LBB23_30
 	mov qword ptr [rsp + 16], rsi
 	mov r14, rsi
 	shr r14, 2
-	je .LBB21_2
+	je .LBB23_2
 	shl r14, 5
 	xor r15d, r15d
-	vpbroadcastd ymm0, dword ptr [rip + .LCPI21_2]
-	vbroadcasti128 ymm1, xmmword ptr [rip + .LCPI21_3]
-	vpxor xmm2, xmm2, xmm2
 	xor r12d, r12d
 	xor r10d, r10d
 	xor r13d, r13d
 	xor ebx, ebx
 	xor edi, edi
 	mov rsi, rdx
-	jmp .LBB21_9
-.LBB21_28:
+	jmp .LBB23_9
+.LBB23_28:
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbx
 	xor ebx, ebx
-.LBB21_29:
+.LBB23_29:
 	add r12, 32
 	cmp r14, r12
-	je .LBB21_3
-.LBB21_9:
-	vmovdqu ymm3, ymmword ptr [rsi + r12]
+	je .LBB23_3
+.LBB23_9:
+	vmovdqu ymm0, ymmword ptr [rsi + r12]
 	mov rax, qword ptr [rsp + 8]
-	vpand ymm4, ymm3, ymmword ptr [rax + r12]
-	vmovdqa ymm5, ymm3
-	vpternlogq ymm5, ymm3, ymm3, 15
-	vpaddq ymm6, ymm5, ymm5
-	vpsllq ymm7, ymm5, 2
-	vpternlogq ymm7, ymm6, ymm5, 150
-	vpsllq ymm5, ymm7, 2
-	vpxor ymm5, ymm5, ymm6
-	vpsllq ymm7, ymm5, 4
-	vpxor ymm5, ymm7, ymm5
-	vpsllq ymm7, ymm5, 8
-	vpxor ymm5, ymm7, ymm5
-	vpsllq ymm7, ymm5, 16
-	vpxor ymm5, ymm7, ymm5
-	vpsllq ymm7, ymm5, 32
-	vpxor ymm5, ymm7, ymm5
-	vpand ymm7, ymm5, ymm3
-	vpsrlq ymm8, ymm7, 1
-	vpternlogq ymm8, ymm7, ymm3, 246
-	vpand ymm7, ymm5, ymm4
-	vpsrlq ymm9, ymm7, 1
-	vpternlogq ymm9, ymm7, ymm4, 246
-	vpandn ymm4, ymm5, ymm6
-	vpaddq ymm5, ymm4, ymm4
-	vpxor ymm5, ymm5, ymm4
-	vpsllq ymm6, ymm5, 2
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 4
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 8
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 16
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 32
-	vpxor ymm5, ymm6, ymm5
-	vpand ymm6, ymm8, ymm5
-	vpsrlq ymm7, ymm6, 2
-	vpternlogq ymm7, ymm6, ymm8, 246
-	vpand ymm6, ymm9, ymm6
-	vpsrlq ymm8, ymm6, 2
-	vpternlogq ymm8, ymm6, ymm9, 246
-	vpandn ymm4, ymm5, ymm4
-	vpaddq ymm5, ymm4, ymm4
-	vpxor ymm5, ymm5, ymm4
-	vpsllq ymm6, ymm5, 2
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 4
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 8
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 16
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 32
-	vpxor ymm5, ymm6, ymm5
-	vpand ymm6, ymm5, ymm7
-	vpsrlq ymm9, ymm6, 4
-	vpternlogq ymm9, ymm6, ymm7, 246
-	vpand ymm6, ymm8, ymm6
-	vpsrlq ymm7, ymm6, 4
-	vpternlogq ymm7, ymm6, ymm8, 246
-	vpandn ymm4, ymm5, ymm4
-	vpaddq ymm5, ymm4, ymm4
-	vpxor ymm5, ymm5, ymm4
-	vpsllq ymm6, ymm5, 2
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 4
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 8
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 16
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 32
-	vpxor ymm5, ymm6, ymm5
-	vpand ymm6, ymm9, ymm5
-	vpsrlq ymm8, ymm6, 8
-	vpternlogq ymm8, ymm6, ymm9, 246
-	vpand ymm6, ymm6, ymm7
-	vpsrlq ymm9, ymm6, 8
-	vpternlogq ymm9, ymm6, ymm7, 246
-	vpandn ymm4, ymm5, ymm4
-	vpaddq ymm5, ymm4, ymm4
-	vpxor ymm5, ymm5, ymm4
-	vpsllq ymm6, ymm5, 2
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 4
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 8
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 16
-	vpxor ymm5, ymm6, ymm5
-	vpsllq ymm6, ymm5, 32
-	vpxor ymm5, ymm6, ymm5
-	vpand ymm6, ymm8, ymm5
-	vpsrlq ymm7, ymm6, 16
-	vpternlogq ymm7, ymm6, ymm8, 246
-	vpand ymm6, ymm9, ymm6
-	vpsrlq ymm8, ymm6, 16
-	vpternlogq ymm8, ymm6, ymm9, 246
-	vpandn ymm4, ymm5, ymm4
-	vpaddq ymm5, ymm4, ymm4
-	vpxor ymm4, ymm5, ymm4
-	vpsllq ymm5, ymm4, 2
-	vpxor ymm4, ymm5, ymm4
-	vpsllq ymm5, ymm4, 4
-	vpxor ymm4, ymm5, ymm4
-	vpsllq ymm5, ymm4, 8
-	vpxor ymm4, ymm5, ymm4
-	vpsllq ymm5, ymm4, 16
-	vpxor ymm4, ymm5, ymm4
-	vpsllq ymm5, ymm4, 32
-	vpxor ymm5, ymm5, ymm4
-	vpternlogq ymm5, ymm8, ymm7, 128
-	vpsrlq ymm4, ymm5, 32
-	vpternlogq ymm4, ymm5, ymm8, 246
-	vpand ymm5, ymm3, ymm0
-	vpshufb ymm5, ymm1, ymm5
-	vpsrlw ymm3, ymm3, 4
-	vpand ymm3, ymm3, ymm0
-	vpshufb ymm3, ymm1, ymm3
-	vpaddb ymm3, ymm3, ymm5
-	vpsadbw ymm3, ymm3, ymm2
-	vmovq rax, xmm4
-	vmovd r11d, xmm3
+	vpand ymm1, ymm0, ymmword ptr [rax + r12]
+	vmovdqa ymm2, ymm0
+	vpternlogq ymm2, ymm0, ymm0, 15
+	vpaddq ymm3, ymm2, ymm2
+	vpsllq ymm4, ymm2, 2
+	vpternlogq ymm4, ymm3, ymm2, 150
+	vpsllq ymm2, ymm4, 2
+	vpxor ymm2, ymm2, ymm3
+	vpsllq ymm4, ymm2, 4
+	vpxor ymm2, ymm4, ymm2
+	vpsllq ymm4, ymm2, 8
+	vpxor ymm2, ymm4, ymm2
+	vpsllq ymm4, ymm2, 16
+	vpxor ymm2, ymm4, ymm2
+	vpsllq ymm4, ymm2, 32
+	vpxor ymm2, ymm4, ymm2
+	vpand ymm4, ymm2, ymm0
+	vpsrlq ymm5, ymm4, 1
+	vpternlogq ymm5, ymm4, ymm0, 246
+	vpand ymm4, ymm2, ymm1
+	vpsrlq ymm6, ymm4, 1
+	vpternlogq ymm6, ymm4, ymm1, 246
+	vpandn ymm1, ymm2, ymm3
+	vpaddq ymm2, ymm1, ymm1
+	vpxor ymm2, ymm2, ymm1
+	vpsllq ymm3, ymm2, 2
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 4
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 8
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 16
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 32
+	vpxor ymm2, ymm3, ymm2
+	vpand ymm3, ymm2, ymm5
+	vpsrlq ymm4, ymm3, 2
+	vpternlogq ymm4, ymm3, ymm5, 246
+	vpand ymm3, ymm3, ymm6
+	vpsrlq ymm5, ymm3, 2
+	vpternlogq ymm5, ymm3, ymm6, 246
+	vpandn ymm1, ymm2, ymm1
+	vpaddq ymm2, ymm1, ymm1
+	vpxor ymm2, ymm2, ymm1
+	vpsllq ymm3, ymm2, 2
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 4
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 8
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 16
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 32
+	vpxor ymm2, ymm3, ymm2
+	vpand ymm3, ymm2, ymm4
+	vpsrlq ymm6, ymm3, 4
+	vpternlogq ymm6, ymm3, ymm4, 246
+	vpand ymm3, ymm3, ymm5
+	vpsrlq ymm4, ymm3, 4
+	vpternlogq ymm4, ymm3, ymm5, 246
+	vpandn ymm1, ymm2, ymm1
+	vpaddq ymm2, ymm1, ymm1
+	vpxor ymm2, ymm2, ymm1
+	vpsllq ymm3, ymm2, 2
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 4
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 8
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 16
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 32
+	vpxor ymm2, ymm3, ymm2
+	vpand ymm3, ymm2, ymm6
+	vpsrlq ymm5, ymm3, 8
+	vpternlogq ymm5, ymm3, ymm6, 246
+	vpand ymm3, ymm3, ymm4
+	vpsrlq ymm6, ymm3, 8
+	vpternlogq ymm6, ymm3, ymm4, 246
+	vpandn ymm1, ymm2, ymm1
+	vpaddq ymm2, ymm1, ymm1
+	vpxor ymm2, ymm2, ymm1
+	vpsllq ymm3, ymm2, 2
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 4
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 8
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 16
+	vpxor ymm2, ymm3, ymm2
+	vpsllq ymm3, ymm2, 32
+	vpxor ymm2, ymm3, ymm2
+	vpand ymm3, ymm2, ymm5
+	vpsrlq ymm4, ymm3, 16
+	vpternlogq ymm4, ymm3, ymm5, 246
+	vpand ymm3, ymm3, ymm6
+	vpsrlq ymm5, ymm3, 16
+	vpternlogq ymm5, ymm3, ymm6, 246
+	vpandn ymm1, ymm2, ymm1
+	vpaddq ymm2, ymm1, ymm1
+	vpxor ymm1, ymm2, ymm1
+	vpsllq ymm2, ymm1, 2
+	vpxor ymm1, ymm2, ymm1
+	vpsllq ymm2, ymm1, 4
+	vpxor ymm1, ymm2, ymm1
+	vpsllq ymm2, ymm1, 8
+	vpxor ymm1, ymm2, ymm1
+	vpsllq ymm2, ymm1, 16
+	vpxor ymm1, ymm2, ymm1
+	vpsllq ymm2, ymm1, 32
+	vpxor ymm2, ymm2, ymm1
+	vpternlogq ymm2, ymm5, ymm4, 128
+	vpsrlq ymm1, ymm2, 32
+	vpternlogq ymm1, ymm2, ymm5, 246
+	vpopcntq ymm0, ymm0
+	vmovq rax, xmm1
+	vmovd r11d, xmm0
 	xor ebp, ebp
 	mov ecx, r10d
 	shld rbp, rax, cl
@@ -174,17 +165,17 @@ bitpacking::filter::filter_portable4:
 	or rax, r13
 	add r11d, r10d
 	cmp r11d, 63
-	jbe .LBB21_20
+	jbe .LBB23_20
 	cmp rdi, r9
-	jae .LBB21_11
+	jae .LBB23_11
 	mov qword ptr [r8 + 8*rdi], rax
 	inc rdi
 	add r11d, -64
 	mov rax, rbp
 	xor ebp, ebp
-.LBB21_20:
-	vpextrq rdx, xmm4, 1
-	vpextrd r10d, xmm3, 2
+.LBB23_20:
+	vpextrq rdx, xmm1, 1
+	vpextrd r10d, xmm0, 2
 	xor ebx, ebx
 	mov ecx, r11d
 	shld rbx, rdx, cl
@@ -196,19 +187,19 @@ bitpacking::filter::filter_portable4:
 	or r13, rax
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB21_23
+	jb .LBB23_23
 	cmp rdi, r9
-	jae .LBB21_11
+	jae .LBB23_11
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbx
 	xor ebx, ebx
-.LBB21_23:
-	vextracti128 xmm4, ymm4, 1
-	vmovq rax, xmm4
-	vextracti128 xmm3, ymm3, 1
-	vmovd r11d, xmm3
+.LBB23_23:
+	vextracti128 xmm1, ymm1, 1
+	vmovq rax, xmm1
+	vextracti128 xmm0, ymm0, 1
+	vmovd r11d, xmm0
 	xor ebp, ebp
 	mov ecx, r10d
 	shld rbp, rax, cl
@@ -220,17 +211,17 @@ bitpacking::filter::filter_portable4:
 	or rax, r13
 	add r11d, r10d
 	cmp r11d, 64
-	jb .LBB21_26
+	jb .LBB23_26
 	cmp rdi, r9
-	jae .LBB21_11
+	jae .LBB23_11
 	mov qword ptr [r8 + 8*rdi], rax
 	inc rdi
 	add r11d, -64
 	mov rax, rbp
 	xor ebp, ebp
-.LBB21_26:
-	vpextrq rdx, xmm4, 1
-	vpextrd r10d, xmm3, 2
+.LBB23_26:
+	vpextrq rdx, xmm1, 1
+	vpextrd r10d, xmm0, 2
 	xor ebx, ebx
 	mov ecx, r11d
 	shld rbx, rdx, cl
@@ -242,40 +233,40 @@ bitpacking::filter::filter_portable4:
 	or r13, rax
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB21_29
+	jb .LBB23_29
 	cmp rdi, r9
-	jb .LBB21_28
-.LBB21_11:
+	jb .LBB23_28
+.LBB23_11:
 	mov rsi, r9
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB21_2:
+.LBB23_2:
 	xor edi, edi
 	xor r13d, r13d
 	xor ebx, ebx
 	xor r10d, r10d
 	mov rsi, rdx
-.LBB21_3:
+.LBB23_3:
 	mov qword ptr [rsp], r9
 	mov rcx, qword ptr [rsp + 16]
 	mov r9d, ecx
 	and r9d, 3
-	je .LBB21_12
+	je .LBB23_12
 	shl rcx, 3
 	movabs rax, 9223372036854775776
 	and rax, rcx
 	add qword ptr [rsp + 8], rax
 	add rsi, rax
 	xor r14d, r14d
-	jmp .LBB21_5
-.LBB21_18:
+	jmp .LBB23_5
+.LBB23_18:
 	mov rsi, r11
 	inc r14
 	mov rbx, rbp
 	cmp r9, r14
-	je .LBB21_12
-.LBB21_5:
+	je .LBB23_12
+.LBB23_5:
 	mov r15, r13
 	mov ecx, r10d
 	mov r11, rsi
@@ -451,23 +442,23 @@ bitpacking::filter::filter_portable4:
 	or r13, r15
 	add r10d, ecx
 	cmp r10d, 63
-	jbe .LBB21_18
+	jbe .LBB23_18
 	cmp rdi, qword ptr [rsp]
-	jae .LBB21_7
+	jae .LBB23_7
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbp
 	xor ebp, ebp
-	jmp .LBB21_18
-.LBB21_12:
+	jmp .LBB23_18
+.LBB23_12:
 	test r10d, r10d
 	mov rsi, qword ptr [rsp]
-	je .LBB21_15
+	je .LBB23_15
 	cmp rdi, rsi
-	jae .LBB21_16
+	jae .LBB23_16
 	mov qword ptr [r8 + 8*rdi], r13
-.LBB21_15:
+.LBB23_15:
 	shl rdi, 6
 	mov eax, r10d
 	add rax, rdi
@@ -480,19 +471,19 @@ bitpacking::filter::filter_portable4:
 	pop rbp
 	vzeroupper
 	ret
-.LBB21_30:
-	lea r9, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.17]
+.LBB23_30:
+	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.22]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB21_7:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
+.LBB23_7:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
 	mov rsi, qword ptr [rsp]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB21_16:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.2]
+.LBB23_16:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

@@ -11,10 +11,10 @@ bitpacking::filter::filter_naive:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB18_19
+	jne .LBB19_19
 	xor ecx, ecx
 	test rsi, rsi
-	je .LBB18_2
+	je .LBB19_2
 	mov qword ptr [rsp], r9
 	mov r11d, 1
 	xor ecx, ecx
@@ -22,29 +22,29 @@ bitpacking::filter::filter_naive:
 	xor ebx, ebx
 	xor r15d, r15d
 	xor r14d, r14d
-	jmp .LBB18_4
-.LBB18_10:
+	jmp .LBB19_4
+.LBB19_10:
 	mov rdi, qword ptr [rsp + 8]
 	mov qword ptr [rdi + 8*rax], rbx
 	inc rax
 	add ecx, -64
 	mov rbx, r12
 	xor r12d, r12d
-.LBB18_11:
+.LBB19_11:
 	inc r14
 	mov r15, r12
 	cmp r14, rsi
-	je .LBB18_12
-.LBB18_4:
+	je .LBB19_12
+.LBB19_4:
 	mov r10, qword ptr [rdx + 8*r14]
 	test r10, r10
-	je .LBB18_5
+	je .LBB19_5
 	mov rdi, qword ptr [rsp + 16]
 	mov rbp, qword ptr [rdi + 8*r14]
 	xor r13d, r13d
 	mov r12, r10
 	xor r9d, r9d
-.LBB18_7:
+.LBB19_7:
 	blsi r8, r12
 	and r8, rbp
 	shlx rdi, r11, r9
@@ -52,12 +52,11 @@ bitpacking::filter::filter_naive:
 	or r13, rdi
 	inc r9d
 	blsr r12, r12
-	jne .LBB18_7
-	jmp .LBB18_8
-.LBB18_5:
+	jne .LBB19_7
+	jmp .LBB19_8
+.LBB19_5:
 	xor r13d, r13d
-.LBB18_8:
-	xor edi, edi
+.LBB19_8:
 	popcnt rdi, r10
 	xor r12d, r12d
 	shld r12, r13, cl
@@ -70,29 +69,29 @@ bitpacking::filter::filter_naive:
 	or rbx, r8
 	add ecx, edi
 	cmp ecx, 63
-	jbe .LBB18_11
+	jbe .LBB19_11
 	cmp rax, qword ptr [rsp]
-	jb .LBB18_10
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
+	jb .LBB19_10
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
 	mov rdi, rax
 	mov rsi, qword ptr [rsp]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB18_12:
+.LBB19_12:
 	test ecx, ecx
-	je .LBB18_13
+	je .LBB19_13
 	mov rsi, qword ptr [rsp]
 	cmp rax, rsi
-	jae .LBB18_17
+	jae .LBB19_17
 	mov rdx, qword ptr [rsp + 8]
 	mov qword ptr [rdx + 8*rax], rbx
 	mov ecx, ecx
-	jmp .LBB18_16
-.LBB18_2:
+	jmp .LBB19_16
+.LBB19_2:
 	xor eax, eax
-	jmp .LBB18_16
-.LBB18_13:
+	jmp .LBB19_16
+.LBB19_13:
 	xor ecx, ecx
-.LBB18_16:
+.LBB19_16:
 	shl rax, 6
 	add rax, rcx
 	add rsp, 40
@@ -103,14 +102,14 @@ bitpacking::filter::filter_naive:
 	pop r15
 	pop rbp
 	ret
-.LBB18_19:
-	lea r9, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.1]
+.LBB19_19:
+	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.1]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB18_17:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.2]
+.LBB19_17:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
 	mov rdi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

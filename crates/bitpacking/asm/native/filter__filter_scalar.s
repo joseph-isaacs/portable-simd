@@ -11,23 +11,23 @@ bitpacking::filter::filter_scalar:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB19_15
+	jne .LBB20_15
 	xor edx, edx
 	test rsi, rsi
-	je .LBB19_2
+	je .LBB20_2
 	mov qword ptr [rsp], r9
 	xor r15d, r15d
 	xor eax, eax
 	xor r12d, r12d
 	xor ebx, ebx
 	xor r11d, r11d
-	jmp .LBB19_4
-.LBB19_7:
+	jmp .LBB20_4
+.LBB20_7:
 	inc r11
 	mov rbx, r13
 	cmp rsi, r11
-	je .LBB19_8
-.LBB19_4:
+	je .LBB20_8
+.LBB20_4:
 	mov r14, r12
 	mov ecx, r15d
 	mov r8, qword ptr [rsp + 16]
@@ -201,32 +201,32 @@ bitpacking::filter::filter_scalar:
 	or r12, r14
 	add r15d, ecx
 	cmp r15d, 63
-	jbe .LBB19_7
+	jbe .LBB20_7
 	cmp rax, qword ptr [rsp]
-	jae .LBB19_14
+	jae .LBB20_14
 	mov rcx, qword ptr [rsp + 8]
 	mov qword ptr [rcx + 8*rax], r12
 	inc rax
 	add r15d, -64
 	mov r12, r13
 	xor r13d, r13d
-	jmp .LBB19_7
-.LBB19_8:
+	jmp .LBB20_7
+.LBB20_8:
 	test r15d, r15d
-	je .LBB19_9
+	je .LBB20_9
 	mov rsi, qword ptr [rsp]
 	cmp rax, rsi
-	jae .LBB19_13
+	jae .LBB20_13
 	mov rcx, qword ptr [rsp + 8]
 	mov qword ptr [rcx + 8*rax], r12
 	mov edx, r15d
-	jmp .LBB19_12
-.LBB19_2:
+	jmp .LBB20_12
+.LBB20_2:
 	xor eax, eax
-	jmp .LBB19_12
-.LBB19_9:
+	jmp .LBB20_12
+.LBB20_9:
 	xor edx, edx
-.LBB19_12:
+.LBB20_12:
 	shl rax, 6
 	add rax, rdx
 	add rsp, 40
@@ -237,19 +237,19 @@ bitpacking::filter::filter_scalar:
 	pop r15
 	pop rbp
 	ret
-.LBB19_15:
-	lea r9, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.1]
+.LBB20_15:
+	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.1]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB19_14:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
+.LBB20_14:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
 	mov rdi, rax
 	mov rsi, qword ptr [rsp]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB19_13:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.2]
+.LBB20_13:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
 	mov rdi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

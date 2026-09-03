@@ -125,6 +125,54 @@ pub fn pext_hd_simd<const N: usize>(x: Simd<u64, N>, mut m: Simd<u64, N>) -> Sim
     x
 }
 
+/// `BYTE_PEXT_LUT[mask_byte * 256 + src_byte]`: 8-bit PEXT table, 64 KiB (fills L1).
+/// Same table as vortex's software fallback (`vortex-array/src/arrays/bool/compute/filter.rs`).
+static BYTE_PEXT_LUT: [u8; 256 * 256] = {
+    let mut lut = [0u8; 256 * 256];
+    let mut mask = 0usize;
+    while mask < 256 {
+        let mut src = 0usize;
+        while src < 256 {
+            let mut result = 0u8;
+            let mut bit = 0;
+            let mut pos = 0;
+            while pos < 8 {
+                if (mask >> pos) & 1 == 1 {
+                    if (src >> pos) & 1 == 1 {
+                        result |= 1 << bit;
+                    }
+                    bit += 1;
+                }
+                pos += 1;
+            }
+            lut[mask * 256 + src] = result;
+            src += 1;
+        }
+        mask += 1;
+    }
+    lut
+};
+
+/// Byte-LUT PEXT (vortex's non-BMI2 path): 8 independent table lookups, each shifted by
+/// the running popcount of the mask bytes before it.
+#[inline(always)]
+pub fn pext_byte_lut(x: u64, m: u64) -> u64 {
+    let xb = x.to_le_bytes();
+    let mb = m.to_le_bytes();
+    let mut r = 0u64;
+    let mut off = 0u32;
+    let mut i = 0;
+    while i < 8 {
+        let mbyte = mb[i];
+        if mbyte != 0 {
+            r |= (BYTE_PEXT_LUT[(mbyte as usize) * 256 + xb[i] as usize] as u64) << off;
+            off += mbyte.count_ones();
+        }
+        i += 1;
+    }
+    r
+}
+
 #[cfg(target_feature = "bmi2")]
 #[inline]
 pub fn pext_bmi2(x: u64, m: u64) -> u64 {
@@ -151,6 +199,48 @@ fn filter_with<const BRANCHLESS: bool>(
     w.finish()
 }
 
+/// Port of vortex's `filter_inner` loop: all-ones mask words are copied without PEXT,
+/// all-zero words are skipped, and output goes through a raw pointer with no per-word
+/// bounds check (the capacity, `values.len() + 1` words, is checked once up front).
+#[inline(always)]
+fn filter_vortex_with(values: &[u64], mask: &[u64], out: &mut [u64], pext: impl Fn(u64, u64) -> u64) -> usize {
+    assert_eq!(values.len(), mask.len());
+    assert!(out.len() > values.len(), "vortex-style writer needs one spare output word");
+    let out_ptr = out.as_mut_ptr();
+    let mut idx = 0usize;
+    let mut acc: u128 = 0;
+    let mut fill: u32 = 0;
+    for (&v, &m) in values.iter().zip(mask) {
+        if m == u64::MAX {
+            acc |= (v as u128) << fill;
+            // fill + 64 >= 64 always, so this word always flushes.
+            // SAFETY: at most one flush per input word, and out has values.len() + 1 words.
+            unsafe { out_ptr.add(idx).write(acc as u64) };
+            idx += 1;
+            acc >>= 64;
+            continue;
+        }
+        let pc = m.count_ones();
+        if pc == 0 {
+            continue;
+        }
+        acc |= (pext(v, m) as u128) << fill;
+        fill += pc;
+        if fill >= 64 {
+            // SAFETY: as above.
+            unsafe { out_ptr.add(idx).write(acc as u64) };
+            idx += 1;
+            acc >>= 64;
+            fill -= 64;
+        }
+    }
+    if fill > 0 {
+        // SAFETY: as above.
+        unsafe { out_ptr.add(idx).write(acc as u64) };
+    }
+    idx * 64 + fill as usize
+}
+
 /// Returns the number of output bits; `out` needs `values.len()` words of capacity.
 pub fn filter_naive(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
     filter_with::<false>(values, mask, out, pext_naive)
@@ -163,6 +253,22 @@ pub fn filter_scalar(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
 #[cfg(target_feature = "bmi2")]
 pub fn filter_bmi2(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
     filter_with::<false>(values, mask, out, pext_bmi2)
+}
+
+/// Byte-LUT PEXT with the plain writer (isolates the LUT from vortex's fast paths).
+pub fn filter_byte_lut(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_with::<false>(values, mask, out, pext_byte_lut)
+}
+
+/// vortex's loop with its software PEXT: what vortex runs without BMI2.
+pub fn filter_vortex_lut(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_vortex_with(values, mask, out, pext_byte_lut)
+}
+
+/// vortex's loop with hardware PEXT: what vortex runs on BMI2 machines.
+#[cfg(target_feature = "bmi2")]
+pub fn filter_vortex_pext(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_vortex_with(values, mask, out, pext_bmi2)
 }
 
 /// `pext` + branchless writer. `out` needs `values.len() + 1` words of capacity.
@@ -257,9 +363,9 @@ mod tests {
     fn check(f: fn(&[u64], &[u64], &mut [u64]) -> usize) {
         let mut rng = Rng::new(9);
         for &len in &[0usize, 1, 3, 4, 5, 8, 9, 16, 17, 100] {
-            for density in [0, 1, 4, 7, 8] {
+            for density in [0, 1, 4, 7, 8, 100] {
                 let values = rng.words(len, 4);
-                let mask = rng.words(len, density);
+                let mask = if density == 100 { rng.words_runs(len, 64.0) } else { rng.words(len, density) };
                 let (expect, n) = reference(&values, &mask);
                 let mut got = vec![0u64; len + 1];
                 let got_n = f(&values, &mask, &mut got);
@@ -272,6 +378,10 @@ mod tests {
     #[test]
     fn pext_hd_matches() {
         check_pext(pext_hd);
+    }
+    #[test]
+    fn pext_byte_lut_matches() {
+        check_pext(pext_byte_lut);
     }
     #[test]
     fn pext_hd_simd_matches() {
@@ -289,6 +399,8 @@ mod tests {
     #[test]
     fn scalar() {
         check(filter_scalar);
+        check(filter_byte_lut);
+        check(filter_vortex_lut);
     }
     #[test]
     fn portable() {
@@ -301,5 +413,6 @@ mod tests {
     fn bmi2() {
         check(filter_bmi2);
         check(filter_bmi2_branchless);
+        check(filter_vortex_pext);
     }
 }

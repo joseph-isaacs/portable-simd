@@ -11,14 +11,14 @@ bitpacking::select::select_scan8_pdep:
 	shr rax, 3
 	mov qword ptr [rsp - 88], rax
 	mov qword ptr [rsp - 96], rdi
-	je .LBB25_5
+	je .LBB29_5
 	shl rax, 6
 	add rax, rdi
 	mov qword ptr [rsp - 72], rax
 	xor eax, eax
 	mov r8, rdi
 	mov r9, qword ptr [rsp - 104]
-.LBB25_2:
+.LBB29_2:
 	mov qword ptr [rsp - 64], rax
 	mov rax, qword ptr [r8]
 	mov rcx, qword ptr [r8 + 8]
@@ -54,25 +54,25 @@ bitpacking::select::select_scan8_pdep:
 	popcnt rdx, r12
 	add rcx, rdx
 	sub r9, rcx
-	jb .LBB25_10
+	jb .LBB29_10
 	add r8, 64
 	mov rax, qword ptr [rsp - 64]
 	add rax, 512
 	mov qword ptr [rsp - 104], r9
 	cmp r8, qword ptr [rsp - 72]
-	jne .LBB25_2
+	jne .LBB29_2
 	mov rdx, qword ptr [rsp - 80]
 	lea ecx, [8*rdx]
 	and ecx, 56
-	jne .LBB25_6
-	jmp .LBB25_21
-.LBB25_5:
+	jne .LBB29_6
+	jmp .LBB29_21
+.LBB29_5:
 	mov r9, qword ptr [rsp - 104]
 	mov rdx, qword ptr [rsp - 80]
 	lea ecx, [8*rdx]
 	and ecx, 56
-	je .LBB25_21
-.LBB25_6:
+	je .LBB29_21
+.LBB29_6:
 	movabs rax, 1152921504606846968
 	and rdx, rax
 	mov rax, qword ptr [rsp - 96]
@@ -83,19 +83,19 @@ bitpacking::select::select_scan8_pdep:
 	xor eax, eax
 	xor esi, esi
 	mov rdi, r9
-.LBB25_7:
+.LBB29_7:
 	mov r8, qword ptr [rdx + rsi]
 	xor r10d, r10d
 	popcnt r10, r8
 	sub rdi, r10
-	jb .LBB25_12
+	jb .LBB29_12
 	add r11, -64
 	add rsi, 8
 	mov r9, rdi
 	cmp rcx, rsi
-	jne .LBB25_7
-	jmp .LBB25_22
-.LBB25_10:
+	jne .LBB29_7
+	jmp .LBB29_22
+.LBB29_10:
 	mov rcx, qword ptr [rsp - 24]
 	mov qword ptr [rsp - 72], r14
 	mov qword ptr [rsp - 80], rbp
@@ -107,73 +107,73 @@ bitpacking::select::select_scan8_pdep:
 	mov rbp, qword ptr [rsp - 16]
 	mov r8, qword ptr [rsp - 104]
 	sub r8, qword ptr [rsp - 8]
-	jae .LBB25_13
+	jae .LBB29_13
 	xor r9d, r9d
 	mov r8, qword ptr [rsp - 104]
 	mov r14, rcx
-	jmp .LBB25_20
-.LBB25_12:
+	jmp .LBB29_20
+.LBB29_12:
 	mov eax, 1
 	shlx rcx, rax, r9
 	pdep rcx, rcx, r8
 	xor r9d, r9d
 	tzcnt r9, rcx
 	sub r9, r11
-	jmp .LBB25_23
-.LBB25_13:
+	jmp .LBB29_23
+.LBB29_13:
 	mov r9d, 64
 	mov rdi, r8
 	sub rdi, qword ptr [rsp - 32]
 	mov r14, rbp
-	jb .LBB25_20
+	jb .LBB29_20
 	mov r9d, 128
 	mov rax, rdi
 	mov r8, rdi
 	mov r14, qword ptr [rsp - 80]
 	sub rax, qword ptr [rsp - 72]
-	jb .LBB25_20
+	jb .LBB29_20
 	mov r9d, 192
 	mov rdi, rax
 	mov r8, rax
 	mov r14, qword ptr [rsp - 96]
 	sub rdi, qword ptr [rsp - 88]
-	jb .LBB25_20
+	jb .LBB29_20
 	mov r9d, 256
 	mov rax, rdi
 	mov r8, rdi
 	mov r14, r10
 	sub rax, qword ptr [rsp - 40]
-	jb .LBB25_20
+	jb .LBB29_20
 	mov r11, rsi
 	mov r9d, 320
 	mov rsi, rax
 	mov r8, rax
 	mov r14, r11
 	sub rsi, qword ptr [rsp - 48]
-	jb .LBB25_20
+	jb .LBB29_20
 	mov r9d, 384
 	mov rax, rsi
 	mov r8, rsi
 	mov r14, r15
 	sub rax, qword ptr [rsp - 56]
-	jb .LBB25_20
+	jb .LBB29_20
 	mov r9d, 448
 	mov r8, rax
 	mov r14, r12
 	cmp rax, rdx
-	jae .LBB25_21
-.LBB25_20:
+	jae .LBB29_21
+.LBB29_20:
 	mov eax, 1
 	shlx rcx, rax, r8
 	pdep rcx, rcx, r14
 	tzcnt rcx, rcx
 	add r9, qword ptr [rsp - 64]
 	add r9, rcx
-	jmp .LBB25_23
-.LBB25_21:
+	jmp .LBB29_23
+.LBB29_21:
 	xor eax, eax
-.LBB25_22:
-.LBB25_23:
+.LBB29_22:
+.LBB29_23:
 	mov rdx, r9
 	pop rbx
 	pop r12

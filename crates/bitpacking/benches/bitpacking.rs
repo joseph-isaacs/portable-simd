@@ -121,9 +121,11 @@ fn bench_filter(c: &mut Criterion) {
     let mut out = vec![0u64; words + 1]; // +1: the branchless writers store one word ahead
     let mut g = c.benchmark_group("filter");
     g.throughput(Throughput::Bytes((words * 16) as u64));
-    for density in [1u32, 4, 7] {
-        let mask = rng.words(words, density);
-        let label = format!("mask{}/8", density);
+    // Three uniform densities plus a run-structured mask (mean run 64 => many all-ones /
+    // all-zero words) where vortex's fast paths apply.
+    for density in [1u32, 4, 7, 100] {
+        let mask = if density == 100 { rng.words_runs(words, 64.0) } else { rng.words(words, density) };
+        let label = if density == 100 { "runs64".to_string() } else { format!("mask{}/8", density) };
         macro_rules! b {
             ($name:literal, $f:path) => {
                 g.bench_with_input(BenchmarkId::new($name, &label), &mask, |b, mask| {
@@ -133,6 +135,8 @@ fn bench_filter(c: &mut Criterion) {
         }
         b!("naive", filter::filter_naive);
         b!("scalar_hd", filter::filter_scalar);
+        b!("scalar_byte_lut", filter::filter_byte_lut);
+        b!("vortex_lut", filter::filter_vortex_lut);
         b!("portable_u64x4", filter::filter_portable4);
         b!("portable_u64x8", filter::filter_portable);
         b!("portable_u64x8_branchless", filter::filter_portable_branchless);
@@ -140,6 +144,8 @@ fn bench_filter(c: &mut Criterion) {
         b!("bmi2_pext", filter::filter_bmi2);
         #[cfg(target_feature = "bmi2")]
         b!("bmi2_pext_branchless", filter::filter_bmi2_branchless);
+        #[cfg(target_feature = "bmi2")]
+        b!("vortex_pext", filter::filter_vortex_pext);
     }
     g.finish();
 }

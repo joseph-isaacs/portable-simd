@@ -6,174 +6,258 @@ bitpacking::filter::filter_portable_branchless:
 	push r12
 	push rbx
 	sub rsp, 40
+	mov qword ptr [rsp + 16], rdx
+	mov qword ptr [rsp + 8], rdi
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB23_27
-	mov rbp, rdi
+	jne .LBB27_27
 	mov rbx, rsi
 	shr rbx, 3
-	je .LBB23_2
+	je .LBB27_2
 	shl rbx, 6
 	xor r14d, r14d
-	vpbroadcastd zmm0, dword ptr [rip + .LCPI23_2]
-	vbroadcasti32x4 zmm1, xmmword ptr [rip + .LCPI23_3]
-	vpxor xmm2, xmm2, xmm2
 	xor r15d, r15d
 	xor r10d, r10d
 	xor r12d, r12d
 	xor r11d, r11d
 	xor edi, edi
-.LBB23_12:
+.LBB27_14:
 	cmp rdi, r9
-	jae .LBB23_21
-	vmovdqu64 zmm4, zmmword ptr [rdx + r15]
-	vpandq zmm3, zmm4, zmmword ptr [rbp + r15]
-	vmovdqa64 zmm5, zmm4
-	vpternlogq zmm5, zmm4, zmm4, 15
-	vpaddq zmm6, zmm5, zmm5
-	vpsllq zmm7, zmm5, 2
-	vpternlogq zmm7, zmm6, zmm5, 150
-	vpsllq zmm5, zmm7, 2
-	vpxorq zmm5, zmm5, zmm6
-	vpsllq zmm7, zmm5, 4
-	vpxorq zmm5, zmm7, zmm5
-	vpsllq zmm7, zmm5, 8
-	vpxorq zmm5, zmm7, zmm5
-	vpsllq zmm7, zmm5, 16
-	vpxorq zmm5, zmm7, zmm5
-	vpsllq zmm7, zmm5, 32
-	vpxorq zmm5, zmm7, zmm5
-	vpandq zmm7, zmm5, zmm4
-	vpsrlq zmm8, zmm7, 1
-	vpternlogq zmm8, zmm7, zmm4, 246
-	vpandq zmm7, zmm5, zmm3
-	vpsrlq zmm9, zmm7, 1
-	vpternlogq zmm9, zmm7, zmm3, 246
-	vpandnq zmm3, zmm5, zmm6
-	vpaddq zmm5, zmm3, zmm3
-	vpxorq zmm5, zmm5, zmm3
-	vpsllq zmm6, zmm5, 2
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 4
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 8
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 16
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 32
-	vpxorq zmm5, zmm6, zmm5
-	vpandq zmm6, zmm5, zmm8
-	vpsrlq zmm7, zmm6, 2
-	vpternlogq zmm7, zmm6, zmm8, 246
-	vpandq zmm6, zmm6, zmm9
-	vpsrlq zmm8, zmm6, 2
-	vpternlogq zmm8, zmm6, zmm9, 246
-	vpandnq zmm3, zmm5, zmm3
-	vpaddq zmm5, zmm3, zmm3
-	vpxorq zmm5, zmm5, zmm3
-	vpsllq zmm6, zmm5, 2
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 4
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 8
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 16
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 32
-	vpxorq zmm5, zmm6, zmm5
-	vpandq zmm6, zmm5, zmm7
-	vpsrlq zmm9, zmm6, 4
-	vpternlogq zmm9, zmm6, zmm7, 246
-	vpandq zmm6, zmm6, zmm8
-	vpsrlq zmm7, zmm6, 4
-	vpternlogq zmm7, zmm6, zmm8, 246
-	vpandnq zmm3, zmm5, zmm3
-	vpaddq zmm5, zmm3, zmm3
-	vpxorq zmm5, zmm5, zmm3
-	vpsllq zmm6, zmm5, 2
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 4
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 8
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 16
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 32
-	vpxorq zmm5, zmm6, zmm5
-	vpandq zmm6, zmm5, zmm9
-	vpsrlq zmm8, zmm6, 8
-	vpternlogq zmm8, zmm6, zmm9, 246
-	vpandq zmm6, zmm6, zmm7
-	vpsrlq zmm9, zmm6, 8
-	vpternlogq zmm9, zmm6, zmm7, 246
-	vpandnq zmm3, zmm5, zmm3
-	vpaddq zmm5, zmm3, zmm3
-	vpxorq zmm5, zmm5, zmm3
-	vpsllq zmm6, zmm5, 2
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 4
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 8
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 16
-	vpxorq zmm5, zmm6, zmm5
-	vpsllq zmm6, zmm5, 32
-	vpxorq zmm5, zmm6, zmm5
-	vpandq zmm6, zmm5, zmm8
-	vpsrlq zmm7, zmm6, 16
-	vpternlogq zmm7, zmm6, zmm8, 246
-	vpandq zmm6, zmm6, zmm9
-	vpsrlq zmm8, zmm6, 16
-	vpternlogq zmm8, zmm6, zmm9, 246
-	vpandnq zmm3, zmm5, zmm3
-	vpaddq zmm5, zmm3, zmm3
-	vpxorq zmm3, zmm5, zmm3
-	vpsllq zmm5, zmm3, 2
-	vpxorq zmm3, zmm5, zmm3
-	vpsllq zmm5, zmm3, 4
-	vpxorq zmm3, zmm5, zmm3
-	vpsllq zmm5, zmm3, 8
-	vpxorq zmm3, zmm5, zmm3
-	vpsllq zmm5, zmm3, 16
-	vpxorq zmm3, zmm5, zmm3
-	vpsllq zmm5, zmm3, 32
-	vpxorq zmm5, zmm5, zmm3
-	vpternlogq zmm5, zmm8, zmm7, 128
-	vpsrlq zmm3, zmm5, 32
-	vpternlogq zmm3, zmm5, zmm8, 246
-	vpandq zmm5, zmm4, zmm0
-	vpshufb zmm5, zmm1, zmm5
-	vpsrlw zmm4, zmm4, 4
-	vpandq zmm4, zmm4, zmm0
-	vpshufb zmm4, zmm1, zmm4
-	vpaddb zmm4, zmm4, zmm5
-	vmovq rax, xmm3
+	jae .LBB27_23
+	mov rax, qword ptr [rsp + 16]
+	vmovdqu64 zmm1, zmmword ptr [rax + r15]
+	mov rax, qword ptr [rsp + 8]
+	vpandq zmm0, zmm1, zmmword ptr [rax + r15]
+	vmovdqa64 zmm2, zmm1
+	vpternlogq zmm2, zmm1, zmm1, 15
+	vpaddq zmm3, zmm2, zmm2
+	vpsllq zmm4, zmm2, 2
+	vpternlogq zmm4, zmm3, zmm2, 150
+	vpsllq zmm2, zmm4, 2
+	vpxorq zmm2, zmm2, zmm3
+	vpsllq zmm4, zmm2, 4
+	vpxorq zmm2, zmm4, zmm2
+	vpsllq zmm4, zmm2, 8
+	vpxorq zmm2, zmm4, zmm2
+	vpsllq zmm4, zmm2, 16
+	vpxorq zmm2, zmm4, zmm2
+	vpsllq zmm4, zmm2, 32
+	vpxorq zmm2, zmm4, zmm2
+	vpandq zmm4, zmm2, zmm1
+	vpsrlq zmm5, zmm4, 1
+	vpternlogq zmm5, zmm4, zmm1, 246
+	vpandq zmm4, zmm2, zmm0
+	vpsrlq zmm6, zmm4, 1
+	vpternlogq zmm6, zmm4, zmm0, 246
+	vpandnq zmm0, zmm2, zmm3
+	vpaddq zmm2, zmm0, zmm0
+	vpxorq zmm2, zmm2, zmm0
+	vpsllq zmm3, zmm2, 2
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 4
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 8
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 16
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 32
+	vpxorq zmm2, zmm3, zmm2
+	vpandq zmm3, zmm2, zmm5
+	vpsrlq zmm4, zmm3, 2
+	vpternlogq zmm4, zmm3, zmm5, 246
+	vpandq zmm3, zmm3, zmm6
+	vpsrlq zmm5, zmm3, 2
+	vpternlogq zmm5, zmm3, zmm6, 246
+	vpandnq zmm0, zmm2, zmm0
+	vpaddq zmm2, zmm0, zmm0
+	vpxorq zmm2, zmm2, zmm0
+	vpsllq zmm3, zmm2, 2
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 4
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 8
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 16
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 32
+	vpxorq zmm2, zmm3, zmm2
+	vpandq zmm3, zmm2, zmm4
+	vpsrlq zmm6, zmm3, 4
+	vpternlogq zmm6, zmm3, zmm4, 246
+	vpandq zmm3, zmm3, zmm5
+	vpsrlq zmm4, zmm3, 4
+	vpternlogq zmm4, zmm3, zmm5, 246
+	vpandnq zmm0, zmm2, zmm0
+	vpaddq zmm2, zmm0, zmm0
+	vpxorq zmm2, zmm2, zmm0
+	vpsllq zmm3, zmm2, 2
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 4
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 8
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 16
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 32
+	vpxorq zmm2, zmm3, zmm2
+	vpandq zmm3, zmm2, zmm6
+	vpsrlq zmm5, zmm3, 8
+	vpternlogq zmm5, zmm3, zmm6, 246
+	vpandq zmm3, zmm3, zmm4
+	vpsrlq zmm6, zmm3, 8
+	vpternlogq zmm6, zmm3, zmm4, 246
+	vpandnq zmm0, zmm2, zmm0
+	vpaddq zmm2, zmm0, zmm0
+	vpxorq zmm2, zmm2, zmm0
+	vpsllq zmm3, zmm2, 2
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 4
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 8
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 16
+	vpxorq zmm2, zmm3, zmm2
+	vpsllq zmm3, zmm2, 32
+	vpxorq zmm2, zmm3, zmm2
+	vpandq zmm3, zmm2, zmm5
+	vpsrlq zmm4, zmm3, 16
+	vpternlogq zmm4, zmm3, zmm5, 246
+	vpandq zmm3, zmm3, zmm6
+	vpsrlq zmm5, zmm3, 16
+	vpternlogq zmm5, zmm3, zmm6, 246
+	vpandnq zmm0, zmm2, zmm0
+	vpaddq zmm2, zmm0, zmm0
+	vpxorq zmm0, zmm2, zmm0
+	vpsllq zmm2, zmm0, 2
+	vpxorq zmm0, zmm2, zmm0
+	vpsllq zmm2, zmm0, 4
+	vpxorq zmm0, zmm2, zmm0
+	vpsllq zmm2, zmm0, 8
+	vpxorq zmm0, zmm2, zmm0
+	vpsllq zmm2, zmm0, 16
+	vpxorq zmm0, zmm2, zmm0
+	vpsllq zmm2, zmm0, 32
+	vpxorq zmm2, zmm2, zmm0
+	vpternlogq zmm2, zmm5, zmm4, 128
+	vpsrlq zmm0, zmm2, 32
+	vpternlogq zmm0, zmm2, zmm5, 246
+	vpopcntq zmm1, zmm1
+	vmovq rax, xmm0
 	xor r13d, r13d
 	mov ecx, r10d
 	shld r13, rax, cl
-	vpsadbw zmm4, zmm4, zmm2
-	vmovd ecx, xmm4
-	add ecx, r10d
+	vmovd ebp, xmm1
+	add ebp, r10d
 	shlx rax, rax, r10
 	test r10b, 64
 	cmovne r13, rax
 	cmovne rax, r14
 	or rax, r12
 	mov qword ptr [r8 + 8*rdi], rax
-	mov r10d, ecx
-	shr r10d, 6
-	add rdi, r10
+	mov ecx, ebp
+	shr ecx, 6
+	add rdi, rcx
 	cmp rdi, r9
-	jae .LBB23_21
+	jae .LBB27_23
 	or r13, r11
-	mov r10d, ecx
-	and r10d, 63
-	test cl, 64
+	mov ecx, ebp
+	and ecx, 63
+	test bpl, 64
 	cmovne rax, r13
 	mov r12d, 0
 	cmove r12, r13
-	vpextrd r11d, xmm4, 2
+	vpextrd r11d, xmm1, 2
+	add r11d, ecx
+	vpextrq r13, xmm0, 1
+	shlx r10, r13, rcx
+	or r10, rax
+	mov qword ptr [r8 + 8*rdi], r10
+	mov eax, r11d
+	shr eax, 6
+	add rdi, rax
+	cmp rdi, r9
+	jae .LBB27_23
+	not cl
+	shr r13
+	shrx rcx, r13, rcx
+	or rcx, r12
+	mov eax, r11d
+	and eax, 63
+	test r11b, 64
+	cmovne r10, rcx
+	mov r12d, 0
+	cmove r12, rcx
+	vextracti128 xmm2, ymm1, 1
+	vmovd r11d, xmm2
+	add r11d, eax
+	vextracti128 xmm2, ymm0, 1
+	vmovq r13, xmm2
+	shlx rcx, r13, rax
+	or rcx, r10
+	mov qword ptr [r8 + 8*rdi], rcx
+	mov edx, r11d
+	shr edx, 6
+	add rdi, rdx
+	cmp rdi, r9
+	jae .LBB27_23
+	not al
+	shr r13
+	shrx rdx, r13, rax
+	or rdx, r12
+	mov eax, r11d
+	and eax, 63
+	test r11b, 64
+	cmovne rcx, rdx
+	mov r12d, 0
+	vextracti128 xmm2, ymm1, 1
+	vpextrd r11d, xmm2, 2
+	cmove r12, rdx
+	add r11d, eax
+	vextracti128 xmm2, ymm0, 1
+	vpextrq r13, xmm2, 1
+	shlx r10, r13, rax
+	or r10, rcx
+	mov qword ptr [r8 + 8*rdi], r10
+	mov ecx, r11d
+	shr ecx, 6
+	add rdi, rcx
+	cmp rdi, r9
+	jae .LBB27_23
+	not al
+	shr r13
+	shrx rax, r13, rax
+	or rax, r12
+	mov ecx, r11d
+	and ecx, 63
+	test r11b, 64
+	cmovne r10, rax
+	mov r12d, 0
+	cmove r12, rax
+	vextracti32x4 xmm2, zmm1, 2
+	vmovd r11d, xmm2
+	add r11d, ecx
+	vextracti32x4 xmm3, zmm0, 2
+	vmovq r13, xmm3
+	shlx rax, r13, rcx
+	or rax, r10
+	mov qword ptr [r8 + 8*rdi], rax
+	mov edx, r11d
+	shr edx, 6
+	add rdi, rdx
+	cmp rdi, r9
+	jae .LBB27_23
+	not cl
+	shr r13
+	shrx rcx, r13, rcx
+	or rcx, r12
+	mov r10d, r11d
+	and r10d, 63
+	test r11b, 64
+	cmovne rax, rcx
+	mov r12d, 0
+	cmove r12, rcx
+	vpextrd r11d, xmm2, 2
 	add r11d, r10d
 	vpextrq r13, xmm3, 1
 	shlx rcx, r13, r10
@@ -183,97 +267,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr eax, 6
 	add rdi, rax
 	cmp rdi, r9
-	jae .LBB23_21
-	not r10b
-	shr r13
-	shrx r10, r13, r10
-	or r10, r12
-	mov eax, r11d
-	and eax, 63
-	test r11b, 64
-	cmovne rcx, r10
-	mov r12d, 0
-	cmove r12, r10
-	vextracti128 xmm5, ymm4, 1
-	vmovd r11d, xmm5
-	add r11d, eax
-	vextracti128 xmm5, ymm3, 1
-	vmovq r13, xmm5
-	shlx r10, r13, rax
-	or r10, rcx
-	mov qword ptr [r8 + 8*rdi], r10
-	mov ecx, r11d
-	shr ecx, 6
-	add rdi, rcx
-	cmp rdi, r9
-	jae .LBB23_21
-	not al
-	shr r13
-	shrx rcx, r13, rax
-	or rcx, r12
-	mov eax, r11d
-	and eax, 63
-	test r11b, 64
-	cmovne r10, rcx
-	mov r12d, 0
-	cmove r12, rcx
-	vextracti128 xmm5, ymm4, 1
-	vpextrd r11d, xmm5, 2
-	add r11d, eax
-	vextracti128 xmm5, ymm3, 1
-	vpextrq r13, xmm5, 1
-	shlx rcx, r13, rax
-	or rcx, r10
-	mov qword ptr [r8 + 8*rdi], rcx
-	mov r10d, r11d
-	shr r10d, 6
-	add rdi, r10
-	cmp rdi, r9
-	jae .LBB23_21
-	not al
-	shr r13
-	shrx rax, r13, rax
-	or rax, r12
-	mov r10d, r11d
-	and r10d, 63
-	test r11b, 64
-	cmovne rcx, rax
-	mov r12d, 0
-	cmove r12, rax
-	vextracti32x4 xmm5, zmm4, 2
-	vmovd r11d, xmm5
-	add r11d, r10d
-	vextracti32x4 xmm6, zmm3, 2
-	vmovq r13, xmm6
-	shlx rax, r13, r10
-	or rax, rcx
-	mov qword ptr [r8 + 8*rdi], rax
-	mov ecx, r11d
-	shr ecx, 6
-	add rdi, rcx
-	cmp rdi, r9
-	jae .LBB23_21
-	not r10b
-	shr r13
-	shrx rcx, r13, r10
-	or rcx, r12
-	mov r10d, r11d
-	and r10d, 63
-	test r11b, 64
-	cmovne rax, rcx
-	mov r12d, 0
-	cmove r12, rcx
-	vpextrd r11d, xmm5, 2
-	add r11d, r10d
-	vpextrq r13, xmm6, 1
-	shlx rcx, r13, r10
-	or rcx, rax
-	mov qword ptr [r8 + 8*rdi], rcx
-	mov eax, r11d
-	shr eax, 6
-	add rdi, rax
-	cmp rdi, r9
-	jae .LBB23_21
+	jae .LBB27_23
 	not r10b
 	shr r13
 	shrx rax, r13, r10
@@ -284,11 +278,11 @@ bitpacking::filter::filter_portable_branchless:
 	cmovne rcx, rax
 	mov r12d, 0
 	cmove r12, rax
-	vextracti32x4 xmm4, zmm4, 3
-	vmovd r11d, xmm4
+	vextracti32x4 xmm1, zmm1, 3
+	vmovd r11d, xmm1
 	add r11d, r10d
-	vextracti32x4 xmm3, zmm3, 3
-	vmovq r13, xmm3
+	vextracti32x4 xmm0, zmm0, 3
+	vmovq r13, xmm0
 	shlx rax, r13, r10
 	or rax, rcx
 	mov qword ptr [r8 + 8*rdi], rax
@@ -296,25 +290,25 @@ bitpacking::filter::filter_portable_branchless:
 	shr ecx, 6
 	add rcx, rdi
 	cmp rcx, r9
-	jae .LBB23_20
+	jae .LBB27_22
 	not r10b
 	shr r13
-	shrx r13, r13, r10
-	or r13, r12
+	shrx rdx, r13, r10
+	or rdx, r12
 	mov edi, r11d
 	and edi, 63
 	test r11b, 64
-	cmovne rax, r13
-	cmovne r13, r14
-	vpextrd r10d, xmm4, 2
+	cmovne rax, rdx
+	cmovne rdx, r14
+	vpextrd r10d, xmm1, 2
 	add r10d, edi
-	vpextrq r11, xmm3, 1
+	vpextrq r11, xmm0, 1
 	shlx r12, r11, rdi
 	or r12, rax
 	not dil
 	shr r11
 	shrx r11, r11, rdi
-	or r11, r13
+	or r11, rdx
 	mov qword ptr [r8 + 8*rcx], r12
 	mov edi, r10d
 	shr edi, 6
@@ -325,43 +319,39 @@ bitpacking::filter::filter_portable_branchless:
 	and r10d, 63
 	add r15, 64
 	cmp rbx, r15
-	jne .LBB23_12
-	mov eax, esi
-	and eax, 7
-	mov qword ptr [rsp + 16], rax
-	jne .LBB23_4
-	jmp .LBB23_7
-.LBB23_2:
+	jne .LBB27_14
+	mov ebx, esi
+	and ebx, 7
+	jne .LBB27_4
+	jmp .LBB27_9
+.LBB27_2:
 	xor edi, edi
 	xor r12d, r12d
 	xor r11d, r11d
 	xor r10d, r10d
-	mov eax, esi
-	and eax, 7
-	mov qword ptr [rsp + 16], rax
-	je .LBB23_7
-.LBB23_4:
+	mov ebx, esi
+	and ebx, 7
+	je .LBB27_9
+.LBB27_4:
 	shl rsi, 3
 	movabs rax, 9223372036854775744
 	and rax, rsi
-	add rbp, rax
-	add rdx, rax
+	add qword ptr [rsp + 8], rax
+	add qword ptr [rsp + 16], rax
 	xor r14d, r14d
-	mov qword ptr [rsp + 8], rdx
-	jmp .LBB23_5
-.LBB23_6:
-	mov rdx, qword ptr [rsp + 8]
-	mov rbp, rbx
+	jmp .LBB27_5
+.LBB27_8:
 	inc r14
 	mov r11, r13
-	cmp qword ptr [rsp + 16], r14
-	je .LBB23_7
-.LBB23_5:
+	cmp rbx, r14
+	je .LBB27_9
+.LBB27_5:
 	mov r15, r12
 	mov ecx, r10d
-	mov r10, qword ptr [rdx + 8*r14]
-	mov rbx, rbp
-	mov r13, qword ptr [rbp + 8*r14]
+	mov rax, qword ptr [rsp + 16]
+	mov r10, qword ptr [rax + 8*r14]
+	mov rax, qword ptr [rsp + 8]
+	mov r13, qword ptr [rax + 8*r14]
 	and r13, r10
 	mov rsi, r10
 	not rsi
@@ -531,22 +521,22 @@ bitpacking::filter::filter_portable_branchless:
 	or r12, r15
 	add r10d, ecx
 	cmp r10d, 63
-	jbe .LBB23_6
+	jbe .LBB27_8
 	cmp rdi, r9
-	jae .LBB23_25
+	jae .LBB27_25
 	mov qword ptr [r8 + 8*rdi], r12
 	inc rdi
 	add r10d, -64
 	mov r12, r13
 	xor r13d, r13d
-	jmp .LBB23_6
-.LBB23_7:
+	jmp .LBB27_8
+.LBB27_9:
 	test r10d, r10d
-	je .LBB23_10
+	je .LBB27_12
 	cmp rdi, r9
-	jae .LBB23_22
+	jae .LBB27_24
 	mov qword ptr [r8 + 8*rdi], r12
-.LBB23_10:
+.LBB27_12:
 	shl rdi, 6
 	mov eax, r10d
 	add rax, rdi
@@ -559,27 +549,27 @@ bitpacking::filter::filter_portable_branchless:
 	pop rbp
 	vzeroupper
 	ret
-.LBB23_27:
-	lea r9, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.5]
+.LBB27_27:
+	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.8]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB23_20:
+.LBB27_22:
 	mov rdi, rcx
-.LBB23_21:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.4]
+.LBB27_23:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.4]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB23_25:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.3]
+.LBB27_25:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB23_22:
-	lea rdx, [rip + .Lanon.fa1c7c224075ac75ac5ae5bb0234f729.2]
+.LBB27_24:
+	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
