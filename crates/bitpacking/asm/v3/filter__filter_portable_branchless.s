@@ -11,24 +11,24 @@ bitpacking::filter::filter_portable_branchless:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB24_27
+	jne .LBB25_27
 	mov r10, rsi
 	shr r10, 3
-	je .LBB24_2
+	je .LBB25_2
 	shl r10, 6
 	xor r11d, r11d
 	vpcmpeqd ymm0, ymm0, ymm0
-	vpbroadcastd ymm1, dword ptr [rip + .LCPI24_2]
-	vbroadcasti128 ymm2, xmmword ptr [rip + .LCPI24_3]
+	vpbroadcastd ymm1, dword ptr [rip + .LCPI25_2]
+	vbroadcasti128 ymm2, xmmword ptr [rip + .LCPI25_3]
 	vpxor xmm3, xmm3, xmm3
 	xor ebx, ebx
 	xor ecx, ecx
 	xor r14d, r14d
 	xor r15d, r15d
 	xor edi, edi
-.LBB24_14:
+.LBB25_14:
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	mov rax, qword ptr [rsp + 16]
 	vmovdqu ymm6, ymmword ptr [rax + rbx]
 	vmovdqu ymm4, ymmword ptr [rax + rbx + 32]
@@ -182,7 +182,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr ecx, 6
 	add rdi, rcx
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	or r12, r15
 	mov r14d, ebp
 	and r14d, 63
@@ -200,7 +200,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr eax, 6
 	add rdi, rax
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	not r14b
 	shr r12
 	shrx rax, r12, r14
@@ -223,7 +223,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr ecx, 6
 	add rdi, rcx
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	not r14b
 	shr r12
 	shrx rcx, r12, r14
@@ -244,7 +244,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr eax, 6
 	add rdi, rax
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	vpxor ymm6, ymm4, ymm0
 	vpaddq ymm7, ymm6, ymm6
 	vpsllq ymm8, ymm6, 2
@@ -397,7 +397,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr ecx, 6
 	add rdi, rcx
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	not al
 	shr r12
 	shrx rcx, r12, rax
@@ -418,7 +418,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr edx, 6
 	add rdi, rdx
 	cmp rdi, r9
-	jae .LBB24_23
+	jae .LBB25_23
 	not al
 	shr r12
 	shrx rax, r12, rax
@@ -441,7 +441,7 @@ bitpacking::filter::filter_portable_branchless:
 	shr r12d, 6
 	add r12, rdi
 	cmp r12, r9
-	jae .LBB24_22
+	jae .LBB25_22
 	not r14b
 	shr r13
 	shrx rdx, r13, r14
@@ -470,33 +470,33 @@ bitpacking::filter::filter_portable_branchless:
 	and ecx, 63
 	add rbx, 64
 	cmp r10, rbx
-	jne .LBB24_14
+	jne .LBB25_14
 	mov r10d, esi
 	and r10d, 7
-	jne .LBB24_4
-	jmp .LBB24_9
-.LBB24_2:
+	jne .LBB25_4
+	jmp .LBB25_9
+.LBB25_2:
 	xor edi, edi
 	xor r14d, r14d
 	xor r15d, r15d
 	xor ecx, ecx
 	mov r10d, esi
 	and r10d, 7
-	je .LBB24_9
-.LBB24_4:
+	je .LBB25_9
+.LBB25_4:
 	shl rsi, 3
 	movabs rax, 9223372036854775744
 	and rax, rsi
 	add qword ptr [rsp + 8], rax
 	add qword ptr [rsp + 16], rax
 	xor ebx, ebx
-	jmp .LBB24_5
-.LBB24_8:
+	jmp .LBB25_5
+.LBB25_8:
 	inc rbx
 	mov r15, r13
 	cmp r10, rbx
-	je .LBB24_9
-.LBB24_5:
+	je .LBB25_9
+.LBB25_5:
 	mov esi, ecx
 	mov rax, qword ptr [rsp + 16]
 	mov r12, qword ptr [rax + 8*rbx]
@@ -674,22 +674,22 @@ bitpacking::filter::filter_portable_branchless:
 	or r14, rax
 	add ecx, esi
 	cmp ecx, 63
-	jbe .LBB24_8
+	jbe .LBB25_8
 	cmp rdi, r9
-	jae .LBB24_25
+	jae .LBB25_25
 	mov qword ptr [r8 + 8*rdi], r14
 	inc rdi
 	add ecx, -64
 	mov r14, r13
 	xor r13d, r13d
-	jmp .LBB24_8
-.LBB24_9:
+	jmp .LBB25_8
+.LBB25_9:
 	test ecx, ecx
-	je .LBB24_12
+	je .LBB25_12
 	cmp rdi, r9
-	jae .LBB24_24
+	jae .LBB25_24
 	mov qword ptr [r8 + 8*rdi], r14
-.LBB24_12:
+.LBB25_12:
 	shl rdi, 6
 	mov eax, ecx
 	add rax, rdi
@@ -702,27 +702,27 @@ bitpacking::filter::filter_portable_branchless:
 	pop rbp
 	vzeroupper
 	ret
-.LBB24_27:
-	lea r9, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.8]
+.LBB25_27:
+	lea r9, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.8]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB24_22:
+.LBB25_22:
 	mov rdi, r12
-.LBB24_23:
-	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.4]
+.LBB25_23:
+	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.4]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB24_25:
-	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.3]
+.LBB25_25:
+	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.3]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB24_24:
-	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.2]
+.LBB25_24:
+	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.2]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

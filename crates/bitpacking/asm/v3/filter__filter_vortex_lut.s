@@ -112,14 +112,14 @@ bitpacking::filter::filter_vortex_lut:
 	pop rbp
 	ret
 .LBB21_18:
-	lea r9, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.5]
+	lea r9, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.5]
 	lea rsi, [rsp + 40]
 	lea rdx, [rsp + 48]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB21_19:
-	lea rdi, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.6]
-	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.7]
+	lea rdi, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.6]
+	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.7]
 	mov esi, 95
 	call qword ptr [rip + core::panicking::panic_fmt@GOTPCREL]

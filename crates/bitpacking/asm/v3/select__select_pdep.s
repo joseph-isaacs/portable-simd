@@ -1,27 +1,27 @@
 bitpacking::select::select_pdep:
 	test rsi, rsi
-	je .LBB25_1
+	je .LBB27_1
 	shl rsi, 3
 	xor eax, eax
 	xor ecx, ecx
 	xor r8d, r8d
 	mov r9, rdx
-.LBB25_3:
+.LBB27_3:
 	mov r10, qword ptr [rdi + r8]
 	xor r11d, r11d
 	popcnt r11, r10
 	sub r9, r11
-	jb .LBB25_6
+	jb .LBB27_6
 	add r8, 8
 	add rcx, -64
 	mov rdx, r9
 	cmp rsi, r8
-	jne .LBB25_3
+	jne .LBB27_3
 	ret
-.LBB25_1:
+.LBB27_1:
 	xor eax, eax
 	ret
-.LBB25_6:
+.LBB27_6:
 	mov eax, 1
 	shlx rdx, rax, rdx
 	pdep rdx, rdx, r10

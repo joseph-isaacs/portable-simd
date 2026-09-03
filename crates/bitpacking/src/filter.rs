@@ -173,6 +173,25 @@ pub fn pext_byte_lut(x: u64, m: u64) -> u64 {
     r
 }
 
+/// Byte-LUT PEXT without the per-byte `mask_byte != 0` branch: a zero mask byte looks up
+/// row 0 (all zeros) and advances the offset by 0, so the branch is redundant, and at low
+/// densities it mispredicts (a mask byte is non-zero with probability 1 - (7/8)^8 = 66%
+/// at 1/8 density).
+#[inline(always)]
+pub fn pext_byte_lut_branchless(x: u64, m: u64) -> u64 {
+    let xb = x.to_le_bytes();
+    let mb = m.to_le_bytes();
+    let mut r = 0u64;
+    let mut off = 0u32;
+    let mut i = 0;
+    while i < 8 {
+        r |= (BYTE_PEXT_LUT[(mb[i] as usize) * 256 + xb[i] as usize] as u64) << off;
+        off += mb[i].count_ones();
+        i += 1;
+    }
+    r
+}
+
 #[cfg(target_feature = "bmi2")]
 #[inline]
 pub fn pext_bmi2(x: u64, m: u64) -> u64 {
@@ -258,6 +277,16 @@ pub fn filter_bmi2(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
 /// Byte-LUT PEXT with the plain writer (isolates the LUT from vortex's fast paths).
 pub fn filter_byte_lut(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
     filter_with::<false>(values, mask, out, pext_byte_lut)
+}
+
+/// Branchless byte-LUT PEXT with the plain writer.
+pub fn filter_byte_lut_branchless(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_with::<false>(values, mask, out, pext_byte_lut_branchless)
+}
+
+/// vortex's loop with the branchless byte-LUT PEXT.
+pub fn filter_vortex_lut_branchless(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_vortex_with(values, mask, out, pext_byte_lut_branchless)
 }
 
 /// vortex's loop with its software PEXT: what vortex runs without BMI2.
@@ -382,6 +411,7 @@ mod tests {
     #[test]
     fn pext_byte_lut_matches() {
         check_pext(pext_byte_lut);
+        check_pext(pext_byte_lut_branchless);
     }
     #[test]
     fn pext_hd_simd_matches() {
@@ -400,7 +430,9 @@ mod tests {
     fn scalar() {
         check(filter_scalar);
         check(filter_byte_lut);
+        check(filter_byte_lut_branchless);
         check(filter_vortex_lut);
+        check(filter_vortex_lut_branchless);
     }
     #[test]
     fn portable() {

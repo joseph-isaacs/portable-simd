@@ -191,7 +191,7 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	lea rsi, [r9 + r10]
 	jmp .LBB3_21
 .LBB3_26:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.12]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.12]
 	mov rsi, rcx
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

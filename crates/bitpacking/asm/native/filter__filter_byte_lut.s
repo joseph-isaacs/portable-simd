@@ -93,16 +93,16 @@ bitpacking::filter::filter_byte_lut:
 	pop rbp
 	ret
 .LBB21_15:
-	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.1]
+	lea r9, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.1]
 	lea rsi, [rsp + 40]
 	lea rdx, [rsp + 48]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB21_14:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.3]
 	mov rsi, qword ptr [rsp + 8]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
 .LBB21_13:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.2]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

@@ -563,19 +563,19 @@ bitpacking::filter::filter_portable:
 	vzeroupper
 	ret
 .LBB22_42:
-	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.8]
+	lea r9, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.8]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB22_7:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.3]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
 .LBB22_36:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.2]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

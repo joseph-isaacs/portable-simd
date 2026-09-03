@@ -1,4 +1,3 @@
- `release` profile [optimized + debuginfo] target(s) in 0.03s
 bitpacking::byte_to_bit::bytes_to_bits_swar:
 	push rbp
 	push r15
@@ -427,6 +426,6 @@ bitpacking::byte_to_bit::bytes_to_bits_swar:
 	lea rsi, [r9 + r10]
 	jmp .LBB4_21
 .LBB4_26:
-	lea rdx, [rip + .Lanon.530bf91f7973b101a7a33e88209e6107.13]
+	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.13]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

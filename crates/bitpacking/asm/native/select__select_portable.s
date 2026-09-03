@@ -5,29 +5,29 @@ bitpacking::select::select_portable:
 	sub rsp, 128
 	mov rcx, rsi
 	shr rcx, 3
-	je .LBB30_1
+	je .LBB32_1
 	mov r10, rcx
 	shl r10, 6
 	xor eax, eax
 	vpxor xmm0, xmm0, xmm0
 	mov r9, rdi
 	mov r8, rdx
-.LBB30_5:
+.LBB32_5:
 	vpopcntq zmm1, zmmword ptr [r9]
 	vpmovqb xmm2, zmm1
 	vpsadbw xmm2, xmm2, xmm0
 	vmovq r11, xmm2
 	sub r8, r11
-	jb .LBB30_12
+	jb .LBB32_12
 	add r9, 64
 	add rax, -512
 	mov rdx, r8
 	add r10, -64
-	jne .LBB30_5
+	jne .LBB32_5
 	lea edx, [8*rsi]
 	and edx, 56
-	je .LBB30_3
-.LBB30_7:
+	je .LBB32_3
+.LBB32_7:
 	movabs rax, 1152921504606846968
 	and rsi, rax
 	lea rdi, [rdi + 8*rsi]
@@ -36,32 +36,32 @@ bitpacking::select::select_portable:
 	xor eax, eax
 	xor r9d, r9d
 	mov r10, r8
-.LBB30_8:
+.LBB32_8:
 	mov rsi, qword ptr [rdi + r9]
 	popcnt r11, rsi
 	sub r10, r11
-	jb .LBB30_11
+	jb .LBB32_11
 	add rcx, -64
 	add r9, 8
 	mov r8, r10
 	cmp rdx, r9
-	jne .LBB30_8
+	jne .LBB32_8
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB30_1:
+.LBB32_1:
 	mov r8, rdx
 	lea edx, [8*rsi]
 	and edx, 56
-	jne .LBB30_7
-.LBB30_3:
+	jne .LBB32_7
+.LBB32_3:
 	xor eax, eax
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB30_12:
+.LBB32_12:
 	vpxor xmm0, xmm0, xmm0
 	valignq zmm2, zmm1, zmm0, 7
 	vpaddq zmm1, zmm2, zmm1
@@ -116,7 +116,7 @@ bitpacking::select::select_portable:
 	pop rbp
 	vzeroupper
 	ret
-.LBB30_11:
+.LBB32_11:
 	vmovq xmm0, rsi
 	vpopcntb xmm0, xmm0
 	vpsllq xmm1, xmm0, 8

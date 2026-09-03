@@ -75,19 +75,19 @@ bitpacking::filter::filter_bmi2:
 	pop rbp
 	ret
 .LBB18_16:
-	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.1]
+	lea r9, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.1]
 	lea rsi, [rsp + 8]
 	lea rdx, [rsp + 16]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB18_15:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.3]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.3]
 	mov rdi, rax
 	mov rsi, r9
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
 .LBB18_13:
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.2]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.2]
 	mov rdi, rax
 	mov rsi, r9
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

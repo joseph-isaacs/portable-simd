@@ -136,7 +136,9 @@ fn bench_filter(c: &mut Criterion) {
         b!("naive", filter::filter_naive);
         b!("scalar_hd", filter::filter_scalar);
         b!("scalar_byte_lut", filter::filter_byte_lut);
+        b!("scalar_byte_lut_branchless", filter::filter_byte_lut_branchless);
         b!("vortex_lut", filter::filter_vortex_lut);
+        b!("vortex_lut_branchless", filter::filter_vortex_lut_branchless);
         b!("portable_u64x4", filter::filter_portable4);
         b!("portable_u64x8", filter::filter_portable);
         b!("portable_u64x8_branchless", filter::filter_portable_branchless);

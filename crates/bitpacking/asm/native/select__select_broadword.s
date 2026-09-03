@@ -1,27 +1,26 @@
- `release` profile [optimized + debuginfo] target(s) in 0.02s
 bitpacking::select::select_broadword:
 	test rsi, rsi
-	je .LBB31_1
+	je .LBB33_1
 	shl rsi, 3
 	xor eax, eax
 	xor ecx, ecx
 	xor r9d, r9d
 	mov r10, rdx
-.LBB31_3:
+.LBB33_3:
 	mov r8, qword ptr [rdi + r9]
 	popcnt r11, r8
 	sub r10, r11
-	jb .LBB31_6
+	jb .LBB33_6
 	add r9, 8
 	add rcx, -64
 	mov rdx, r10
 	cmp rsi, r9
-	jne .LBB31_3
+	jne .LBB33_3
 	ret
-.LBB31_1:
+.LBB33_1:
 	xor eax, eax
 	ret
-.LBB31_6:
+.LBB33_6:
 	mov rax, r8
 	shr rax
 	movabs rsi, 6148914691236517205

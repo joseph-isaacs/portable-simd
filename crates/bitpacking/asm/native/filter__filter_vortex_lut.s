@@ -1,4 +1,3 @@
- `release` profile [optimized + debuginfo] target(s) in 0.02s
 bitpacking::filter::filter_vortex_lut:
 	push rbp
 	push r15
@@ -113,14 +112,14 @@ bitpacking::filter::filter_vortex_lut:
 	pop rbp
 	ret
 .LBB24_18:
-	lea r9, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.5]
+	lea r9, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.5]
 	lea rsi, [rsp + 40]
 	lea rdx, [rsp + 48]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
 .LBB24_19:
-	lea rdi, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.6]
-	lea rdx, [rip + .Lanon.cb6c5d1d9c81477bac8acc2b0e6bb2ed.7]
+	lea rdi, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.6]
+	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.7]
 	mov esi, 95
 	call qword ptr [rip + core::panicking::panic_fmt@GOTPCREL]
