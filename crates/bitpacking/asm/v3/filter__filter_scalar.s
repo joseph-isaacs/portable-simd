@@ -1,0 +1,255 @@
+bitpacking::filter::filter_scalar:
+	push rbp
+	push r15
+	push r14
+	push r13
+	push r12
+	push rbx
+	sub rsp, 40
+	mov qword ptr [rsp + 8], r8
+	mov qword ptr [rsp + 16], rdx
+	mov qword ptr [rsp + 24], rsi
+	mov qword ptr [rsp + 32], rcx
+	cmp rsi, rcx
+	jne .LBB16_15
+	xor edx, edx
+	test rsi, rsi
+	je .LBB16_2
+	mov qword ptr [rsp], r9
+	xor r15d, r15d
+	xor eax, eax
+	xor r11d, r11d
+	xor r14d, r14d
+	xor ebx, ebx
+	jmp .LBB16_4
+.LBB16_7:
+	inc rbx
+	mov r14, r13
+	cmp rsi, rbx
+	je .LBB16_8
+.LBB16_4:
+	mov ecx, r15d
+	mov r8, qword ptr [rsp + 16]
+	mov r15, qword ptr [r8 + 8*rbx]
+	mov r13, qword ptr [rdi + 8*rbx]
+	and r13, r15
+	mov r10, r15
+	not r10
+	lea r9, [r10 + r10]
+	lea r12, [4*r10]
+	xor r12, r10
+	xor r12, r9
+	shl r12, 2
+	xor r12, r9
+	mov r10, r12
+	shl r10, 4
+	xor r10, r12
+	mov r12, r10
+	shl r12, 8
+	xor r12, r10
+	mov r10, r12
+	shl r10, 16
+	xor r10, r12
+	mov r12, r10
+	shl r12, 32
+	xor r12, r10
+	mov rbp, r12
+	and rbp, r15
+	mov r10, rbp
+	xor r10, r15
+	shr rbp
+	or rbp, r10
+	andn r9, r12, r9
+	and r12, r13
+	xor r13, r12
+	shr r12
+	or r12, r13
+	lea r10, [r9 + r9]
+	xor r10, r9
+	lea r13, [4*r10]
+	xor r13, r10
+	mov r10, r13
+	shl r10, 4
+	xor r10, r13
+	mov r13, r10
+	shl r13, 8
+	xor r13, r10
+	mov r10, r13
+	shl r10, 16
+	xor r10, r13
+	mov r13, r10
+	shl r13, 32
+	xor r13, r10
+	andn r9, r13, r9
+	and r13, rbp
+	xor rbp, r13
+	mov r10, r13
+	shr r10, 2
+	or r10, rbp
+	and r13, r12
+	xor r12, r13
+	shr r13, 2
+	or r13, r12
+	lea r12, [r9 + r9]
+	xor r12, r9
+	lea rbp, [4*r12]
+	xor rbp, r12
+	mov r12, rbp
+	shl r12, 4
+	xor r12, rbp
+	mov rbp, r12
+	shl rbp, 8
+	xor rbp, r12
+	mov r8, rbp
+	shl r8, 16
+	xor r8, rbp
+	mov r12, r8
+	shl r12, 32
+	xor r12, r8
+	andn r9, r12, r9
+	and r12, r10
+	xor r10, r12
+	mov rbp, r12
+	shr rbp, 4
+	or rbp, r10
+	and r12, r13
+	xor r13, r12
+	shr r12, 4
+	or r12, r13
+	lea r8, [r9 + r9]
+	xor r8, r9
+	lea r10, [4*r8]
+	xor r10, r8
+	mov r8, r10
+	shl r8, 4
+	xor r8, r10
+	mov r10, r8
+	shl r10, 8
+	xor r10, r8
+	mov r8, r10
+	shl r8, 16
+	xor r8, r10
+	mov r13, r8
+	shl r13, 32
+	xor r13, r8
+	andn r9, r13, r9
+	and r13, rbp
+	xor rbp, r13
+	mov r10, r13
+	shr r10, 8
+	or r10, rbp
+	and r13, r12
+	xor r12, r13
+	shr r13, 8
+	or r13, r12
+	lea r8, [r9 + r9]
+	xor r8, r9
+	lea r12, [4*r8]
+	xor r12, r8
+	mov r8, r12
+	shl r8, 4
+	xor r8, r12
+	mov r12, r8
+	shl r12, 8
+	xor r12, r8
+	mov r8, r12
+	shl r8, 16
+	xor r8, r12
+	mov rbp, r8
+	shl rbp, 32
+	xor rbp, r8
+	andn r8, rbp, r9
+	and rbp, r10
+	xor r10, rbp
+	mov r12, rbp
+	shr r12, 16
+	or r12, r10
+	and rbp, r13
+	xor r13, rbp
+	shr rbp, 16
+	or rbp, r13
+	lea r9, [r8 + r8]
+	xor r9, r8
+	lea r8, [4*r9]
+	xor r8, r9
+	mov r9, r8
+	shl r9, 4
+	xor r9, r8
+	mov r8, r9
+	shl r8, 8
+	xor r8, r9
+	mov r9, r8
+	shl r9, 16
+	xor r9, r8
+	mov r8, r9
+	shl r8, 32
+	xor r8, r9
+	and r12, rbp
+	and r12, r8
+	xor rbp, r12
+	shr r12, 32
+	or r12, rbp
+	xor r13d, r13d
+	shld r13, r12, cl
+	mov r8, r11
+	popcnt r15, r15
+	shlx r11, r12, rcx
+	test cl, 64
+	cmovne r13, r11
+	cmovne r11, rdx
+	or r13, r14
+	or r11, r8
+	add r15d, ecx
+	cmp r15d, 63
+	jbe .LBB16_7
+	cmp rax, qword ptr [rsp]
+	jae .LBB16_14
+	mov rcx, qword ptr [rsp + 8]
+	mov qword ptr [rcx + 8*rax], r11
+	inc rax
+	add r15d, -64
+	mov r11, r13
+	xor r13d, r13d
+	jmp .LBB16_7
+.LBB16_8:
+	test r15d, r15d
+	je .LBB16_9
+	mov rsi, qword ptr [rsp]
+	cmp rax, rsi
+	jae .LBB16_13
+	mov rcx, qword ptr [rsp + 8]
+	mov qword ptr [rcx + 8*rax], r11
+	mov edx, r15d
+	jmp .LBB16_12
+.LBB16_2:
+	xor eax, eax
+	jmp .LBB16_12
+.LBB16_9:
+	xor edx, edx
+.LBB16_12:
+	shl rax, 6
+	add rax, rdx
+	add rsp, 40
+	pop rbx
+	pop r12
+	pop r13
+	pop r14
+	pop r15
+	pop rbp
+	ret
+.LBB16_15:
+	lea r9, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.1]
+	lea rsi, [rsp + 24]
+	lea rdx, [rsp + 32]
+	xor edi, edi
+	xor ecx, ecx
+	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
+.LBB16_14:
+	lea rdx, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.3]
+	mov rdi, rax
+	mov rsi, qword ptr [rsp]
+	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
+.LBB16_13:
+	lea rdx, [rip + .Lanon.e4ba99f9515b8f6375d48eb30413ba0b.2]
+	mov rdi, rax
+	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

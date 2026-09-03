@@ -1,0 +1,27 @@
+[package]
+name = "bitpacking"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Bit-packing primitives (byte->bit, rank, select, bit filter) in portable SIMD vs scalar vs intrinsics"
+
+# Standalone workspace so the main portable-simd workspace/lockfile is untouched.
+[workspace]
+
+[dependencies]
+core_simd = { path = "../core_simd" }
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "bitpacking"
+harness = false
+
+[profile.release]
+codegen-units = 1
+debug = 1
+
+[profile.bench]
+codegen-units = 1
+debug = 1
