@@ -2,7 +2,7 @@
 //!   rustc +nightly --edition 2024 --crate-type lib -O --emit=llvm-ir --target aarch64-unknown-linux-gnu ir/bitmask_repro.rs
 //! and feed the .ll to `llc -O2 -mtriple=aarch64` (or `-mtriple=x86_64 -mattr=+avx2`).
 #![feature(portable_simd)]
-use core::simd::{Mask, Simd, cmp::SimdPartialEq};
+use core::simd::{Mask, Select, Simd, cmp::SimdPartialEq};
 
 /// `to_bitmask`: icmp + bitcast <64 x i1> to i64
 #[unsafe(no_mangle)]
