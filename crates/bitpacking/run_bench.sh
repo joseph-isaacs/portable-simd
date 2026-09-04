@@ -23,6 +23,6 @@ for cfg in "${cfgs[@]}"; do
   esac
   echo "=== $cfg ($flags ${target[*]:-})"
   RUSTFLAGS="$flags" CARGO_TARGET_DIR="target/$cfg" \
-    cargo bench --bench bitpacking "${target[@]}" -- --noplot --warm-up-time 1 --measurement-time 2 "$@" \
+    cargo bench --bench bitpacking "${target[@]}" -- --noplot --warm-up-time "${WARM:-1}" --measurement-time "${MEAS:-2}" "$@" \
     2>&1 | tee "results/bench-$cfg.txt"
 done

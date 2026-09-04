@@ -1,12 +1,418 @@
     Finished `bench` profile [optimized + debuginfo] target(s) in 0.03s
      Running benches/bitpacking.rs (target/a64/aarch64-unknown-linux-gnu/release/deps/bitpacking-ebc87d9b299980f2)
 Benchmarking byte_to_bit/scalar
-Benchmarking byte_to_bit/scalar: Warming up for 1.0000 s
-Benchmarking byte_to_bit/scalar: Collecting 100 samples in estimated 2.0416 s (30k iterations)
+Benchmarking byte_to_bit/scalar: Warming up for 300.00 ms
+Benchmarking byte_to_bit/scalar: Collecting 10 samples in estimated 702.91 ms (9735 iterations)
 Benchmarking byte_to_bit/scalar: Analyzing
-byte_to_bit/scalar      time:   [67.401 µs 68.783 µs 69.867 µs]
-                        thrpt:  [223.64 MiB/s 227.16 MiB/s 231.82 MiB/s]
+byte_to_bit/scalar      time:   [71.498 µs 72.007 µs 72.464 µs]
+                        thrpt:  [215.62 MiB/s 216.99 MiB/s 218.54 MiB/s]
+                 change:
+                        time:   [+11.134% +14.089% +16.540%] (p = 0.00 < 0.05)
+                        thrpt:  [-14.193% -12.349% -10.018%]
+                        Performance has regressed.
 Benchmarking byte_to_bit/swar
-Benchmarking byte_to_bit/swar: Warming up for 1.0000 s
-Benchmarking byte_to_bit/swar: Collecting 100 samples in estimated 2.0097 s (858k iterations)
+Benchmarking byte_to_bit/swar: Warming up for 300.00 ms
+Benchmarking byte_to_bit/swar: Collecting 10 samples in estimated 700.09 ms (304k iterations)
 Benchmarking byte_to_bit/swar: Analyzing
+byte_to_bit/swar        time:   [2.2863 µs 2.3722 µs 2.5395 µs]
+                        thrpt:  [6.0085 GiB/s 6.4323 GiB/s 6.6741 GiB/s]
+                 change:
+                        time:   [-2.5894% +2.0063% +6.2693%] (p = 0.44 > 0.05)
+                        thrpt:  [-5.8994% -1.9669% +2.6582%]
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+Benchmarking byte_to_bit/portable_u8x64
+Benchmarking byte_to_bit/portable_u8x64: Warming up for 300.00 ms
+Benchmarking byte_to_bit/portable_u8x64: Collecting 10 samples in estimated 700.03 ms (89k iterations)
+Benchmarking byte_to_bit/portable_u8x64: Analyzing
+byte_to_bit/portable_u8x64
+                        time:   [7.9365 µs 8.0054 µs 8.0932 µs]
+                        thrpt:  [1.8854 GiB/s 1.9061 GiB/s 1.9226 GiB/s]
+                 change:
+                        time:   [+25.538% +27.309% +28.775%] (p = 0.00 < 0.05)
+                        thrpt:  [-22.345% -21.451% -20.343%]
+                        Performance has regressed.
+Benchmarking byte_to_bit/portable_u8x32
+Benchmarking byte_to_bit/portable_u8x32: Warming up for 300.00 ms
+Benchmarking byte_to_bit/portable_u8x32: Collecting 10 samples in estimated 700.03 ms (88k iterations)
+Benchmarking byte_to_bit/portable_u8x32: Analyzing
+byte_to_bit/portable_u8x32
+                        time:   [6.7767 µs 7.3344 µs 8.0953 µs]
+                        thrpt:  [1.8849 GiB/s 2.0804 GiB/s 2.2517 GiB/s]
+                 change:
+                        time:   [+10.373% +15.591% +20.649%] (p = 0.00 < 0.05)
+                        thrpt:  [-17.115% -13.488% -9.3978%]
+                        Performance has regressed.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) low severe
+  1 (10.00%) low mild
+Benchmarking byte_to_bit/neon
+Benchmarking byte_to_bit/neon: Warming up for 300.00 ms
+Benchmarking byte_to_bit/neon: Collecting 10 samples in estimated 700.09 ms (55k iterations)
+Benchmarking byte_to_bit/neon: Analyzing
+byte_to_bit/neon        time:   [14.002 µs 14.169 µs 14.297 µs]
+                        thrpt:  [1.0673 GiB/s 1.0769 GiB/s 1.0898 GiB/s]
+                 change:
+                        time:   [-5.1461% +0.0463% +4.2720%] (p = 0.90 > 0.05)
+                        thrpt:  [-4.0969% -0.0463% +5.4252%]
+                        No change in performance detected.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) low severe
+
+Benchmarking rank/scalar/1024
+Benchmarking rank/scalar/1024: Warming up for 300.00 ms
+Benchmarking rank/scalar/1024: Collecting 10 samples in estimated 700.04 ms (166k iterations)
+Benchmarking rank/scalar/1024: Analyzing
+rank/scalar/1024        time:   [4.2281 µs 4.3019 µs 4.4083 µs]
+                        thrpt:  [1.2980 GiB/s 1.3301 GiB/s 1.3533 GiB/s]
+                 change:
+                        time:   [+14.276% +17.898% +20.526%] (p = 0.00 < 0.05)
+                        thrpt:  [-17.030% -15.181% -12.492%]
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking rank/portable_u64x8/1024
+Benchmarking rank/portable_u64x8/1024: Warming up for 300.00 ms
+Benchmarking rank/portable_u64x8/1024: Collecting 10 samples in estimated 700.15 ms (167k iterations)
+Benchmarking rank/portable_u64x8/1024: Analyzing
+rank/portable_u64x8/1024
+                        time:   [4.0500 µs 4.2138 µs 4.4835 µs]
+                        thrpt:  [1.2763 GiB/s 1.3579 GiB/s 1.4129 GiB/s]
+                 change:
+                        time:   [+3.2496% +9.6844% +17.583%] (p = 0.00 < 0.05)
+                        thrpt:  [-14.954% -8.8293% -3.1473%]
+                        Performance has regressed.
+Benchmarking rank/portable_u8x64/1024
+Benchmarking rank/portable_u8x64/1024: Warming up for 300.00 ms
+Benchmarking rank/portable_u8x64/1024: Collecting 10 samples in estimated 700.02 ms (261k iterations)
+Benchmarking rank/portable_u8x64/1024: Analyzing
+rank/portable_u8x64/1024
+                        time:   [2.1707 µs 2.3263 µs 2.6033 µs]
+                        thrpt:  [2.1980 GiB/s 2.4597 GiB/s 2.6361 GiB/s]
+                 change:
+                        time:   [-17.281% -6.7440% -1.9448%] (p = 0.05 < 0.05)
+                        thrpt:  [+1.9834% +7.2317% +20.892%]
+                        Performance has improved.
+Benchmarking rank/neon/1024
+Benchmarking rank/neon/1024: Warming up for 300.00 ms
+Benchmarking rank/neon/1024: Collecting 10 samples in estimated 700.17 ms (147k iterations)
+Benchmarking rank/neon/1024: Analyzing
+rank/neon/1024          time:   [4.8944 µs 4.9281 µs 4.9536 µs]
+                        thrpt:  [1.1551 GiB/s 1.1611 GiB/s 1.1691 GiB/s]
+                 change:
+                        time:   [-1.8702% -1.1553% -0.0831%] (p = 0.16 > 0.05)
+                        thrpt:  [+0.0832% +1.1688% +1.9058%]
+                        No change in performance detected.
+
+Benchmarking select64/naive
+Benchmarking select64/naive: Warming up for 300.00 ms
+Benchmarking select64/naive: Collecting 10 samples in estimated 706.69 ms (4620 iterations)
+Benchmarking select64/naive: Analyzing
+select64/naive          time:   [155.55 µs 157.67 µs 161.46 µs]
+                        thrpt:  [25.369 Melem/s 25.979 Melem/s 26.333 Melem/s]
+                 change:
+                        time:   [-2.4414% +2.4650% +6.4449%] (p = 0.12 > 0.05)
+                        thrpt:  [-6.0547% -2.4057% +2.5025%]
+                        No change in performance detected.
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) high mild
+  1 (10.00%) high severe
+Benchmarking select64/broadword
+Benchmarking select64/broadword: Warming up for 300.00 ms
+Benchmarking select64/broadword: Collecting 10 samples in estimated 700.49 ms (16k iterations)
+Benchmarking select64/broadword: Analyzing
+select64/broadword      time:   [42.967 µs 43.152 µs 43.628 µs]
+                        thrpt:  [93.886 Melem/s 94.919 Melem/s 95.330 Melem/s]
+                 change:
+                        time:   [+0.5536% +2.0934% +3.8242%] (p = 0.03 < 0.05)
+                        thrpt:  [-3.6833% -2.0505% -0.5505%]
+                        Change within noise threshold.
+Benchmarking select64/portable_u8x8
+Benchmarking select64/portable_u8x8: Warming up for 300.00 ms
+Benchmarking select64/portable_u8x8: Collecting 10 samples in estimated 718.43 ms (2090 iterations)
+Benchmarking select64/portable_u8x8: Analyzing
+select64/portable_u8x8  time:   [344.84 µs 347.23 µs 349.88 µs]
+                        thrpt:  [11.707 Melem/s 11.796 Melem/s 11.878 Melem/s]
+                 change:
+                        time:   [-2.0242% -1.1816% -0.4876%] (p = 0.04 < 0.05)
+                        thrpt:  [+0.4900% +1.1957% +2.0660%]
+                        Change within noise threshold.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking select64/neon
+Benchmarking select64/neon: Warming up for 300.00 ms
+Benchmarking select64/neon: Collecting 10 samples in estimated 707.81 ms (4565 iterations)
+Benchmarking select64/neon: Analyzing
+select64/neon           time:   [151.77 µs 152.16 µs 152.98 µs]
+                        thrpt:  [26.776 Melem/s 26.919 Melem/s 26.988 Melem/s]
+                 change:
+                        time:   [-0.1844% +0.5780% +1.5526%] (p = 0.31 > 0.05)
+                        thrpt:  [-1.5289% -0.5747% +0.1847%]
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+Benchmarking select/scalar_scan+naive
+Benchmarking select/scalar_scan+naive: Warming up for 300.00 ms
+Benchmarking select/scalar_scan+naive: Collecting 10 samples in estimated 700.38 ms (49k iterations)
+Benchmarking select/scalar_scan+naive: Analyzing
+select/scalar_scan+naive
+                        time:   [11.945 µs 12.483 µs 13.438 µs]
+                        thrpt:  [436.03 MiB/s 469.39 MiB/s 490.55 MiB/s]
+                 change:
+                        time:   [-10.642% -6.5573% -3.1425%] (p = 0.00 < 0.05)
+                        thrpt:  [+3.2444% +7.0175% +11.910%]
+                        Performance has improved.
+Benchmarking select/scalar_scan+broadword
+Benchmarking select/scalar_scan+broadword: Warming up for 300.00 ms
+Benchmarking select/scalar_scan+broadword: Collecting 10 samples in estimated 700.13 ms (171k iterations)
+Benchmarking select/scalar_scan+broadword: Analyzing
+select/scalar_scan+broadword
+                        time:   [4.0514 µs 4.1609 µs 4.2740 µs]
+                        thrpt:  [1.3388 GiB/s 1.3752 GiB/s 1.4124 GiB/s]
+                 change:
+                        time:   [-25.198% -23.904% -22.356%] (p = 0.00 < 0.05)
+                        thrpt:  [+28.793% +31.413% +33.687%]
+                        Performance has improved.
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+Benchmarking select/scalar_scan8+broadword
+Benchmarking select/scalar_scan8+broadword: Warming up for 300.00 ms
+Benchmarking select/scalar_scan8+broadword: Collecting 10 samples in estimated 700.15 ms (209k iterations)
+Benchmarking select/scalar_scan8+broadword: Analyzing
+select/scalar_scan8+broadword
+                        time:   [3.8250 µs 3.8759 µs 3.9384 µs]
+                        thrpt:  [1.4529 GiB/s 1.4763 GiB/s 1.4959 GiB/s]
+                 change:
+                        time:   [-0.0476% +1.5245% +2.7385%] (p = 0.02 < 0.05)
+                        thrpt:  [-2.6655% -1.5016% +0.0477%]
+                        Change within noise threshold.
+Benchmarking select/portable_scan+neon
+Benchmarking select/portable_scan+neon: Warming up for 300.00 ms
+Benchmarking select/portable_scan+neon: Collecting 10 samples in estimated 700.07 ms (133k iterations)
+Benchmarking select/portable_scan+neon: Analyzing
+select/portable_scan+neon
+                        time:   [5.0196 µs 5.0834 µs 5.1672 µs]
+                        thrpt:  [1.1074 GiB/s 1.1256 GiB/s 1.1399 GiB/s]
+                 change:
+                        time:   [-5.5285% -2.1257% +0.9712%] (p = 0.80 > 0.05)
+                        thrpt:  [-0.9619% +2.1719% +5.8520%]
+                        No change in performance detected.
+Benchmarking select/portable_scan+portable
+Benchmarking select/portable_scan+portable: Warming up for 300.00 ms
+Benchmarking select/portable_scan+portable: Collecting 10 samples in estimated 700.15 ms (146k iterations)
+Benchmarking select/portable_scan+portable: Analyzing
+select/portable_scan+portable
+                        time:   [4.7421 µs 4.9869 µs 5.0759 µs]
+                        thrpt:  [1.1273 GiB/s 1.1474 GiB/s 1.2067 GiB/s]
+                 change:
+                        time:   [-10.807% -6.5435% -1.2189%] (p = 0.01 < 0.05)
+                        thrpt:  [+1.2339% +7.0016% +12.117%]
+                        Performance has improved.
+
+Benchmarking filter/naive/mask4/8
+Benchmarking filter/naive/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/naive/mask4/8: Collecting 10 samples in estimated 719.02 ms (1925 iterations)
+Benchmarking filter/naive/mask4/8: Analyzing
+filter/naive/mask4/8    time:   [367.66 µs 377.88 µs 398.47 µs]
+                        thrpt:  [156.85 MiB/s 165.39 MiB/s 170.00 MiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking filter/scalar_hd/mask4/8
+Benchmarking filter/scalar_hd/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/scalar_hd/mask4/8: Collecting 10 samples in estimated 705.31 ms (4730 iterations)
+Benchmarking filter/scalar_hd/mask4/8: Analyzing
+filter/scalar_hd/mask4/8
+                        time:   [129.58 µs 136.70 µs 144.84 µs]
+                        thrpt:  [431.51 MiB/s 457.19 MiB/s 482.34 MiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) low mild
+Benchmarking filter/scalar_byte_lut/mask4/8
+Benchmarking filter/scalar_byte_lut/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/scalar_byte_lut/mask4/8: Collecting 10 samples in estimated 709.88 ms (2805 iterations)
+Benchmarking filter/scalar_byte_lut/mask4/8: Analyzing
+filter/scalar_byte_lut/mask4/8
+                        time:   [251.15 µs 260.79 µs 271.56 µs]
+                        thrpt:  [230.15 MiB/s 239.66 MiB/s 248.86 MiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking filter/scalar_byte_lut_branchless/mask4/8
+Benchmarking filter/scalar_byte_lut_branchless/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/scalar_byte_lut_branchless/mask4/8: Collecting 10 samples in estimated 705.74 ms (3850 iterations)
+Benchmarking filter/scalar_byte_lut_branchless/mask4/8: Analyzing
+filter/scalar_byte_lut_branchless/mask4/8
+                        time:   [178.67 µs 180.66 µs 181.66 µs]
+                        thrpt:  [344.05 MiB/s 345.96 MiB/s 349.81 MiB/s]
+Benchmarking filter/vortex_lut/mask4/8
+Benchmarking filter/vortex_lut/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/vortex_lut/mask4/8: Collecting 10 samples in estimated 713.75 ms (2750 iterations)
+Benchmarking filter/vortex_lut/mask4/8: Analyzing
+filter/vortex_lut/mask4/8
+                        time:   [257.52 µs 260.55 µs 264.30 µs]
+                        thrpt:  [236.47 MiB/s 239.87 MiB/s 242.70 MiB/s]
+Benchmarking filter/vortex_lut_branchless/mask4/8
+Benchmarking filter/vortex_lut_branchless/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/vortex_lut_branchless/mask4/8: Collecting 10 samples in estimated 706.77 ms (3685 iterations)
+Benchmarking filter/vortex_lut_branchless/mask4/8: Analyzing
+filter/vortex_lut_branchless/mask4/8
+                        time:   [171.95 µs 183.30 µs 199.72 µs]
+                        thrpt:  [312.94 MiB/s 340.97 MiB/s 363.47 MiB/s]
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) low mild
+Benchmarking filter/portable_u64x4/mask4/8
+Benchmarking filter/portable_u64x4/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/portable_u64x4/mask4/8: Collecting 10 samples in estimated 700.71 ms (5280 iterations)
+Benchmarking filter/portable_u64x4/mask4/8: Analyzing
+filter/portable_u64x4/mask4/8
+                        time:   [118.31 µs 122.06 µs 127.21 µs]
+                        thrpt:  [491.33 MiB/s 512.04 MiB/s 528.28 MiB/s]
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) low severe
+  1 (10.00%) low mild
+Benchmarking filter/portable_u64x8/mask4/8
+Benchmarking filter/portable_u64x8/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/portable_u64x8/mask4/8: Collecting 10 samples in estimated 701.92 ms (5335 iterations)
+Benchmarking filter/portable_u64x8/mask4/8: Analyzing
+filter/portable_u64x8/mask4/8
+                        time:   [134.88 µs 137.67 µs 141.82 µs]
+                        thrpt:  [440.70 MiB/s 453.97 MiB/s 463.38 MiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking filter/portable_u64x8_branchless/mask4/8
+Benchmarking filter/portable_u64x8_branchless/mask4/8: Warming up for 300.00 ms
+Benchmarking filter/portable_u64x8_branchless/mask4/8: Collecting 10 samples in estimated 706.48 ms (4785 iterations)
+Benchmarking filter/portable_u64x8_branchless/mask4/8: Analyzing
+filter/portable_u64x8_branchless/mask4/8
+                        time:   [143.88 µs 146.12 µs 148.97 µs]
+                        thrpt:  [419.54 MiB/s 427.73 MiB/s 434.39 MiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+
+Benchmarking rank_index/scalar/1024
+Benchmarking rank_index/scalar/1024: Warming up for 300.00 ms
+Benchmarking rank_index/scalar/1024: Collecting 10 samples in estimated 700.35 ms (97k iterations)
+Benchmarking rank_index/scalar/1024: Analyzing
+rank_index/scalar/1024  time:   [6.4499 µs 6.8807 µs 7.2100 µs]
+                        thrpt:  [1.0582 GiB/s 1.1088 GiB/s 1.1829 GiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) low severe
+Benchmarking rank_index/portable_u64x8/1024
+Benchmarking rank_index/portable_u64x8/1024: Warming up for 300.00 ms
+Benchmarking rank_index/portable_u64x8/1024: Collecting 10 samples in estimated 700.10 ms (110k iterations)
+Benchmarking rank_index/portable_u64x8/1024: Analyzing
+rank_index/portable_u64x8/1024
+                        time:   [6.9886 µs 7.0325 µs 7.1091 µs]
+                        thrpt:  [1.0732 GiB/s 1.0849 GiB/s 1.0917 GiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+Benchmarking bitmap_to_indices/scalar_tzcnt/mask4/8
+Benchmarking bitmap_to_indices/scalar_tzcnt/mask4/8: Warming up for 300.00 ms
+Benchmarking bitmap_to_indices/scalar_tzcnt/mask4/8: Collecting 10 samples in estimated 701.53 ms (4345 iterations)
+Benchmarking bitmap_to_indices/scalar_tzcnt/mask4/8: Analyzing
+bitmap_to_indices/scalar_tzcnt/mask4/8
+                        time:   [156.95 µs 158.91 µs 160.39 µs]
+                        thrpt:  [48.710 MiB/s 49.162 MiB/s 49.779 MiB/s]
+Benchmarking bitmap_to_indices/portable_lut/mask4/8
+Benchmarking bitmap_to_indices/portable_lut/mask4/8: Warming up for 300.00 ms
+Benchmarking bitmap_to_indices/portable_lut/mask4/8: Collecting 10 samples in estimated 700.23 ms (5995 iterations)
+Benchmarking bitmap_to_indices/portable_lut/mask4/8: Analyzing
+bitmap_to_indices/portable_lut/mask4/8
+                        time:   [115.72 µs 116.31 µs 117.01 µs]
+                        thrpt:  [66.770 MiB/s 67.168 MiB/s 67.510 MiB/s]
+
+Benchmarking bit_to_byte/scalar
+Benchmarking bit_to_byte/scalar: Warming up for 300.00 ms
+Benchmarking bit_to_byte/scalar: Collecting 10 samples in estimated 703.42 ms (10k iterations)
+Benchmarking bit_to_byte/scalar: Analyzing
+bit_to_byte/scalar      time:   [66.643 µs 67.624 µs 68.730 µs]
+                        thrpt:  [227.34 MiB/s 231.06 MiB/s 234.46 MiB/s]
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+Benchmarking bit_to_byte/swar
+Benchmarking bit_to_byte/swar: Warming up for 300.00 ms
+Benchmarking bit_to_byte/swar: Collecting 10 samples in estimated 700.01 ms (111k iterations)
+Benchmarking bit_to_byte/swar: Analyzing
+bit_to_byte/swar        time:   [6.1829 µs 6.2319 µs 6.3097 µs]
+                        thrpt:  [2.4183 GiB/s 2.4485 GiB/s 2.4679 GiB/s]
+Benchmarking bit_to_byte/portable_select
+Benchmarking bit_to_byte/portable_select: Warming up for 300.00 ms
+Benchmarking bit_to_byte/portable_select: Collecting 10 samples in estimated 700.52 ms (66k iterations)
+Benchmarking bit_to_byte/portable_select: Analyzing
+bit_to_byte/portable_select
+                        time:   [10.571 µs 10.589 µs 10.617 µs]
+                        thrpt:  [1.4372 GiB/s 1.4410 GiB/s 1.4434 GiB/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking bit_to_byte/portable_to_simd
+Benchmarking bit_to_byte/portable_to_simd: Warming up for 300.00 ms
+Benchmarking bit_to_byte/portable_to_simd: Collecting 10 samples in estimated 700.21 ms (87k iterations)
+Benchmarking bit_to_byte/portable_to_simd: Analyzing
+bit_to_byte/portable_to_simd
+                        time:   [8.0144 µs 8.0377 µs 8.0590 µs]
+                        thrpt:  [1.8934 GiB/s 1.8984 GiB/s 1.9039 GiB/s]
+Benchmarking bit_to_byte/neon
+Benchmarking bit_to_byte/neon: Warming up for 300.00 ms
+Benchmarking bit_to_byte/neon: Collecting 10 samples in estimated 700.16 ms (147k iterations)
+Benchmarking bit_to_byte/neon: Analyzing
+bit_to_byte/neon        time:   [4.7572 µs 4.8076 µs 4.8430 µs]
+                        thrpt:  [3.1507 GiB/s 3.1739 GiB/s 3.2075 GiB/s]
+
+Benchmarking expand/naive/mask4/8
+Benchmarking expand/naive/mask4/8: Warming up for 300.00 ms
+Benchmarking expand/naive/mask4/8: Collecting 10 samples in estimated 720.53 ms (1870 iterations)
+Benchmarking expand/naive/mask4/8: Analyzing
+expand/naive/mask4/8    time:   [372.93 µs 378.32 µs 384.92 µs]
+                        thrpt:  [162.37 MiB/s 165.20 MiB/s 167.59 MiB/s]
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) low severe
+  1 (10.00%) low mild
+Benchmarking expand/scalar_hd/mask4/8
+Benchmarking expand/scalar_hd/mask4/8: Warming up for 300.00 ms
+Benchmarking expand/scalar_hd/mask4/8: Collecting 10 samples in estimated 703.60 ms (5830 iterations)
+Benchmarking expand/scalar_hd/mask4/8: Analyzing
+expand/scalar_hd/mask4/8
+                        time:   [120.37 µs 120.91 µs 121.98 µs]
+                        thrpt:  [512.38 MiB/s 516.93 MiB/s 519.22 MiB/s]
+Found 2 outliers among 10 measurements (20.00%)
+  2 (20.00%) high mild
+Benchmarking expand/portable_u64x8/mask4/8
+Benchmarking expand/portable_u64x8/mask4/8: Warming up for 300.00 ms
+Benchmarking expand/portable_u64x8/mask4/8: Collecting 10 samples in estimated 703.21 ms (3410 iterations)
+Benchmarking expand/portable_u64x8/mask4/8: Analyzing
+expand/portable_u64x8/mask4/8
+                        time:   [203.51 µs 204.48 µs 205.41 µs]
+                        thrpt:  [304.27 MiB/s 305.65 MiB/s 307.10 MiB/s]
+
+Benchmarking unpack/scalar/k3
+Benchmarking unpack/scalar/k3: Warming up for 300.00 ms
+Benchmarking unpack/scalar/k3: Collecting 10 samples in estimated 701.04 ms (26k iterations)
+Benchmarking unpack/scalar/k3: Analyzing
+unpack/scalar/k3        time:   [26.513 µs 26.986 µs 27.447 µs]
+                        thrpt:  [596.93 Melem/s 607.14 Melem/s 617.95 Melem/s]
+Benchmarking unpack/portable_mul/k3
+Benchmarking unpack/portable_mul/k3: Warming up for 300.00 ms
+Benchmarking unpack/portable_mul/k3: Collecting 10 samples in estimated 700.41 ms (14k iterations)
+Benchmarking unpack/portable_mul/k3: Analyzing
+unpack/portable_mul/k3  time:   [50.356 µs 50.768 µs 51.189 µs]
+                        thrpt:  [320.07 Melem/s 322.72 Melem/s 325.36 Melem/s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking unpack/portable_shift/k3
+Benchmarking unpack/portable_shift/k3: Warming up for 300.00 ms
+Benchmarking unpack/portable_shift/k3: Collecting 10 samples in estimated 702.66 ms (13k iterations)
+Benchmarking unpack/portable_shift/k3: Analyzing
+unpack/portable_shift/k3
+                        time:   [41.502 µs 42.779 µs 45.469 µs]
+                        thrpt:  [360.34 Melem/s 382.99 Melem/s 394.78 Melem/s]
+Benchmarking unpack/neon/k3
+Benchmarking unpack/neon/k3: Warming up for 300.00 ms
+Benchmarking unpack/neon/k3: Collecting 10 samples in estimated 701.35 ms (17k iterations)
+Benchmarking unpack/neon/k3: Analyzing
+unpack/neon/k3          time:   [48.880 µs 49.554 µs 50.114 µs]
+                        thrpt:  [326.93 Melem/s 330.63 Melem/s 335.19 Melem/s]
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) low severe
+  1 (10.00%) low mild
+

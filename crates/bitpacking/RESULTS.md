@@ -6,8 +6,11 @@ AVX-512 F/BW/VL/DQ/VNNI, no VBMI/VPOPCNTDQ); the VM was migrated mid-way to an I
 from one final run on the Ice-Lake host.**
 Toolchain: `nightly-2026-04-28`, `core_simd` from this tree, criterion 0.5, `-C codegen-units=1`.
 
-Two builds: `v3` = `-C target-cpu=x86-64-v3` (AVX2 + BMI2), `native` = `-C target-cpu=native`
-(adds AVX-512 incl. VBMI/VBMI2/VPOPCNTDQ). Intrinsic variants exist only where their feature is
+Four builds: `v3` = `-C target-cpu=x86-64-v3` (AVX2 + BMI2), `native` = `-C target-cpu=native`
+(adds AVX-512 incl. VBMI/VBMI2/VPOPCNTDQ), `a64` = `aarch64-unknown-linux-gnu` baseline NEON and
+`a64sve2` = `+sve2,+sve2-bitperm`, the latter two cross-compiled and run under `qemu-aarch64 -cpu max`
+(user-mode emulation: correctness and asm are real, timings are of the emulator, see the aarch64
+section). The aarch64 runs cover the representative parameters only. Intrinsic variants exist only where their feature is
 enabled at compile time. Inputs are L1-resident (8–64 KiB) so the numbers measure compute, not
 bandwidth; the `/65536` rows are 512 KiB (L2). Times are criterion medians; absolute times on this
 VM drift between runs, so compare within a run. See `results/bench-*.txt` for the full output.
@@ -52,213 +55,245 @@ first is at or below 1.
 | unpack k=3 | native | scalar 2.6µs | portable_mul 666ns | vbmi_multishift 201ns | 4.0x | 3.3x |
 
 
+### aarch64: static comparison (instructions per unit of work, `a64` build)
+
+qemu timings cannot rank these (see below), so this table counts instructions in the hot loop as
+read from `asm/a64/*.s`. Same three tiers as the x86 table.
+
+| kernel | unit | auto-vec / scalar | portable SIMD | NEON intrinsics | verdict |
+|---|---|---|---|---|---|
+| byte → bit | 64 B | SWAR ~12 scalar ops / 8 B (~100) | 4 x (`cmeq`,`bic`,`ext`,`zip1`,`addv h`,`str h`) + 2 `ldp` = 26 | 4 x (`ld`,`cmtst`,`and`) + 3 `addp` + `str` = 16 | portable 1.6x more instrs and 4 horizontal `addv` |
+| bit → byte | 64 B | SWAR ~45 | **~150** (`ubfx` + `mov v.b[i]` per bit) | 28 (8 `dup`, 4 `and`/`cmeq`/`bic`, 2 `stp`) | **scalarised `from_bitmask`**: 5x NEON, 3x worse than SWAR |
+| popcount | 16 B | `fmov`,`cnt`,`addv`,`fmov` x2 = 8 | `cnt`,`uaddlp`,`uaddlp`,`uadalp` = 4 | `cnt`,`uadalp` = 2 | portable re-widens every vector |
+| rank index | 8 words | 8 x (`fmov`,`cnt`,`addv`,`fmov`,`add`,`str`) ≈ 48 | 4 x (`cnt` + 3 `uaddlp`) + ~20 `ext`/`zip1`/`add`/`sub` + stores ≈ 50 | (not written) | parity; the 8-lane scan is 4 two-lane vectors |
+| select64 in-word | 1 query | broadword ~30 scalar | `cnt`, 3 x (`shl`,`add`), `cmhs`, `addv`, stack round trip ≈ 20 | the same instructions | tie; both pay `addv` + spill; scalar broadword is competitive |
+| filter / expand | 1 word | HD compress ~90 scalar | 2-lane HD: ~½ the ops per word, 4 vectors for `u64x8` | none (no NEON PEXT); `bext` on SVE2 only | 128-bit lanes give ≤2x; the hole is the missing instruction |
+| unpack k=3 | 16 values | 9 per 8 values (`lsr`,`and`,`strb`) | `ldr q`, 2 `tbl`, 2 `ushl`, `uzp1`, `and`, `str` = 8 | identical | **parity**: static `Swizzle` = `tbl`, lane shift = `ushl` |
+| set-bit indices | 1 byte | `rbit`,`clz`,`str`,`bic` per set bit | `ubfx`, `ldr d`, 2 `ushll`, `add`, 2 `str q`, `cnt` = 8 | same idiom | parity; no lane compress on NEON either |
+
 ## Numbers
+
+x86 columns are hardware; `a64`/`a64sve2` columns are **qemu user-mode emulation** and only
+show that the code runs (a `tbl`, `addv` or SVE `bext` costs a helper call each, so vector code is
+penalised ~5–300x relative to scalar and SVE2 rows are meaningless as timings).
 
 ### byte_to_bit
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar | 3.69 µs | 4.1384 GiB/s | 3.30 µs | 4.6173 GiB/s |
-| swar | 1000.0 ns | 15.259 GiB/s | 845.6 ns | 18.044 GiB/s |
-| portable_u8x64 | 205.6 ns | 74.201 GiB/s | 130.4 ns | 116.98 GiB/s |
-| portable_u8x32 | 204.8 ns | 74.487 GiB/s | 126.4 ns | 120.74 GiB/s |
-| avx2 | 200.9 ns | 75.942 GiB/s | 130.2 ns | 117.16 GiB/s |
-| avx512 | – | – | 133.6 ns | 114.20 GiB/s |
+| scalar | 3.69 µs | 3.30 µs | 72.01 µs | 119.57 µs |
+| swar | 1000.0 ns | 845.6 ns | 2.37 µs | 8.44 µs |
+| portable_u8x64 | 205.6 ns | 130.4 ns | 8.01 µs | 7.80 µs |
+| portable_u8x32 | 204.8 ns | 126.4 ns | 7.33 µs | 7.67 µs |
+| avx2 | 200.9 ns | 130.2 ns | – | – |
+| avx512 | – | 133.6 ns | – | – |
+| neon | – | – | 14.17 µs | 13.68 µs |
 
 ### rank
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar/1024 | 165.0 ns | 34.673 GiB/s | 65.0 ns | 88.020 GiB/s |
-| portable_u64x8/1024 | 162.6 ns | 35.195 GiB/s | 56.0 ns | 102.14 GiB/s |
-| portable_u8x64/1024 | 141.8 ns | 40.341 GiB/s | 64.5 ns | 88.706 GiB/s |
-| avx2/1024 | 144.3 ns | 39.650 GiB/s | 145.1 ns | 39.431 GiB/s |
-| scalar/65536 | 10.51 µs | 34.851 GiB/s | 5.77 µs | 63.450 GiB/s |
-| portable_u64x8/65536 | 10.66 µs | 34.347 GiB/s | 4.70 µs | 77.913 GiB/s |
-| portable_u8x64/65536 | 10.15 µs | 36.077 GiB/s | 5.65 µs | 64.810 GiB/s |
-| avx2/65536 | 10.11 µs | 36.222 GiB/s | 9.88 µs | 37.062 GiB/s |
-| avx512_lut/1024 | – | – | 127.8 ns | 44.767 GiB/s |
-| avx512_vpopcnt/1024 | – | – | 54.9 ns | 104.26 GiB/s |
-| avx512_lut/65536 | – | – | 8.47 µs | 43.241 GiB/s |
-| avx512_vpopcnt/65536 | – | – | 5.24 µs | 69.855 GiB/s |
+| scalar/1024 | 165.0 ns | 65.0 ns | 4.30 µs | 1.60 µs |
+| portable_u64x8/1024 | 162.6 ns | 56.0 ns | 4.21 µs | 3.55 µs |
+| portable_u8x64/1024 | 141.8 ns | 64.5 ns | 2.33 µs | 2.57 µs |
+| avx2/1024 | 144.3 ns | 145.1 ns | – | – |
+| scalar/65536 | 10.51 µs | 5.77 µs | – | – |
+| portable_u64x8/65536 | 10.66 µs | 4.70 µs | – | – |
+| portable_u8x64/65536 | 10.15 µs | 5.65 µs | – | – |
+| avx2/65536 | 10.11 µs | 9.88 µs | – | – |
+| avx512_lut/1024 | – | 127.8 ns | – | – |
+| avx512_vpopcnt/1024 | – | 54.9 ns | – | – |
+| avx512_lut/65536 | – | 8.47 µs | – | – |
+| avx512_vpopcnt/65536 | – | 5.24 µs | – | – |
+| neon/1024 | – | – | 4.93 µs | 4.47 µs |
 
 ### select64
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| naive | 22.48 µs | 182.24 Melem/s | 22.38 µs | 183.06 Melem/s |
-| broadword | 10.65 µs | 384.59 Melem/s | 12.24 µs | 334.62 Melem/s |
-| portable_u8x8 | 13.18 µs | 310.68 Melem/s | 10.52 µs | 389.53 Melem/s |
-| pdep | 2.46 µs | 1.6642 Gelem/s | 2.57 µs | 1.5946 Gelem/s |
+| naive | 22.48 µs | 22.38 µs | 157.67 µs | 157.08 µs |
+| broadword | 10.65 µs | 12.24 µs | 43.15 µs | 216.44 µs |
+| portable_u8x8 | 13.18 µs | 10.52 µs | 347.23 µs | 441.32 µs |
+| pdep | 2.46 µs | 2.57 µs | – | – |
+| neon | – | – | 152.16 µs | 153.90 µs |
+| sve2_bdep | – | – | – | 2119.60 µs |
 
 ### select
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar_scan+naive | 318.1 ns | 17.991 GiB/s | 293.3 ns | 19.511 GiB/s |
-| scalar_scan+broadword | 341.4 ns | 16.762 GiB/s | 299.5 ns | 19.106 GiB/s |
-| portable_scan+portable | 212.5 ns | 26.927 GiB/s | 139.6 ns | 40.987 GiB/s |
-| scalar_scan+pdep | 343.3 ns | 16.670 GiB/s | 305.3 ns | 18.745 GiB/s |
-| scalar_scan8+pdep | 255.0 ns | 22.436 GiB/s | 244.9 ns | 23.368 GiB/s |
-| portable_scan+pdep | 209.9 ns | 27.263 GiB/s | 135.2 ns | 42.339 GiB/s |
+| scalar_scan+naive | 318.1 ns | 293.3 ns | 12.48 µs | 13.47 µs |
+| scalar_scan+broadword | 341.4 ns | 299.5 ns | 4.16 µs | 13.85 µs |
+| portable_scan+portable | 212.5 ns | 139.6 ns | 4.99 µs | 5.17 µs |
+| scalar_scan+pdep | 343.3 ns | 305.3 ns | – | – |
+| scalar_scan8+pdep | 255.0 ns | 244.9 ns | – | – |
+| portable_scan+pdep | 209.9 ns | 135.2 ns | – | – |
+| scalar_scan8+broadword | – | – | 3.88 µs | 11.13 µs |
+| portable_scan+neon | – | – | 5.08 µs | 3.59 µs |
+| portable_scan+sve2 | – | – | – | 4.56 µs |
 
 ### filter
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| naive/mask1/8 | 56.90 µs | 1.0726 GiB/s | 47.63 µs | 1.2814 GiB/s |
-| scalar_hd/mask1/8 | 79.88 µs | 782.42 MiB/s | 78.22 µs | 799.03 MiB/s |
-| scalar_byte_lut/mask1/8 | 82.25 µs | 759.89 MiB/s | 86.58 µs | 721.86 MiB/s |
-| scalar_byte_lut_branchless/mask1/8 | 26.16 µs | 2.3332 GiB/s | 25.60 µs | 2.3842 GiB/s |
-| vortex_lut/mask1/8 | 79.00 µs | 791.15 MiB/s | 82.10 µs | 761.24 MiB/s |
-| vortex_lut_branchless/mask1/8 | 28.55 µs | 2.1381 GiB/s | 26.89 µs | 2.2699 GiB/s |
-| portable_u64x4/mask1/8 | 26.51 µs | 2.3026 GiB/s | 24.72 µs | 2.4692 GiB/s |
-| portable_u64x8/mask1/8 | 26.80 µs | 2.2777 GiB/s | 18.41 µs | 3.3158 GiB/s |
-| portable_u64x8_branchless/mask1/8 | 27.25 µs | 2.2399 GiB/s | 18.64 µs | 3.2742 GiB/s |
-| bmi2_pext/mask1/8 | 5.29 µs | 11.547 GiB/s | 5.23 µs | 11.670 GiB/s |
-| bmi2_pext_branchless/mask1/8 | 6.79 µs | 8.9931 GiB/s | 6.61 µs | 9.2396 GiB/s |
-| vortex_pext/mask1/8 | 6.93 µs | 8.8064 GiB/s | 7.05 µs | 8.6628 GiB/s |
-| naive/mask4/8 | 137.09 µs | 455.91 MiB/s | 146.11 µs | 427.77 MiB/s |
-| scalar_hd/mask4/8 | 76.45 µs | 817.52 MiB/s | 79.17 µs | 789.46 MiB/s |
-| scalar_byte_lut/mask4/8 | 32.72 µs | 1.8656 GiB/s | 35.44 µs | 1.7220 GiB/s |
-| scalar_byte_lut_branchless/mask4/8 | 26.79 µs | 2.2779 GiB/s | 27.21 µs | 2.2428 GiB/s |
-| vortex_lut/mask4/8 | 36.68 µs | 1.6641 GiB/s | 37.73 µs | 1.6179 GiB/s |
-| vortex_lut_branchless/mask4/8 | 30.52 µs | 1.9996 GiB/s | 27.20 µs | 2.2440 GiB/s |
-| portable_u64x4/mask4/8 | 27.63 µs | 2.2089 GiB/s | 24.82 µs | 2.4592 GiB/s |
-| portable_u64x8/mask4/8 | 27.71 µs | 2.2028 GiB/s | 17.98 µs | 3.3942 GiB/s |
-| portable_u64x8_branchless/mask4/8 | 27.71 µs | 2.2023 GiB/s | 18.75 µs | 3.2558 GiB/s |
-| bmi2_pext/mask4/8 | 6.54 µs | 9.3385 GiB/s | 6.72 µs | 9.0825 GiB/s |
-| bmi2_pext_branchless/mask4/8 | 6.86 µs | 8.8930 GiB/s | 6.40 µs | 9.5438 GiB/s |
-| vortex_pext/mask4/8 | 7.34 µs | 8.3111 GiB/s | 7.10 µs | 8.5963 GiB/s |
-| naive/mask7/8 | 213.90 µs | 292.19 MiB/s | 217.76 µs | 287.02 MiB/s |
-| scalar_hd/mask7/8 | 78.33 µs | 797.85 MiB/s | 70.97 µs | 880.69 MiB/s |
-| scalar_byte_lut/mask7/8 | 39.27 µs | 1.5545 GiB/s | 36.81 µs | 1.6583 GiB/s |
-| scalar_byte_lut_branchless/mask7/8 | 25.70 µs | 2.3747 GiB/s | 27.11 µs | 2.2513 GiB/s |
-| vortex_lut/mask7/8 | 43.33 µs | 1.4086 GiB/s | 38.58 µs | 1.5822 GiB/s |
-| vortex_lut_branchless/mask7/8 | 30.73 µs | 1.9863 GiB/s | 26.82 µs | 2.2757 GiB/s |
-| portable_u64x4/mask7/8 | 28.15 µs | 2.1685 GiB/s | 24.75 µs | 2.4658 GiB/s |
-| portable_u64x8/mask7/8 | 26.98 µs | 2.2623 GiB/s | 18.05 µs | 3.3820 GiB/s |
-| portable_u64x8_branchless/mask7/8 | 25.96 µs | 2.3508 GiB/s | 18.22 µs | 3.3491 GiB/s |
-| bmi2_pext/mask7/8 | 5.87 µs | 10.405 GiB/s | 5.84 µs | 10.444 GiB/s |
-| bmi2_pext_branchless/mask7/8 | 6.98 µs | 8.7393 GiB/s | 6.52 µs | 9.3565 GiB/s |
-| vortex_pext/mask7/8 | 6.54 µs | 9.3290 GiB/s | 6.79 µs | 8.9899 GiB/s |
-| naive/runs64 | 129.69 µs | 481.93 MiB/s | 134.31 µs | 465.36 MiB/s |
-| scalar_hd/runs64 | 72.52 µs | 861.81 MiB/s | 78.78 µs | 793.32 MiB/s |
-| scalar_byte_lut/runs64 | 26.66 µs | 2.2898 GiB/s | 30.16 µs | 2.0236 GiB/s |
-| scalar_byte_lut_branchless/runs64 | 25.64 µs | 2.3808 GiB/s | 26.44 µs | 2.3084 GiB/s |
-| vortex_lut/runs64 | 20.03 µs | 3.0465 GiB/s | 20.19 µs | 3.0231 GiB/s |
-| vortex_lut_branchless/runs64 | 18.69 µs | 3.2661 GiB/s | 18.03 µs | 3.3855 GiB/s |
-| portable_u64x4/runs64 | 27.64 µs | 2.2081 GiB/s | 25.67 µs | 2.3779 GiB/s |
-| portable_u64x8/runs64 | 27.34 µs | 2.2326 GiB/s | 18.45 µs | 3.3082 GiB/s |
-| portable_u64x8_branchless/runs64 | 27.75 µs | 2.1997 GiB/s | 17.67 µs | 3.4544 GiB/s |
-| bmi2_pext/runs64 | 5.51 µs | 11.077 GiB/s | 5.32 µs | 11.472 GiB/s |
-| bmi2_pext_branchless/runs64 | 6.74 µs | 9.0537 GiB/s | 6.77 µs | 9.0108 GiB/s |
-| vortex_pext/runs64 | 6.05 µs | 10.092 GiB/s | 5.88 µs | 10.375 GiB/s |
-| vbmi2_compressb/mask1/8 | – | – | 8.91 µs | 6.8495 GiB/s |
-| vbmi2_compressb/mask4/8 | – | – | 9.36 µs | 6.5191 GiB/s |
-| vbmi2_compressb/mask7/8 | – | – | 9.27 µs | 6.5861 GiB/s |
-| vbmi2_compressb/runs64 | – | – | 9.41 µs | 6.4841 GiB/s |
+| naive/mask1/8 | 56.90 µs | 47.63 µs | – | – |
+| scalar_hd/mask1/8 | 79.88 µs | 78.22 µs | – | – |
+| scalar_byte_lut/mask1/8 | 82.25 µs | 86.58 µs | – | – |
+| scalar_byte_lut_branchless/mask1/8 | 26.16 µs | 25.60 µs | – | – |
+| vortex_lut/mask1/8 | 79.00 µs | 82.10 µs | – | – |
+| vortex_lut_branchless/mask1/8 | 28.55 µs | 26.89 µs | – | – |
+| portable_u64x4/mask1/8 | 26.51 µs | 24.72 µs | – | – |
+| portable_u64x8/mask1/8 | 26.80 µs | 18.41 µs | – | – |
+| portable_u64x8_branchless/mask1/8 | 27.25 µs | 18.64 µs | – | – |
+| bmi2_pext/mask1/8 | 5.29 µs | 5.23 µs | – | – |
+| bmi2_pext_branchless/mask1/8 | 6.79 µs | 6.61 µs | – | – |
+| vortex_pext/mask1/8 | 6.93 µs | 7.05 µs | – | – |
+| naive/mask4/8 | 137.09 µs | 146.11 µs | 377.88 µs | 413.31 µs |
+| scalar_hd/mask4/8 | 76.45 µs | 79.17 µs | 136.70 µs | 148.89 µs |
+| scalar_byte_lut/mask4/8 | 32.72 µs | 35.44 µs | 260.79 µs | 1067.40 µs |
+| scalar_byte_lut_branchless/mask4/8 | 26.79 µs | 27.21 µs | 180.66 µs | 1017.00 µs |
+| vortex_lut/mask4/8 | 36.68 µs | 37.73 µs | 260.55 µs | 1174.70 µs |
+| vortex_lut_branchless/mask4/8 | 30.52 µs | 27.20 µs | 183.30 µs | 1093.70 µs |
+| portable_u64x4/mask4/8 | 27.63 µs | 24.82 µs | 122.06 µs | 715.18 µs |
+| portable_u64x8/mask4/8 | 27.71 µs | 17.98 µs | 137.67 µs | 570.96 µs |
+| portable_u64x8_branchless/mask4/8 | 27.71 µs | 18.75 µs | 146.12 µs | 635.28 µs |
+| bmi2_pext/mask4/8 | 6.54 µs | 6.72 µs | – | – |
+| bmi2_pext_branchless/mask4/8 | 6.86 µs | 6.40 µs | – | – |
+| vortex_pext/mask4/8 | 7.34 µs | 7.10 µs | – | – |
+| naive/mask7/8 | 213.90 µs | 217.76 µs | – | – |
+| scalar_hd/mask7/8 | 78.33 µs | 70.97 µs | – | – |
+| scalar_byte_lut/mask7/8 | 39.27 µs | 36.81 µs | – | – |
+| scalar_byte_lut_branchless/mask7/8 | 25.70 µs | 27.11 µs | – | – |
+| vortex_lut/mask7/8 | 43.33 µs | 38.58 µs | – | – |
+| vortex_lut_branchless/mask7/8 | 30.73 µs | 26.82 µs | – | – |
+| portable_u64x4/mask7/8 | 28.15 µs | 24.75 µs | – | – |
+| portable_u64x8/mask7/8 | 26.98 µs | 18.05 µs | – | – |
+| portable_u64x8_branchless/mask7/8 | 25.96 µs | 18.22 µs | – | – |
+| bmi2_pext/mask7/8 | 5.87 µs | 5.84 µs | – | – |
+| bmi2_pext_branchless/mask7/8 | 6.98 µs | 6.52 µs | – | – |
+| vortex_pext/mask7/8 | 6.54 µs | 6.79 µs | – | – |
+| naive/runs64 | 129.69 µs | 134.31 µs | – | – |
+| scalar_hd/runs64 | 72.52 µs | 78.78 µs | – | – |
+| scalar_byte_lut/runs64 | 26.66 µs | 30.16 µs | – | – |
+| scalar_byte_lut_branchless/runs64 | 25.64 µs | 26.44 µs | – | – |
+| vortex_lut/runs64 | 20.03 µs | 20.19 µs | – | – |
+| vortex_lut_branchless/runs64 | 18.69 µs | 18.03 µs | – | – |
+| portable_u64x4/runs64 | 27.64 µs | 25.67 µs | – | – |
+| portable_u64x8/runs64 | 27.34 µs | 18.45 µs | – | – |
+| portable_u64x8_branchless/runs64 | 27.75 µs | 17.67 µs | – | – |
+| bmi2_pext/runs64 | 5.51 µs | 5.32 µs | – | – |
+| bmi2_pext_branchless/runs64 | 6.74 µs | 6.77 µs | – | – |
+| vortex_pext/runs64 | 6.05 µs | 5.88 µs | – | – |
+| vbmi2_compressb/mask1/8 | – | 8.91 µs | – | – |
+| vbmi2_compressb/mask4/8 | – | 9.36 µs | – | – |
+| vbmi2_compressb/mask7/8 | – | 9.27 µs | – | – |
+| vbmi2_compressb/runs64 | – | 9.41 µs | – | – |
+| sve2_bext/mask4/8 | – | – | – | 1957.30 µs |
 
 ### rank_index
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar/1024 | 322.9 ns | 23.628 GiB/s | 322.2 ns | 23.678 GiB/s |
-| portable_u64x8/1024 | 464.6 ns | 16.422 GiB/s | 268.3 ns | 28.439 GiB/s |
-| avx2/1024 | 463.5 ns | 16.459 GiB/s | 462.1 ns | 16.510 GiB/s |
-| scalar/65536 | 28.06 µs | 17.402 GiB/s | 22.76 µs | 21.454 GiB/s |
-| portable_u64x8/65536 | 29.00 µs | 16.838 GiB/s | 18.68 µs | 26.145 GiB/s |
-| avx2/65536 | 31.00 µs | 15.749 GiB/s | 29.25 µs | 16.691 GiB/s |
-| avx512/1024 | – | – | 268.5 ns | 28.416 GiB/s |
-| avx512/65536 | – | – | 18.14 µs | 26.909 GiB/s |
+| scalar/1024 | 322.9 ns | 322.2 ns | 6.88 µs | 14.35 µs |
+| portable_u64x8/1024 | 464.6 ns | 268.3 ns | 7.03 µs | 4.95 µs |
+| avx2/1024 | 463.5 ns | 462.1 ns | – | – |
+| scalar/65536 | 28.06 µs | 22.76 µs | – | – |
+| portable_u64x8/65536 | 29.00 µs | 18.68 µs | – | – |
+| avx2/65536 | 31.00 µs | 29.25 µs | – | – |
+| avx512/1024 | – | 268.5 ns | – | – |
+| avx512/65536 | – | 18.14 µs | – | – |
 
 ### select_all64
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar_tzcnt | 65.60 µs | 62.435 Melem/s | 58.13 µs | 70.468 Melem/s |
-| portable_lut | 15.78 µs | 259.56 Melem/s | 17.28 µs | 237.05 Melem/s |
-| avx2_lut | 16.49 µs | 248.41 Melem/s | 17.13 µs | 239.14 Melem/s |
-| avx512_compress | – | – | 15.32 µs | 267.32 Melem/s |
-| vbmi2_compressb | – | – | 12.79 µs | 320.27 Melem/s |
+| scalar_tzcnt | 65.60 µs | 58.13 µs | – | – |
+| portable_lut | 15.78 µs | 17.28 µs | – | – |
+| avx2_lut | 16.49 µs | 17.13 µs | – | – |
+| avx512_compress | – | 15.32 µs | – | – |
+| vbmi2_compressb | – | 12.79 µs | – | – |
 
 ### bitmap_to_indices
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar_tzcnt/mask1/8 | 3.73 µs | 2.0459 GiB/s | 4.39 µs | 1.7376 GiB/s |
-| portable_lut/mask1/8 | 7.89 µs | 989.84 MiB/s | 5.57 µs | 1.3694 GiB/s |
-| avx2_lut/mask1/8 | 7.50 µs | 1.0166 GiB/s | 5.60 µs | 1.3632 GiB/s |
-| scalar_tzcnt/mask4/8 | 10.16 µs | 768.80 MiB/s | 10.56 µs | 740.01 MiB/s |
-| portable_lut/mask4/8 | 7.37 µs | 1.0350 GiB/s | 5.59 µs | 1.3648 GiB/s |
-| avx2_lut/mask4/8 | 7.91 µs | 987.92 MiB/s | 5.53 µs | 1.3799 GiB/s |
-| scalar_tzcnt/mask7/8 | 18.84 µs | 414.78 MiB/s | 18.11 µs | 431.51 MiB/s |
-| portable_lut/mask7/8 | 7.22 µs | 1.0566 GiB/s | 5.53 µs | 1.3787 GiB/s |
-| avx2_lut/mask7/8 | 7.60 µs | 1.0044 GiB/s | 5.61 µs | 1.3600 GiB/s |
-| avx512_compress/mask1/8 | – | – | 5.25 µs | 1.4543 GiB/s |
-| vbmi2_compressb/mask1/8 | – | – | 3.73 µs | 2.0480 GiB/s |
-| avx512_compress/mask4/8 | – | – | 5.03 µs | 1.5169 GiB/s |
-| vbmi2_compressb/mask4/8 | – | – | 3.36 µs | 2.2693 GiB/s |
-| avx512_compress/mask7/8 | – | – | 5.00 µs | 1.5244 GiB/s |
-| vbmi2_compressb/mask7/8 | – | – | 7.22 µs | 1.0566 GiB/s |
+| scalar_tzcnt/mask1/8 | 3.73 µs | 4.39 µs | – | – |
+| portable_lut/mask1/8 | 7.89 µs | 5.57 µs | – | – |
+| avx2_lut/mask1/8 | 7.50 µs | 5.60 µs | – | – |
+| scalar_tzcnt/mask4/8 | 10.16 µs | 10.56 µs | 158.91 µs | 149.40 µs |
+| portable_lut/mask4/8 | 7.37 µs | 5.59 µs | 116.31 µs | 316.75 µs |
+| avx2_lut/mask4/8 | 7.91 µs | 5.53 µs | – | – |
+| scalar_tzcnt/mask7/8 | 18.84 µs | 18.11 µs | – | – |
+| portable_lut/mask7/8 | 7.22 µs | 5.53 µs | – | – |
+| avx2_lut/mask7/8 | 7.60 µs | 5.61 µs | – | – |
+| avx512_compress/mask1/8 | – | 5.25 µs | – | – |
+| vbmi2_compressb/mask1/8 | – | 3.73 µs | – | – |
+| avx512_compress/mask4/8 | – | 5.03 µs | – | – |
+| vbmi2_compressb/mask4/8 | – | 3.36 µs | – | – |
+| avx512_compress/mask7/8 | – | 5.00 µs | – | – |
+| vbmi2_compressb/mask7/8 | – | 7.22 µs | – | – |
 
 ### bit_to_byte
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar | 2.03 µs | 7.5330 GiB/s | 1.63 µs | 9.3642 GiB/s |
-| swar | 640.4 ns | 23.827 GiB/s | 463.0 ns | 32.954 GiB/s |
-| portable_select | 286.0 ns | 53.359 GiB/s | 99.9 ns | 152.75 GiB/s |
-| portable_to_simd | 295.2 ns | 51.684 GiB/s | 101.4 ns | 150.45 GiB/s |
-| avx2 | 290.8 ns | 52.467 GiB/s | 221.8 ns | 68.785 GiB/s |
-| pdep | 652.9 ns | 23.370 GiB/s | 616.4 ns | 24.755 GiB/s |
-| avx512 | – | – | 94.7 ns | 161.05 GiB/s |
+| scalar | 2.03 µs | 1.63 µs | 67.62 µs | 235.92 µs |
+| swar | 640.4 ns | 463.0 ns | 6.23 µs | 5.14 µs |
+| portable_select | 286.0 ns | 99.9 ns | 10.59 µs | 8.01 µs |
+| portable_to_simd | 295.2 ns | 101.4 ns | 8.04 µs | 8.09 µs |
+| avx2 | 290.8 ns | 221.8 ns | – | – |
+| pdep | 652.9 ns | 616.4 ns | – | – |
+| avx512 | – | 94.7 ns | – | – |
+| neon | – | – | 4.81 µs | 4.98 µs |
 
 ### expand
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| naive/mask1/8 | 46.68 µs | 1.3076 GiB/s | 46.93 µs | 1.3007 GiB/s |
-| scalar_hd/mask1/8 | 75.58 µs | 826.94 MiB/s | 80.02 µs | 781.07 MiB/s |
-| portable_u64x8/mask1/8 | 27.06 µs | 2.2558 GiB/s | 15.66 µs | 3.8973 GiB/s |
-| bmi2_pdep/mask1/8 | 7.62 µs | 8.0144 GiB/s | 7.67 µs | 7.9549 GiB/s |
-| naive/mask4/8 | 130.56 µs | 478.70 MiB/s | 117.87 µs | 530.24 MiB/s |
-| scalar_hd/mask4/8 | 81.92 µs | 762.94 MiB/s | 78.01 µs | 801.14 MiB/s |
-| portable_u64x8/mask4/8 | 28.69 µs | 2.1271 GiB/s | 16.59 µs | 3.6792 GiB/s |
-| bmi2_pdep/mask4/8 | 8.43 µs | 7.2424 GiB/s | 8.08 µs | 7.5512 GiB/s |
-| naive/mask7/8 | 192.27 µs | 325.07 MiB/s | 186.18 µs | 335.70 MiB/s |
-| scalar_hd/mask7/8 | 83.21 µs | 751.10 MiB/s | 81.38 µs | 767.99 MiB/s |
-| portable_u64x8/mask7/8 | 27.66 µs | 2.2064 GiB/s | 17.18 µs | 3.5533 GiB/s |
-| bmi2_pdep/mask7/8 | 8.93 µs | 6.8371 GiB/s | 8.24 µs | 7.4066 GiB/s |
-| vbmi2_expandb/mask1/8 | – | – | 10.47 µs | 5.8298 GiB/s |
-| vbmi2_expandb/mask4/8 | – | – | 10.85 µs | 5.6233 GiB/s |
-| vbmi2_expandb/mask7/8 | – | – | 10.15 µs | 6.0104 GiB/s |
+| naive/mask1/8 | 46.68 µs | 46.93 µs | – | – |
+| scalar_hd/mask1/8 | 75.58 µs | 80.02 µs | – | – |
+| portable_u64x8/mask1/8 | 27.06 µs | 15.66 µs | – | – |
+| bmi2_pdep/mask1/8 | 7.62 µs | 7.67 µs | – | – |
+| naive/mask4/8 | 130.56 µs | 117.87 µs | 378.32 µs | 429.52 µs |
+| scalar_hd/mask4/8 | 81.92 µs | 78.01 µs | 120.91 µs | 174.28 µs |
+| portable_u64x8/mask4/8 | 28.69 µs | 16.59 µs | 204.48 µs | 483.29 µs |
+| bmi2_pdep/mask4/8 | 8.43 µs | 8.08 µs | – | – |
+| naive/mask7/8 | 192.27 µs | 186.18 µs | – | – |
+| scalar_hd/mask7/8 | 83.21 µs | 81.38 µs | – | – |
+| portable_u64x8/mask7/8 | 27.66 µs | 17.18 µs | – | – |
+| bmi2_pdep/mask7/8 | 8.93 µs | 8.24 µs | – | – |
+| vbmi2_expandb/mask1/8 | – | 10.47 µs | – | – |
+| vbmi2_expandb/mask4/8 | – | 10.85 µs | – | – |
+| vbmi2_expandb/mask7/8 | – | 10.15 µs | – | – |
+| sve2_bdep/mask4/8 | – | – | – | 2520.20 µs |
 
 ### unpack
 
-| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+| variant | v3 | native | a64 | a64sve2 |
 |---|---|---|---|---|
-| scalar/k1 | 3.83 µs | 4.2799 Gelem/s | 2.58 µs | 6.3572 Gelem/s |
-| portable_mul/k1 | 980.8 ns | 16.705 Gelem/s | 679.0 ns | 24.128 Gelem/s |
-| portable_shift/k1 | 997.1 ns | 16.432 Gelem/s | 676.3 ns | 24.227 Gelem/s |
-| pdep/k1 | 665.8 ns | 24.607 Gelem/s | 623.5 ns | 26.280 Gelem/s |
-| avx2/k1 | 716.6 ns | 22.863 Gelem/s | 695.0 ns | 23.574 Gelem/s |
-| scalar/k3 | 3.51 µs | 4.6637 Gelem/s | 2.64 µs | 6.2080 Gelem/s |
-| portable_mul/k3 | 790.8 ns | 20.720 Gelem/s | 665.8 ns | 24.607 Gelem/s |
-| portable_shift/k3 | 819.0 ns | 20.004 Gelem/s | 681.6 ns | 24.037 Gelem/s |
-| pdep/k3 | 697.5 ns | 23.489 Gelem/s | 762.6 ns | 21.485 Gelem/s |
-| avx2/k3 | 792.6 ns | 20.672 Gelem/s | 711.0 ns | 23.043 Gelem/s |
-| scalar/k7 | 3.94 µs | 4.1557 Gelem/s | 2.54 µs | 6.4586 Gelem/s |
-| portable_mul/k7 | 881.8 ns | 18.581 Gelem/s | 733.0 ns | 22.352 Gelem/s |
-| portable_shift/k7 | 867.0 ns | 18.896 Gelem/s | 695.0 ns | 23.574 Gelem/s |
-| pdep/k7 | 673.9 ns | 24.314 Gelem/s | 704.7 ns | 23.249 Gelem/s |
-| avx2/k7 | 738.5 ns | 22.184 Gelem/s | 648.1 ns | 25.279 Gelem/s |
-| avx512/k1 | – | – | 908.8 ns | 18.027 Gelem/s |
-| vbmi_multishift/k1 | – | – | 196.5 ns | 83.367 Gelem/s |
-| avx512/k3 | – | – | 958.9 ns | 17.086 Gelem/s |
-| vbmi_multishift/k3 | – | – | 200.8 ns | 81.599 Gelem/s |
-| avx512/k7 | – | – | 895.3 ns | 18.299 Gelem/s |
-| vbmi_multishift/k7 | – | – | 189.9 ns | 86.279 Gelem/s |
+| scalar/k1 | 3.83 µs | 2.58 µs | – | – |
+| portable_mul/k1 | 980.8 ns | 679.0 ns | – | – |
+| portable_shift/k1 | 997.1 ns | 676.3 ns | – | – |
+| pdep/k1 | 665.8 ns | 623.5 ns | – | – |
+| avx2/k1 | 716.6 ns | 695.0 ns | – | – |
+| scalar/k3 | 3.51 µs | 2.64 µs | 26.99 µs | 46.48 µs |
+| portable_mul/k3 | 790.8 ns | 665.8 ns | 50.77 µs | 167.62 µs |
+| portable_shift/k3 | 819.0 ns | 681.6 ns | 42.78 µs | 164.80 µs |
+| pdep/k3 | 697.5 ns | 762.6 ns | – | – |
+| avx2/k3 | 792.6 ns | 711.0 ns | – | – |
+| scalar/k7 | 3.94 µs | 2.54 µs | – | – |
+| portable_mul/k7 | 881.8 ns | 733.0 ns | – | – |
+| portable_shift/k7 | 867.0 ns | 695.0 ns | – | – |
+| pdep/k7 | 673.9 ns | 704.7 ns | – | – |
+| avx2/k7 | 738.5 ns | 648.1 ns | – | – |
+| avx512/k1 | – | 908.8 ns | – | – |
+| vbmi_multishift/k1 | – | 196.5 ns | – | – |
+| avx512/k3 | – | 958.9 ns | – | – |
+| vbmi_multishift/k3 | – | 200.8 ns | – | – |
+| avx512/k7 | – | 895.3 ns | – | – |
+| vbmi_multishift/k7 | – | 189.9 ns | – | – |
+| neon/k3 | – | – | 49.55 µs | 161.08 µs |
+| sve2_bdep/k3 | – | – | – | 678.72 µs |
 
 
 ## What the asm shows (`asm/{v3,native}/*.s`)
@@ -390,6 +425,55 @@ plus AVX-512 VBMI, VBMI2, BITALG, VPOPCNTDQ, GFNI). All numbers in this file are
 run on the Ice-Lake host, so on native `Simd::count_ones` is `vpopcntq`, the LUT popcount is the
 slow one, and `vpcompressb`/`vpexpandb`/`vpmultishiftqb` are available and measured.
 
+
+## aarch64 (NEON / SVE2) under qemu
+
+Cross-compiled with the same nightly (`aarch64-unknown-linux-gnu`, cross gcc as linker) and run
+under `qemu-aarch64 -cpu max` (user-mode TCG). Two builds: `a64` = baseline ARMv8 NEON;
+`a64sve2` = `+sve2,+sve2-bitperm`, which adds `bext`/`bdep` (SVE2 BitPerm; Neoverse N2/V2 class
+hardware) used through inline asm on lane 0 of a Z register, plus SVE `cnt z.d` which LLVM then
+picks for `count_ones`.
+
+**qemu timings measure the emulator, not a CPU.** TCG translates each NEON instruction into a
+helper call or a host vector op with very uneven costs (a `tbl` or `addv` costs far more than an
+`and`), so only coarse ratios (2x and up) mean anything, and the "auto→portable" step is
+systematically understated because scalar code emulates cheaply. The asm instruction counts below
+are the reliable signal.
+
+Per-loop instruction counts, `a64` build (same source as x86):
+
+| kernel | portable SIMD | NEON intrinsics | notes |
+|---|---|---|---|
+| byte → bit (`to_bitmask`) | 6 / 16 B: `cmeq`, `bic`, `ext`, `zip1`, **`addv h`**, `str h` | 1.75 / 16 B: `cmtst`, `and`, 3 `addp` per 64 B, one `str` | LLVM's bitmask lowering uses a horizontal `addv` per 16 lanes and four 2-byte stores; the pairwise-add tree is the known idiom |
+| bit → byte (`Mask::from_bitmask().select`) | **~150 / 64 B**: `ubfx` per bit + `mov v.b[i]` lane insert | 28 / 64 B: 8 `dup` lane, `and`, `cmeq`, `bic`, 2 `stp` | **scalarised** — the biggest aarch64 hole; x86 gets `kmov`+masked broadcast |
+| popcount (`u64x8::count_ones`) | 4 / 16 B: `cnt`, `uaddlp` x2, `uadalp` | 2 / 16 B: `cnt`, `uadalp` into u16, fold rarely | portable widens to u64 every vector; `u8x64` variant does not help (LLVM re-widens) |
+| rank index | 8 words: 4x(`cnt`+3 `uaddlp`) + ~20 `ext`/`zip1`/`add`/`sub` | — | the 8-lane scan is 4 two-lane vectors: every `shift_elements_right` becomes `ext` pairs |
+| select64 in-word (`u8x8`) | `cnt`, 3x(`shl`+`add`), `cmhs`, `addv b`, stack round-trip for the dynamic lane | same instructions written by hand | tie; both pay the `addv` and the spill |
+| filter / expand (Hacker's Delight) | 2-lane vectors: ~110 ops per 8 words become 4x that in `eor`/`shl`/`and`/`orr` (239 `eor`, 124 `shl` in the function) | no NEON PEXT; `bext` on SVE2 only | 128-bit vectors give no lane-count advantage over scalar; the win vs scalar is just ILP |
+| unpack k=3 | `ldr q`, 2 `tbl`, 2 `ushl`, `uzp1`, `and`, `str` per 16 values | same | **identical** — the static `Swizzle` gather is `tbl`, the per-lane shift is `ushl` with negative amounts |
+| set-bit indices | `ubfx`, `ldr d [LUT]`, `ushll` x2, `add`, `str q` x2, `cnt` per byte | same | tie; no lane compress on NEON either |
+
+`a64sve2`: `bext`/`bdep` work as expected (`fmov d0, x; fmov d1, m; bext z0.d, z0.d, z1.d; fmov x, d0`
+— the two moves each way are the price of using a Z register from scalar code; a real SVE2 kernel
+would load whole vectors). LLVM also switches `count_ones` to `cnt z.d, p/m` with SVE enabled.
+
+Portable-simd holes specific to aarch64, ranked:
+
+1. `Mask::<i8, 64>::from_bitmask(u64)` scalarises (per-bit extract + lane insert). The fix is a
+   NEON-specific lowering (`dup` byte lanes, `cmtst` against bit weights) either in LLVM or in
+   `from_bitmask` itself, the way `swizzle_dyn` special-cases NEON.
+2. `Mask::<i8, 64>::to_bitmask()` lowers to `addv` + 2-byte stores; the `addp` tree is ~3x fewer
+   instructions and avoids the horizontal reduction.
+3. `Simd<u64, N>::count_ones()` re-widens to u64 every vector (`uaddlp` x2 + `uadalp`); there
+   is no way to say "keep byte counts and fold later" that survives LLVM (it re-widens
+   `Simd<u8, 64>::count_ones()` too).
+4. Anything that needs cross-lane movement on 8 x u64 (rank index scan, `shift_elements_right`)
+   is 4 vectors wide on NEON and turns into `ext`/`zip` chains.
+5. As on x86: no PEXT/PDEP-class op. On NEON there is no instruction to lower it to at all; on
+   SVE2 `bext`/`bdep` exist but would need an SVE-width vector type to be useful.
+
+The qemu numbers in the table above bear this out only in sign: e.g. NEON `bits_to_bytes` at 4.8 µs
+vs portable 8.0 µs, and the SVE2 `bext` rows at ~2 ms are pure helper-call cost.
 
 ## Comparison with vortex's bit filter
 

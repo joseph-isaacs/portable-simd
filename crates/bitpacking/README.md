@@ -30,4 +30,12 @@ cargo test --release                                   # RUSTFLAGS="-C target-cp
 ./summarize.py                                          # results/*.txt → markdown table
 ```
 
-`RESULTS.md` holds the numbers and asm observations from the machine this was developed on.
+`RESULTS.md` holds the numbers and asm observations from the machine this was developed on
+(x86-64 hardware, two feature levels) plus an aarch64 NEON/SVE2 comparison run under qemu.
+
+```sh
+# aarch64 (needs: rustup target add aarch64-unknown-linux-gnu; apt qemu-user gcc-aarch64-linux-gnu libc6-dev-arm64-cross)
+cargo test --release --target aarch64-unknown-linux-gnu           # runs under qemu via .cargo/config.toml
+./run_bench.sh a64 a64sve2 -- --sample-size 10 --nresamples 500  # emulator timings: correctness, not perf
+./dump_asm.sh a64 a64sve2
+```
