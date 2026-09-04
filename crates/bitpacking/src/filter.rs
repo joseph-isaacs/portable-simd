@@ -199,6 +199,15 @@ pub fn pext_bmi2(x: u64, m: u64) -> u64 {
     unsafe { core::arch::x86_64::_pext_u64(x, m) }
 }
 
+/// AVX-512 VBMI2 PEXT: bits -> bytes (`vpmovm2b`), `vpcompressb`, bytes -> bits (`vpmovb2m`).
+#[cfg(target_feature = "avx512vbmi2")]
+#[inline]
+pub fn pext_vbmi2(x: u64, m: u64) -> u64 {
+    use core::arch::x86_64::*;
+    // SAFETY: avx512vbmi2 (and thus avx512bw) compile-time feature.
+    unsafe { _mm512_movepi8_mask(_mm512_maskz_compress_epi8(m, _mm512_movm_epi8(x))) }
+}
+
 #[inline(always)]
 fn filter_with<const BRANCHLESS: bool>(
     values: &[u64],
@@ -298,6 +307,12 @@ pub fn filter_vortex_lut(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize
 #[cfg(target_feature = "bmi2")]
 pub fn filter_vortex_pext(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
     filter_vortex_with(values, mask, out, pext_bmi2)
+}
+
+/// `vpcompressb`-based PEXT with the plain writer.
+#[cfg(target_feature = "avx512vbmi2")]
+pub fn filter_vbmi2(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_with::<false>(values, mask, out, pext_vbmi2)
 }
 
 /// `pext` + branchless writer. `out` needs `values.len() + 1` words of capacity.
@@ -421,6 +436,12 @@ mod tests {
     #[test]
     fn pext_bmi2_matches() {
         check_pext(pext_bmi2);
+    }
+    #[cfg(target_feature = "avx512vbmi2")]
+    #[test]
+    fn pext_vbmi2_matches() {
+        check_pext(pext_vbmi2);
+        check(filter_vbmi2);
     }
     #[test]
     fn naive() {

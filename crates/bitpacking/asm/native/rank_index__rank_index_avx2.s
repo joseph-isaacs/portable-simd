@@ -123,7 +123,7 @@ bitpacking::rank_index::rank_index_avx2:
 	vzeroupper
 	ret
 .LBB3_14:
-	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.31]
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.33]
+	lea rdi, [rip + .Lanon.7f2c312b5472e5928991000022678349.32]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.34]
 	mov esi, 41
 	call qword ptr [rip + core::panicking::panic@GOTPCREL]

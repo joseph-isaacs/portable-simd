@@ -107,6 +107,27 @@ pub fn select_all64_avx512(w: u64, base: u32, out: &mut [u32]) -> usize {
     n
 }
 
+/// AVX-512 VBMI2: one `vpcompressb` of a 64-byte iota per word, then 4 x widen (`vpmovzxbd`)
+/// + add base + store.
+#[cfg(target_feature = "avx512vbmi2")]
+#[inline]
+pub fn select_all64_vbmi2(w: u64, base: u32, out: &mut [u32]) -> usize {
+    use core::arch::x86_64::*;
+    assert!(out.len() >= 64);
+    let ptr = out.as_mut_ptr();
+    // SAFETY: avx512vbmi2 compile-time feature; 64 u32 of slack.
+    unsafe {
+        let iota: __m512i = Simd::<u8, 64>::from_array(core::array::from_fn(|i| i as u8)).into();
+        let c = _mm512_maskz_compress_epi8(w, iota);
+        let b = _mm512_set1_epi32(base as i32);
+        _mm512_storeu_si512(ptr as *mut __m512i, _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32::<0>(c)), b));
+        _mm512_storeu_si512(ptr.add(16) as *mut __m512i, _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32::<1>(c)), b));
+        _mm512_storeu_si512(ptr.add(32) as *mut __m512i, _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32::<2>(c)), b));
+        _mm512_storeu_si512(ptr.add(48) as *mut __m512i, _mm512_add_epi32(_mm512_cvtepu8_epi32(_mm512_extracti32x4_epi32::<3>(c)), b));
+    }
+    w.count_ones() as usize
+}
+
 #[inline(always)]
 fn bitmap_to_indices_with(bits: &[u64], out: &mut [u32], f: impl Fn(u64, u32, &mut [u32]) -> usize) -> usize {
     let mut n = 0;
@@ -133,6 +154,11 @@ pub fn bitmap_to_indices_avx2(bits: &[u64], out: &mut [u32]) -> usize {
 #[cfg(target_feature = "avx512f")]
 pub fn bitmap_to_indices_avx512(bits: &[u64], out: &mut [u32]) -> usize {
     bitmap_to_indices_with(bits, out, select_all64_avx512)
+}
+
+#[cfg(target_feature = "avx512vbmi2")]
+pub fn bitmap_to_indices_vbmi2(bits: &[u64], out: &mut [u32]) -> usize {
+    bitmap_to_indices_with(bits, out, select_all64_vbmi2)
 }
 
 #[cfg(test)]
@@ -175,5 +201,10 @@ mod tests {
     #[test]
     fn avx512() {
         check(bitmap_to_indices_avx512);
+    }
+    #[cfg(target_feature = "avx512vbmi2")]
+    #[test]
+    fn vbmi2() {
+        check(bitmap_to_indices_vbmi2);
     }
 }

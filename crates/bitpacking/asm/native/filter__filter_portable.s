@@ -10,10 +10,10 @@ bitpacking::filter::filter_portable:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB37_42
+	jne .LBB41_42
 	mov qword ptr [rsp + 16], rsi
 	shr rsi, 3
-	je .LBB37_2
+	je .LBB41_2
 	shl rsi, 6
 	mov qword ptr [rsp], rsi
 	xor r14d, r14d
@@ -22,13 +22,13 @@ bitpacking::filter::filter_portable:
 	xor r13d, r13d
 	xor r12d, r12d
 	xor edi, edi
-	jmp .LBB37_9
-.LBB37_31:
+	jmp .LBB41_9
+.LBB41_31:
 	mov rax, qword ptr [rsp]
 	add r15, 64
 	cmp rax, r15
-	je .LBB37_3
-.LBB37_9:
+	je .LBB41_3
+.LBB41_9:
 	vmovdqu64 zmm1, zmmword ptr [rdx + r15]
 	mov rax, qword ptr [rsp + 8]
 	vpandq zmm0, zmm1, zmmword ptr [rax + r15]
@@ -159,15 +159,15 @@ bitpacking::filter::filter_portable:
 	or rsi, r13
 	add r11d, r10d
 	cmp r11d, 63
-	jbe .LBB37_12
+	jbe .LBB41_12
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rsi
 	inc rdi
 	add r11d, -64
 	mov rsi, rbp
 	xor ebp, ebp
-.LBB37_12:
+.LBB41_12:
 	vpextrq rax, xmm0, 1
 	vpextrd r10d, xmm1, 2
 	xor r12d, r12d
@@ -181,15 +181,15 @@ bitpacking::filter::filter_portable:
 	or rbx, rsi
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB37_15
+	jb .LBB41_15
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rbx
 	inc rdi
 	add r10d, -64
 	mov rbx, r12
 	xor r12d, r12d
-.LBB37_15:
+.LBB41_15:
 	vextracti128 xmm2, ymm0, 1
 	vmovq rax, xmm2
 	vextracti128 xmm2, ymm1, 1
@@ -205,15 +205,15 @@ bitpacking::filter::filter_portable:
 	or rbp, rbx
 	add r11d, r10d
 	cmp r11d, 64
-	jb .LBB37_18
+	jb .LBB41_18
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rbp
 	inc rdi
 	add r11d, -64
 	mov rbp, r13
 	xor r13d, r13d
-.LBB37_18:
+.LBB41_18:
 	vextracti128 xmm2, ymm0, 1
 	vpextrq rax, xmm2, 1
 	vextracti128 xmm2, ymm1, 1
@@ -229,15 +229,15 @@ bitpacking::filter::filter_portable:
 	or rsi, rbp
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB37_21
+	jb .LBB41_21
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rsi
 	inc rdi
 	add r10d, -64
 	mov rsi, r12
 	xor r12d, r12d
-.LBB37_21:
+.LBB41_21:
 	vextracti32x4 xmm2, zmm0, 2
 	vmovq rax, xmm2
 	vextracti32x4 xmm3, zmm1, 2
@@ -253,15 +253,15 @@ bitpacking::filter::filter_portable:
 	or rbx, rsi
 	add r11d, r10d
 	cmp r11d, 64
-	jb .LBB37_24
+	jb .LBB41_24
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rbx
 	inc rdi
 	add r11d, -64
 	mov rbx, r13
 	xor r13d, r13d
-.LBB37_24:
+.LBB41_24:
 	vpextrq rax, xmm2, 1
 	vpextrd r10d, xmm3, 2
 	xor r12d, r12d
@@ -275,15 +275,15 @@ bitpacking::filter::filter_portable:
 	or rsi, rbx
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB37_27
+	jb .LBB41_27
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rsi
 	inc rdi
 	add r10d, -64
 	mov rsi, r12
 	xor r12d, r12d
-.LBB37_27:
+.LBB41_27:
 	vextracti32x4 xmm0, zmm0, 3
 	vmovq rax, xmm0
 	vextracti32x4 xmm1, zmm1, 3
@@ -299,15 +299,15 @@ bitpacking::filter::filter_portable:
 	or rbx, rsi
 	add r11d, r10d
 	cmp r11d, 64
-	jb .LBB37_30
+	jb .LBB41_30
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], rbx
 	inc rdi
 	add r11d, -64
 	mov rbx, rbp
 	xor ebp, ebp
-.LBB37_30:
+.LBB41_30:
 	vpextrq rax, xmm0, 1
 	vpextrd r10d, xmm1, 2
 	xor r12d, r12d
@@ -321,10 +321,10 @@ bitpacking::filter::filter_portable:
 	or r13, rbx
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB37_31
+	jb .LBB41_31
 	cmp rdi, r9
 	mov rax, qword ptr [rsp]
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
@@ -332,33 +332,33 @@ bitpacking::filter::filter_portable:
 	xor r12d, r12d
 	add r15, 64
 	cmp rax, r15
-	jne .LBB37_9
-	jmp .LBB37_3
-.LBB37_2:
+	jne .LBB41_9
+	jmp .LBB41_3
+.LBB41_2:
 	xor edi, edi
 	xor r13d, r13d
 	xor r12d, r12d
 	xor r10d, r10d
-.LBB37_3:
+.LBB41_3:
 	mov rcx, qword ptr [rsp + 16]
 	mov eax, ecx
 	and eax, 7
 	mov qword ptr [rsp], rax
-	je .LBB37_32
+	je .LBB41_32
 	shl rcx, 3
 	movabs rax, 9223372036854775744
 	and rax, rcx
 	add qword ptr [rsp + 8], rax
 	add rdx, rax
 	xor ebx, ebx
-	jmp .LBB37_5
-.LBB37_38:
+	jmp .LBB41_5
+.LBB41_38:
 	mov rdx, r11
 	inc rbx
 	mov r12, rbp
 	cmp qword ptr [rsp], rbx
-	je .LBB37_32
-.LBB37_5:
+	je .LBB41_32
+.LBB41_5:
 	mov r14, r13
 	mov ecx, r10d
 	mov r11, rdx
@@ -534,22 +534,22 @@ bitpacking::filter::filter_portable:
 	or r13, r14
 	add r10d, ecx
 	cmp r10d, 63
-	jbe .LBB37_38
+	jbe .LBB41_38
 	cmp rdi, r9
-	jae .LBB37_7
+	jae .LBB41_7
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbp
 	xor ebp, ebp
-	jmp .LBB37_38
-.LBB37_32:
+	jmp .LBB41_38
+.LBB41_32:
 	test r10d, r10d
-	je .LBB37_35
+	je .LBB41_35
 	cmp rdi, r9
-	jae .LBB37_36
+	jae .LBB41_36
 	mov qword ptr [r8 + 8*rdi], r13
-.LBB37_35:
+.LBB41_35:
 	shl rdi, 6
 	mov eax, r10d
 	add rax, rdi
@@ -562,20 +562,20 @@ bitpacking::filter::filter_portable:
 	pop rbp
 	vzeroupper
 	ret
-.LBB37_42:
-	lea r9, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.11]
+.LBB41_42:
+	lea r9, [rip + .Lanon.7f2c312b5472e5928991000022678349.11]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB37_7:
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.6]
+.LBB41_7:
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.6]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB37_36:
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.5]
+.LBB41_36:
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.5]
 	mov rsi, r9
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

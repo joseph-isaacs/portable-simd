@@ -3,19 +3,23 @@
      Running benches/bitpacking.rs (target/v3/release/deps/bitpacking-542600a385b6fbac)
 Benchmarking byte_to_bit/scalar
 Benchmarking byte_to_bit/scalar: Warming up for 1.0000 s
-Benchmarking byte_to_bit/scalar: Collecting 100 samples in estimated 2.0131 s (550k iterations)
+Benchmarking byte_to_bit/scalar: Collecting 100 samples in estimated 2.0156 s (556k iterations)
 Benchmarking byte_to_bit/scalar: Analyzing
-byte_to_bit/scalar      time:   [3.6490 µs 3.6620 µs 3.6754 µs]
-                        thrpt:  [4.1516 GiB/s 4.1667 GiB/s 4.1817 GiB/s]
+byte_to_bit/scalar      time:   [3.5961 µs 3.6238 µs 3.6495 µs]
+                        thrpt:  [4.1811 GiB/s 4.2107 GiB/s 4.2432 GiB/s]
                  change:
-                        time:   [-14.555% -13.225% -12.431%] (p = 0.00 < 0.05)
-                        thrpt:  [+14.196% +15.241% +17.034%]
+                        time:   [-2.4157% -1.7886% -1.1440%] (p = 0.00 < 0.05)
+                        thrpt:  [+1.1572% +1.8212% +2.4755%]
                         Performance has improved.
-Found 18 outliers among 100 measurements (18.00%)
-  5 (5.00%) low severe
-  3 (3.00%) low mild
-  1 (1.00%) high mild
-  9 (9.00%) high severe
 Benchmarking byte_to_bit/swar
 Benchmarking byte_to_bit/swar: Warming up for 1.0000 s
-Benchmarking byte_to_bit/swar: Collecting 100 samples in estimated 2.0017 s (2.0M iterations)
+Benchmarking byte_to_bit/swar: Collecting 100 samples in estimated 2.0047 s (2.1M iterations)
+Benchmarking byte_to_bit/swar: Analyzing
+byte_to_bit/swar        time:   [964.44 ns 972.64 ns 981.42 ns]
+                        thrpt:  [15.548 GiB/s 15.688 GiB/s 15.821 GiB/s]
+                 change:
+                        time:   [-2.6622% -1.5226% -0.4187%] (p = 0.01 < 0.05)
+                        thrpt:  [+0.4204% +1.5461% +2.7350%]
+                        Change within noise threshold.
+Benchmarking byte_to_bit/portable_u8x64
+Benchmarking byte_to_bit/portable_u8x64: Warming up for 1.0000 s

@@ -30,7 +30,7 @@ bitpacking::rank::rank_scalar:
 	cmp rsi, rax
 	jbe .LBB21_8
 .LBB21_4:
-	lea rcx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.56]
+	lea rcx, [rip + .Lanon.7f2c312b5472e5928991000022678349.57]
 	xor edi, edi
 	mov rdx, rax
 	call qword ptr [rip + core::slice::index::slice_index_fail@GOTPCREL]
@@ -116,12 +116,12 @@ bitpacking::rank::rank_scalar:
 	lea r10, [rdi + 8*r9]
 	jmp .LBB21_22
 .LBB21_25:
-	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.53]
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.54]
+	lea rdi, [rip + .Lanon.7f2c312b5472e5928991000022678349.54]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.55]
 	mov esi, 53
 	call qword ptr [rip + core::panicking::panic_fmt@GOTPCREL]
 .LBB21_7:
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.55]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.56]
 	mov rdi, rsi
 	mov rsi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

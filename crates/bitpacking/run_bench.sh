@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Runs the criterion benchmarks under two feature sets and stores the raw output.
 #   v3     = -C target-cpu=x86-64-v3  (AVX2, BMI1/2, POPCNT, LZCNT; no AVX-512)
-#   native = -C target-cpu=native     (on the dev box: + AVX-512 F/BW/VL/DQ, still no VBMI2/VPOPCNTDQ)
+#   native = -C target-cpu=native     (on the dev box: + AVX-512 F/BW/VL/DQ/VBMI/VBMI2/BITALG/VPOPCNTDQ/GFNI)
 set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p results

@@ -11,19 +11,19 @@ bitpacking::expand::expand_scalar:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 16], rdi
 	cmp r9, rcx
-	jb .LBB31_11
+	jb .LBB34_11
 	test rcx, rcx
-	je .LBB31_10
+	je .LBB34_10
 	xor r15d, r15d
 	xor r9d, r9d
 	xor eax, eax
 	xor edi, edi
 	mov qword ptr [rsp + 8], 0
 	mov qword ptr [rsp + 32], rcx
-	jmp .LBB31_3
-.LBB31_4:
+	jmp .LBB34_3
+.LBB34_4:
 	xor r8d, r8d
-.LBB31_9:
+.LBB34_9:
 	test r10b, 64
 	shrx rdx, rdi, r10
 	mov r13, rdx
@@ -202,25 +202,25 @@ bitpacking::expand::expand_scalar:
 	mov rax, rbp
 	mov rdi, r13
 	cmp qword ptr [rsp + 32], r15
-	je .LBB31_10
-.LBB31_3:
+	je .LBB34_10
+.LBB34_3:
 	mov rcx, qword ptr [rsp + 40]
 	mov r12, qword ptr [rcx + 8*r15]
 	popcnt r10, r12
 	cmp r9d, r10d
-	jae .LBB31_4
+	jae .LBB34_4
 	mov rcx, qword ptr [rsp + 8]
 	cmp rcx, qword ptr [rsp + 24]
 	mov r8d, 0
-	jae .LBB31_6
+	jae .LBB34_6
 	mov rcx, qword ptr [rsp + 16]
 	mov rdx, qword ptr [rsp + 8]
 	mov rdx, qword ptr [rcx + 8*rdx]
 	mov rcx, qword ptr [rsp + 8]
-	jmp .LBB31_8
-.LBB31_6:
+	jmp .LBB34_8
+.LBB34_6:
 	xor edx, edx
-.LBB31_8:
+.LBB34_8:
 	inc rcx
 	mov qword ptr [rsp + 8], rcx
 	xor esi, esi
@@ -233,8 +233,8 @@ bitpacking::expand::expand_scalar:
 	or rdi, rsi
 	or rax, rcx
 	add r9d, 64
-	jmp .LBB31_9
-.LBB31_10:
+	jmp .LBB34_9
+.LBB34_10:
 	add rsp, 56
 	pop rbx
 	pop r12
@@ -243,8 +243,8 @@ bitpacking::expand::expand_scalar:
 	pop r15
 	pop rbp
 	ret
-.LBB31_11:
-	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.0]
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.2]
+.LBB34_11:
+	lea rdi, [rip + .Lanon.7f2c312b5472e5928991000022678349.0]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.2]
 	mov esi, 41
 	call qword ptr [rip + core::panicking::panic@GOTPCREL]

@@ -5,29 +5,29 @@ bitpacking::select::select_portable_scan_pdep:
 	sub rsp, 128
 	mov r8, rsi
 	shr r8, 3
-	je .LBB50_9
+	je .LBB54_9
 	mov rax, r8
 	shl rax, 6
 	xor r9d, r9d
 	vpxor xmm0, xmm0, xmm0
 	mov r10, rdi
 	mov rcx, rdx
-.LBB50_2:
+.LBB54_2:
 	vpopcntq zmm1, zmmword ptr [r10]
 	vpmovqb xmm2, zmm1
 	vpsadbw xmm2, xmm2, xmm0
 	vmovq r11, xmm2
 	sub rcx, r11
-	jb .LBB50_11
+	jb .LBB54_11
 	add r10, 64
 	add r9, -512
 	mov rdx, rcx
 	add rax, -64
-	jne .LBB50_2
+	jne .LBB54_2
 	lea edx, [8*rsi]
 	and edx, 56
-	je .LBB50_10
-.LBB50_5:
+	je .LBB54_10
+.LBB54_5:
 	movabs rax, 1152921504606846968
 	and rsi, rax
 	lea rsi, [rdi + 8*rsi]
@@ -36,34 +36,34 @@ bitpacking::select::select_portable_scan_pdep:
 	xor eax, eax
 	xor edi, edi
 	mov r9, rcx
-.LBB50_6:
+.LBB54_6:
 	mov r10, qword ptr [rsi + rdi]
 	popcnt r11, r10
 	sub r9, r11
-	jb .LBB50_12
+	jb .LBB54_12
 	add r8, -64
 	add rdi, 8
 	mov rcx, r9
 	cmp rdx, rdi
-	jne .LBB50_6
+	jne .LBB54_6
 	mov rdx, rcx
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB50_9:
+.LBB54_9:
 	mov rcx, rdx
 	lea edx, [8*rsi]
 	and edx, 56
-	jne .LBB50_5
-.LBB50_10:
+	jne .LBB54_5
+.LBB54_10:
 	xor eax, eax
 	mov rdx, rcx
 	mov rsp, rbp
 	pop rbp
 	vzeroupper
 	ret
-.LBB50_11:
+.LBB54_11:
 	vpxor xmm0, xmm0, xmm0
 	valignq zmm2, zmm1, zmm0, 7
 	vpaddq zmm1, zmm2, zmm1
@@ -92,7 +92,7 @@ bitpacking::select::select_portable_scan_pdep:
 	pop rbp
 	vzeroupper
 	ret
-.LBB50_12:
+.LBB54_12:
 	mov eax, 1
 	shlx rcx, rax, rcx
 	pdep rcx, rcx, r10

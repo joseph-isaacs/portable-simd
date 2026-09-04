@@ -1,28 +1,28 @@
-bitpacking::rank::popcount_portable:
+bitpacking::rank::popcount_vpopcnt:
 	mov eax, esi
 	and eax, 7
 	lea r8, [8*rsi]
 	mov rcx, r8
 	and rcx, -64
-	je .LBB28_1
+	je .LBB26_1
 	add r8, -64
 	mov edx, r8d
 	not edx
 	test edx, 448
-	jne .LBB28_4
+	jne .LBB26_4
 	vpxor xmm0, xmm0, xmm0
 	mov rdx, rdi
-	jmp .LBB28_6
-.LBB28_1:
+	jmp .LBB26_6
+.LBB26_1:
 	xor ecx, ecx
 	test rax, rax
-	jne .LBB28_12
-.LBB28_11:
+	jne .LBB26_12
+.LBB26_11:
 	xor eax, eax
 	add rax, rcx
 	vzeroupper
 	ret
-.LBB28_4:
+.LBB26_4:
 	mov r9d, r8d
 	shr r9d, 6
 	inc r9d
@@ -30,17 +30,17 @@ bitpacking::rank::popcount_portable:
 	neg r9
 	vpxor xmm0, xmm0, xmm0
 	mov rdx, rdi
-.LBB28_5:
+.LBB26_5:
 	vpopcntq zmm1, zmmword ptr [rdx]
 	add rdx, 64
 	vpaddq zmm0, zmm1, zmm0
 	inc r9
-	jne .LBB28_5
-.LBB28_6:
+	jne .LBB26_5
+.LBB26_6:
 	cmp r8, 448
-	jb .LBB28_9
+	jb .LBB26_9
 	add rcx, rdi
-.LBB28_8:
+.LBB26_8:
 	vpopcntq zmm1, zmmword ptr [rdx]
 	vpaddq zmm0, zmm1, zmm0
 	vpopcntq zmm1, zmmword ptr [rdx + 64]
@@ -59,8 +59,8 @@ bitpacking::rank::popcount_portable:
 	vpaddq zmm1, zmm2, zmm1
 	vpaddq zmm0, zmm1, zmm0
 	cmp rdx, rcx
-	jne .LBB28_8
-.LBB28_9:
+	jne .LBB26_8
+.LBB26_9:
 	vextracti64x4 ymm1, zmm0, 1
 	vpaddq zmm0, zmm0, zmm1
 	vextracti128 xmm1, ymm0, 1
@@ -69,8 +69,8 @@ bitpacking::rank::popcount_portable:
 	vpaddq xmm0, xmm0, xmm1
 	vmovq rcx, xmm0
 	test rax, rax
-	je .LBB28_11
-.LBB28_12:
+	je .LBB26_11
+.LBB26_12:
 	movabs rdx, 1152921504606846968
 	and rsi, rdx
 	lea rdx, [rdi + 8*rsi]
@@ -84,8 +84,8 @@ bitpacking::rank::popcount_portable:
 	vpbroadcastq ymm0, rsi
 	vpxor xmm3, xmm3, xmm3
 	xor esi, esi
-	vmovdqa ymm2, ymmword ptr [rip + .LCPI28_0]
-.LBB28_13:
+	vmovdqa ymm2, ymmword ptr [rip + .LCPI26_0]
+.LBB26_13:
 	vmovdqa ymm1, ymm3
 	vpbroadcastq ymm3, rsi
 	vpor ymm3, ymm3, ymm2
@@ -95,7 +95,7 @@ bitpacking::rank::popcount_portable:
 	vpaddq ymm3, ymm3, ymm1
 	add rsi, 4
 	cmp rax, rsi
-	jne .LBB28_13
+	jne .LBB26_13
 	vmovdqa64 ymm1 {k1}, ymm3
 	vextracti128 xmm0, ymm1, 1
 	vpaddq xmm0, xmm1, xmm0

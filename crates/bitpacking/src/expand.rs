@@ -118,6 +118,15 @@ pub fn pdep_bmi2(x: u64, m: u64) -> u64 {
     unsafe { core::arch::x86_64::_pdep_u64(x, m) }
 }
 
+/// AVX-512 VBMI2 PDEP: bits -> bytes, `vpexpandb`, bytes -> bits.
+#[cfg(target_feature = "avx512vbmi2")]
+#[inline]
+pub fn pdep_vbmi2(x: u64, m: u64) -> u64 {
+    use core::arch::x86_64::*;
+    // SAFETY: avx512vbmi2 compile-time feature.
+    unsafe { _mm512_movepi8_mask(_mm512_maskz_expand_epi8(m, _mm512_movm_epi8(x))) }
+}
+
 #[inline(always)]
 fn expand_with(packed: &[u64], mask: &[u64], out: &mut [u64], pdep: impl Fn(u64, u64) -> u64) {
     assert!(out.len() >= mask.len());
@@ -139,6 +148,11 @@ pub fn expand_scalar(packed: &[u64], mask: &[u64], out: &mut [u64]) {
 #[cfg(target_feature = "bmi2")]
 pub fn expand_bmi2(packed: &[u64], mask: &[u64], out: &mut [u64]) {
     expand_with(packed, mask, out, pdep_bmi2)
+}
+
+#[cfg(target_feature = "avx512vbmi2")]
+pub fn expand_vbmi2(packed: &[u64], mask: &[u64], out: &mut [u64]) {
+    expand_with(packed, mask, out, pdep_vbmi2)
 }
 
 /// Portable SIMD: read 8 chunks, expand 8 lanes at once.
@@ -211,6 +225,12 @@ mod tests {
     #[test]
     fn pdep_bmi2_matches() {
         check_pdep(pdep_bmi2);
+    }
+    #[cfg(target_feature = "avx512vbmi2")]
+    #[test]
+    fn pdep_vbmi2_matches() {
+        check_pdep(pdep_vbmi2);
+        check(expand_vbmi2);
     }
     #[test]
     fn naive() {

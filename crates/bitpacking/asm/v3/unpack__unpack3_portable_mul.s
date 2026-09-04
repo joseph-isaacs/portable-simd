@@ -9,7 +9,7 @@ bitpacking::unpack::unpack3_portable_mul:
 	and edx, 7
 	cmp rdx, 1
 	sbb r8, -1
-	add r8, 32
+	add r8, 64
 	cmp rsi, r8
 	jb .LBB49_22
 	movabs r11, 9223372036854775792
@@ -65,7 +65,7 @@ bitpacking::unpack::unpack3_portable_mul:
 	and ecx, 7
 	cmp rcx, 1
 	sbb rsi, -1
-	or rsi, 32
+	or rsi, 64
 	cmp r8, rsi
 	jb .LBB49_22
 	add rax, r11

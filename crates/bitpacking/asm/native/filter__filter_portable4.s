@@ -10,11 +10,11 @@ bitpacking::filter::filter_portable4:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB38_30
+	jne .LBB42_30
 	mov qword ptr [rsp + 16], rsi
 	mov r14, rsi
 	shr r14, 2
-	je .LBB38_2
+	je .LBB42_2
 	shl r14, 5
 	xor r15d, r15d
 	xor r12d, r12d
@@ -23,18 +23,18 @@ bitpacking::filter::filter_portable4:
 	xor ebx, ebx
 	xor edi, edi
 	mov rsi, rdx
-	jmp .LBB38_9
-.LBB38_28:
+	jmp .LBB42_9
+.LBB42_28:
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbx
 	xor ebx, ebx
-.LBB38_29:
+.LBB42_29:
 	add r12, 32
 	cmp r14, r12
-	je .LBB38_3
-.LBB38_9:
+	je .LBB42_3
+.LBB42_9:
 	vmovdqu ymm0, ymmword ptr [rsi + r12]
 	mov rax, qword ptr [rsp + 8]
 	vpand ymm1, ymm0, ymmword ptr [rax + r12]
@@ -165,15 +165,15 @@ bitpacking::filter::filter_portable4:
 	or rax, r13
 	add r11d, r10d
 	cmp r11d, 63
-	jbe .LBB38_20
+	jbe .LBB42_20
 	cmp rdi, r9
-	jae .LBB38_11
+	jae .LBB42_11
 	mov qword ptr [r8 + 8*rdi], rax
 	inc rdi
 	add r11d, -64
 	mov rax, rbp
 	xor ebp, ebp
-.LBB38_20:
+.LBB42_20:
 	vpextrq rdx, xmm1, 1
 	vpextrd r10d, xmm0, 2
 	xor ebx, ebx
@@ -187,15 +187,15 @@ bitpacking::filter::filter_portable4:
 	or r13, rax
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB38_23
+	jb .LBB42_23
 	cmp rdi, r9
-	jae .LBB38_11
+	jae .LBB42_11
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbx
 	xor ebx, ebx
-.LBB38_23:
+.LBB42_23:
 	vextracti128 xmm1, ymm1, 1
 	vmovq rax, xmm1
 	vextracti128 xmm0, ymm0, 1
@@ -211,15 +211,15 @@ bitpacking::filter::filter_portable4:
 	or rax, r13
 	add r11d, r10d
 	cmp r11d, 64
-	jb .LBB38_26
+	jb .LBB42_26
 	cmp rdi, r9
-	jae .LBB38_11
+	jae .LBB42_11
 	mov qword ptr [r8 + 8*rdi], rax
 	inc rdi
 	add r11d, -64
 	mov rax, rbp
 	xor ebp, ebp
-.LBB38_26:
+.LBB42_26:
 	vpextrq rdx, xmm1, 1
 	vpextrd r10d, xmm0, 2
 	xor ebx, ebx
@@ -233,40 +233,40 @@ bitpacking::filter::filter_portable4:
 	or r13, rax
 	add r10d, r11d
 	cmp r10d, 64
-	jb .LBB38_29
+	jb .LBB42_29
 	cmp rdi, r9
-	jb .LBB38_28
-.LBB38_11:
+	jb .LBB42_28
+.LBB42_11:
 	mov rsi, r9
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.6]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.6]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB38_2:
+.LBB42_2:
 	xor edi, edi
 	xor r13d, r13d
 	xor ebx, ebx
 	xor r10d, r10d
 	mov rsi, rdx
-.LBB38_3:
+.LBB42_3:
 	mov qword ptr [rsp], r9
 	mov rcx, qword ptr [rsp + 16]
 	mov r9d, ecx
 	and r9d, 3
-	je .LBB38_12
+	je .LBB42_12
 	shl rcx, 3
 	movabs rax, 9223372036854775776
 	and rax, rcx
 	add qword ptr [rsp + 8], rax
 	add rsi, rax
 	xor r14d, r14d
-	jmp .LBB38_5
-.LBB38_18:
+	jmp .LBB42_5
+.LBB42_18:
 	mov rsi, r11
 	inc r14
 	mov rbx, rbp
 	cmp r9, r14
-	je .LBB38_12
-.LBB38_5:
+	je .LBB42_12
+.LBB42_5:
 	mov r15, r13
 	mov ecx, r10d
 	mov r11, rsi
@@ -442,23 +442,23 @@ bitpacking::filter::filter_portable4:
 	or r13, r15
 	add r10d, ecx
 	cmp r10d, 63
-	jbe .LBB38_18
+	jbe .LBB42_18
 	cmp rdi, qword ptr [rsp]
-	jae .LBB38_7
+	jae .LBB42_7
 	mov qword ptr [r8 + 8*rdi], r13
 	inc rdi
 	add r10d, -64
 	mov r13, rbp
 	xor ebp, ebp
-	jmp .LBB38_18
-.LBB38_12:
+	jmp .LBB42_18
+.LBB42_12:
 	test r10d, r10d
 	mov rsi, qword ptr [rsp]
-	je .LBB38_15
+	je .LBB42_15
 	cmp rdi, rsi
-	jae .LBB38_16
+	jae .LBB42_16
 	mov qword ptr [r8 + 8*rdi], r13
-.LBB38_15:
+.LBB42_15:
 	shl rdi, 6
 	mov eax, r10d
 	add rax, rdi
@@ -471,19 +471,19 @@ bitpacking::filter::filter_portable4:
 	pop rbp
 	vzeroupper
 	ret
-.LBB38_30:
-	lea r9, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.58]
+.LBB42_30:
+	lea r9, [rip + .Lanon.7f2c312b5472e5928991000022678349.59]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB38_7:
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.6]
+.LBB42_7:
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.6]
 	mov rsi, qword ptr [rsp]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB38_16:
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.5]
+.LBB42_16:
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.5]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

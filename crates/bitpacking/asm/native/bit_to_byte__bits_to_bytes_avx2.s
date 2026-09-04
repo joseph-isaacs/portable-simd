@@ -118,7 +118,7 @@ bitpacking::bit_to_byte::bits_to_bytes_avx2:
 	vzeroupper
 	ret
 .LBB7_10:
-	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.37]
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.39]
+	lea rdi, [rip + .Lanon.7f2c312b5472e5928991000022678349.38]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.40]
 	mov esi, 46
 	call qword ptr [rip + core::panicking::panic@GOTPCREL]

@@ -2,8 +2,8 @@
 //! Value `j` occupies bits `[j*K, j*K + K)` of `packed` (Parquet-style bit packing, not the
 //! FastLanes transposed layout).
 //!
-//! All variants may read up to 32 bytes past the last needed byte, so
-//! `packed.len() >= (out.len() * K).div_ceil(8) + 32` is required.
+//! All variants may read up to 64 bytes past the last needed byte, so
+//! `packed.len() >= (out.len() * K).div_ceil(8) + 64` is required.
 
 use core_simd::simd::{Simd, Swizzle};
 use core_simd::simd::prelude::*;
@@ -11,7 +11,7 @@ use core_simd::simd::prelude::*;
 #[inline(always)]
 fn check<const K: usize>(packed: &[u8], out: &[u8]) {
     const { assert!(K >= 1 && K <= 7) };
-    assert!(packed.len() >= (out.len() * K).div_ceil(8) + 32, "need 32 bytes of read slack");
+    assert!(packed.len() >= (out.len() * K).div_ceil(8) + 64, "need 64 bytes of read slack");
 }
 
 /// Byte-repeated field mask, e.g. `0x0707..07` for K = 3.
@@ -222,6 +222,32 @@ pub fn unpack_avx512<const K: usize>(packed: &[u8], out: &mut [u8]) {
     }
 }
 
+/// AVX-512 VBMI, 64 values per step: `vpermb` gathers each 8-value group (K bytes) into a
+/// qword lane, `vpmultishiftqb` pulls the 8 fields to byte boundaries, `vpand` masks. This is
+/// the instruction pair designed for exactly this job.
+#[cfg(target_feature = "avx512vbmi")]
+pub fn unpack_vbmi<const K: usize>(packed: &[u8], out: &mut [u8]) {
+    use core::arch::x86_64::*;
+    check::<K>(packed, out);
+    let gather: __m512i = Simd::<u8, 64>::from_array(core::array::from_fn(|i| ((i / 8) * K + i % 8) as u8)).into();
+    let ctrl: __m512i = Simd::<u8, 64>::from_array(core::array::from_fn(|i| ((i % 8) * K) as u8)).into();
+    let (chunks, rem) = out.as_chunks_mut::<64>();
+    // SAFETY: avx512vbmi compile-time feature; the slack assertion covers every 64-byte load.
+    unsafe {
+        let mask = _mm512_set1_epi8(((1u16 << K) - 1) as i8);
+        for (g, chunk) in chunks.iter_mut().enumerate() {
+            let v = _mm512_loadu_si512(packed.as_ptr().add(g * 8 * K) as *const __m512i);
+            let lanes = _mm512_permutexvar_epi8(gather, v);
+            let fields = _mm512_and_si512(_mm512_multishift_epi64_epi8(ctrl, lanes), mask);
+            _mm512_storeu_si512(chunk.as_mut_ptr() as *mut __m512i, fields);
+        }
+    }
+    if !rem.is_empty() {
+        let g = chunks.len();
+        unpack_scalar::<K>(&packed[g * 8 * K..], rem);
+    }
+}
+
 // Non-generic K = 3 instantiations so the asm can be dumped by name.
 pub fn unpack3_scalar(packed: &[u8], out: &mut [u8]) {
     unpack_scalar::<3>(packed, out)
@@ -243,6 +269,10 @@ pub fn unpack3_avx2(packed: &[u8], out: &mut [u8]) {
 #[cfg(target_feature = "avx512bw")]
 pub fn unpack3_avx512(packed: &[u8], out: &mut [u8]) {
     unpack_avx512::<3>(packed, out)
+}
+#[cfg(target_feature = "avx512vbmi")]
+pub fn unpack3_vbmi(packed: &[u8], out: &mut [u8]) {
+    unpack_vbmi::<3>(packed, out)
 }
 
 #[cfg(test)]
@@ -275,9 +305,11 @@ mod tests {
             ("avx2", unpack_avx2::<K>),
             #[cfg(target_feature = "avx512bw")]
             ("avx512", unpack_avx512::<K>),
+            #[cfg(target_feature = "avx512vbmi")]
+            ("vbmi", unpack_vbmi::<K>),
         ];
         for &n in &[0usize, 1, 7, 8, 15, 16, 17, 31, 32, 33, 100, 1000] {
-            let packed = rng.bytes((n * K).div_ceil(8) + 32, 8).iter().map(|b| b ^ 0x5a).collect::<Vec<u8>>();
+            let packed = rng.bytes((n * K).div_ceil(8) + 64, 8).iter().map(|b| b ^ 0x5a).collect::<Vec<u8>>();
             let expect = reference::<K>(&packed, n);
             for (name, f) in &fns {
                 let mut got = vec![0xffu8; n];

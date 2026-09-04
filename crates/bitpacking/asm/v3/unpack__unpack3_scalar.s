@@ -9,7 +9,7 @@ bitpacking::unpack::unpack3_scalar:
 	and edx, 7
 	cmp rdx, 1
 	sbb r8, -1
-	add r8, 32
+	add r8, 64
 	cmp rsi, r8
 	jb .LBB48_3
 	test rcx, rcx

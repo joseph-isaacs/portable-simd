@@ -5,18 +5,18 @@ bitpacking::indices::bitmap_to_indices_portable:
 	push rbx
 	push rax
 	test rsi, rsi
-	je .LBB60_1
+	je .LBB66_1
 	shl rsi, 3
 	mov r9d, 56
 	xor r8d, r8d
 	mov r10, qword ptr [rip + bitpacking::indices::POS_LUT@GOTPCREL]
 	xor r11d, r11d
-.LBB60_3:
+.LBB66_3:
 	mov rax, rcx
 	sub rax, r8
-	jb .LBB60_8
+	jb .LBB66_8
 	cmp rax, 63
-	jbe .LBB60_7
+	jbe .LBB66_7
 	mov rax, qword ptr [rdi + r11]
 	lea rbx, [rdx + 4*r8]
 	lea ebp, [r9 - 56]
@@ -101,11 +101,11 @@ bitpacking::indices::bitmap_to_indices_portable:
 	add r9d, 64
 	mov r8, rax
 	cmp rsi, r11
-	jne .LBB60_3
-	jmp .LBB60_6
-.LBB60_1:
+	jne .LBB66_3
+	jmp .LBB66_6
+.LBB66_1:
 	xor eax, eax
-.LBB60_6:
+.LBB66_6:
 	add rsp, 8
 	pop rbx
 	pop r14
@@ -113,17 +113,17 @@ bitpacking::indices::bitmap_to_indices_portable:
 	pop rbp
 	vzeroupper
 	ret
-.LBB60_8:
-	lea rax, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.27]
+.LBB66_8:
+	lea rax, [rip + .Lanon.7f2c312b5472e5928991000022678349.28]
 	mov rdi, r8
 	mov rsi, rcx
 	mov rdx, rcx
 	mov rcx, rax
 	vzeroupper
 	call qword ptr [rip + core::slice::index::slice_index_fail@GOTPCREL]
-.LBB60_7:
-	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.59]
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.63]
+.LBB66_7:
+	lea rdi, [rip + .Lanon.7f2c312b5472e5928991000022678349.60]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.65]
 	mov esi, 33
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic@GOTPCREL]

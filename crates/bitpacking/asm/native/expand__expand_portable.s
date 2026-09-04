@@ -10,7 +10,7 @@ bitpacking::expand::expand_portable:
 	mov qword ptr [rsp + 40], rdx
 	mov qword ptr [rsp], rdi
 	cmp r9, rcx
-	jb .LBB32_57
+	jb .LBB35_57
 	mov r14, -1
 	mov eax, ecx
 	and eax, 7
@@ -18,7 +18,7 @@ bitpacking::expand::expand_portable:
 	mov qword ptr [rsp + 64], rcx
 	shr rcx, 3
 	mov qword ptr [rsp + 16], rsi
-	je .LBB32_2
+	je .LBB35_2
 	shl rcx, 6
 	xor r15d, r15d
 	mov al, 4
@@ -39,11 +39,11 @@ bitpacking::expand::expand_portable:
 	xor r12d, r12d
 	xor r11d, r11d
 	mov qword ptr [rsp + 72], rcx
-	jmp .LBB32_8
-.LBB32_51:
+	jmp .LBB35_8
+.LBB35_51:
 	mov rsi, qword ptr [rsp + 16]
 	mov r13, qword ptr [rsp + 8]
-.LBB32_56:
+.LBB35_56:
 	test r10b, 64
 	shrx rdi, rbx, r10
 	mov r11, rdi
@@ -174,23 +174,23 @@ bitpacking::expand::expand_portable:
 	add rdx, 64
 	mov rcx, qword ptr [rsp + 72]
 	cmp rcx, rdx
-	je .LBB32_3
-.LBB32_8:
+	je .LBB35_3
+.LBB35_8:
 	mov rcx, qword ptr [rsp + 40]
 	vmovdqu64 zmm0, zmmword ptr [rcx + rdx]
 	vpopcntq zmm1, zmm0
 	vmovd r10d, xmm1
 	cmp eax, r10d
 	mov qword ptr [rsp + 32], rdx
-	jae .LBB32_19
+	jae .LBB35_19
 	cmp r13, rsi
-	jae .LBB32_10
+	jae .LBB35_10
 	mov rcx, qword ptr [rsp]
 	mov rdx, qword ptr [rcx + 8*r13]
-	jmp .LBB32_18
-.LBB32_10:
+	jmp .LBB35_18
+.LBB35_10:
 	xor edx, edx
-.LBB32_18:
+.LBB35_18:
 	inc r13
 	xor edi, edi
 	mov ecx, eax
@@ -202,7 +202,7 @@ bitpacking::expand::expand_portable:
 	or r11, rdi
 	or r12, rcx
 	add eax, 64
-.LBB32_19:
+.LBB35_19:
 	test r10b, 64
 	shrx rdx, r11, r10
 	mov rdi, rdx
@@ -218,15 +218,15 @@ bitpacking::expand::expand_portable:
 	sub eax, r10d
 	vpextrd r10d, xmm1, 2
 	cmp eax, r10d
-	jae .LBB32_24
+	jae .LBB35_24
 	cmp r13, rsi
-	jae .LBB32_21
+	jae .LBB35_21
 	mov rcx, qword ptr [rsp]
 	mov rdx, qword ptr [rcx + 8*r13]
-	jmp .LBB32_23
-.LBB32_21:
+	jmp .LBB35_23
+.LBB35_21:
 	xor edx, edx
-.LBB32_23:
+.LBB35_23:
 	inc r13
 	xor r8d, r8d
 	mov ecx, eax
@@ -238,7 +238,7 @@ bitpacking::expand::expand_portable:
 	or rdi, r8
 	or r9, rcx
 	add eax, 64
-.LBB32_24:
+.LBB35_24:
 	test r10b, 64
 	shrx r8, rdi, r10
 	mov rdx, r8
@@ -256,15 +256,15 @@ bitpacking::expand::expand_portable:
 	vmovd r10d, xmm2
 	cmp eax, r10d
 	mov qword ptr [rsp + 24], r9
-	jae .LBB32_29
+	jae .LBB35_29
 	cmp r13, rsi
-	jae .LBB32_26
+	jae .LBB35_26
 	mov rcx, qword ptr [rsp]
 	mov rdi, qword ptr [rcx + 8*r13]
-	jmp .LBB32_28
-.LBB32_26:
+	jmp .LBB35_28
+.LBB35_26:
 	xor edi, edi
-.LBB32_28:
+.LBB35_28:
 	inc r13
 	xor r8d, r8d
 	mov ecx, eax
@@ -276,7 +276,7 @@ bitpacking::expand::expand_portable:
 	or rdx, r8
 	or r11, rcx
 	add eax, 64
-.LBB32_29:
+.LBB35_29:
 	test r10b, 64
 	shrx r8, rdx, r10
 	mov r9, r8
@@ -294,15 +294,15 @@ bitpacking::expand::expand_portable:
 	vpextrd r10d, xmm2, 2
 	cmp eax, r10d
 	mov qword ptr [rsp + 104], r11
-	jae .LBB32_34
+	jae .LBB35_34
 	cmp r13, rsi
-	jae .LBB32_31
+	jae .LBB35_31
 	mov rcx, qword ptr [rsp]
 	mov rdx, qword ptr [rcx + 8*r13]
-	jmp .LBB32_33
-.LBB32_31:
+	jmp .LBB35_33
+.LBB35_31:
 	xor edx, edx
-.LBB32_33:
+.LBB35_33:
 	inc r13
 	xor r8d, r8d
 	mov ecx, eax
@@ -314,7 +314,7 @@ bitpacking::expand::expand_portable:
 	or r9, r8
 	or rdi, rcx
 	add eax, 64
-.LBB32_34:
+.LBB35_34:
 	test r10b, 64
 	shrx r11, r9, r10
 	mov rdx, r11
@@ -331,15 +331,15 @@ bitpacking::expand::expand_portable:
 	vextracti32x4 xmm2, zmm1, 2
 	vmovd r10d, xmm2
 	cmp eax, r10d
-	jae .LBB32_39
+	jae .LBB35_39
 	cmp r13, rsi
-	jae .LBB32_36
+	jae .LBB35_36
 	mov rcx, qword ptr [rsp]
 	mov r9, qword ptr [rcx + 8*r13]
-	jmp .LBB32_38
-.LBB32_36:
+	jmp .LBB35_38
+.LBB35_36:
 	xor r9d, r9d
-.LBB32_38:
+.LBB35_38:
 	inc r13
 	xor r11d, r11d
 	mov ecx, eax
@@ -351,7 +351,7 @@ bitpacking::expand::expand_portable:
 	or rdx, r11
 	or r8, rcx
 	add eax, 64
-.LBB32_39:
+.LBB35_39:
 	xor ebp, ebp
 	test r10b, 64
 	shrx r11, rdx, r10
@@ -367,20 +367,20 @@ bitpacking::expand::expand_portable:
 	sub eax, r10d
 	vpextrd r10d, xmm2, 2
 	cmp eax, r10d
-	jae .LBB32_40
+	jae .LBB35_40
 	cmp r13, rsi
-	jae .LBB32_42
+	jae .LBB35_42
 	mov rcx, qword ptr [rsp]
 	mov rdx, qword ptr [rcx + 8*r13]
-	jmp .LBB32_44
-.LBB32_40:
+	jmp .LBB35_44
+.LBB35_40:
 	mov qword ptr [rsp + 8], r13
 	mov rsi, -1
 	xor ebp, ebp
-	jmp .LBB32_45
-.LBB32_42:
+	jmp .LBB35_45
+.LBB35_42:
 	xor edx, edx
-.LBB32_44:
+.LBB35_44:
 	mov rsi, -1
 	inc r13
 	mov qword ptr [rsp + 8], r13
@@ -395,7 +395,7 @@ bitpacking::expand::expand_portable:
 	or r15, r11
 	or r9, rcx
 	add eax, 64
-.LBB32_45:
+.LBB35_45:
 	test r10b, 64
 	shrx r13, r15, r10
 	mov r14, r13
@@ -412,16 +412,16 @@ bitpacking::expand::expand_portable:
 	vmovd r10d, xmm2
 	cmp eax, r10d
 	mov r15d, 0
-	jae .LBB32_50
+	jae .LBB35_50
 	mov rsi, qword ptr [rsp + 8]
 	cmp rsi, qword ptr [rsp + 16]
-	jae .LBB32_47
+	jae .LBB35_47
 	mov rcx, qword ptr [rsp]
 	mov r15, qword ptr [rcx + 8*rsi]
-	jmp .LBB32_49
-.LBB32_47:
+	jmp .LBB35_49
+.LBB35_47:
 	xor r15d, r15d
-.LBB32_49:
+.LBB35_49:
 	inc rsi
 	mov qword ptr [rsp + 8], rsi
 	xor r13d, r13d
@@ -435,7 +435,7 @@ bitpacking::expand::expand_portable:
 	or r14, r13
 	or r11, rcx
 	add eax, 64
-.LBB32_50:
+.LBB35_50:
 	mov rcx, qword ptr [rsp + 112]
 	andn rcx, rcx, r12
 	vmovq xmm1, rcx
@@ -470,17 +470,17 @@ bitpacking::expand::expand_portable:
 	vpbroadcastq zmm1 {k5}, rcx
 	vpextrd r10d, xmm2, 2
 	cmp eax, r10d
-	jae .LBB32_51
+	jae .LBB35_51
 	mov rsi, qword ptr [rsp + 16]
 	mov r13, qword ptr [rsp + 8]
 	cmp r13, rsi
-	jae .LBB32_53
+	jae .LBB35_53
 	mov rcx, qword ptr [rsp]
 	mov rdi, qword ptr [rcx + 8*r13]
-	jmp .LBB32_55
-.LBB32_53:
+	jmp .LBB35_55
+.LBB35_53:
 	xor edi, edi
-.LBB32_55:
+.LBB35_55:
 	inc r13
 	xor r8d, r8d
 	mov ecx, eax
@@ -492,15 +492,15 @@ bitpacking::expand::expand_portable:
 	or rbx, r8
 	or rdx, rcx
 	add eax, 64
-	jmp .LBB32_56
-.LBB32_2:
+	jmp .LBB35_56
+.LBB35_2:
 	xor r12d, r12d
 	xor r11d, r11d
 	xor r13d, r13d
 	xor eax, eax
-.LBB32_3:
+.LBB35_3:
 	cmp qword ptr [rsp + 56], 0
-	je .LBB32_16
+	je .LBB35_16
 	mov rdx, qword ptr [rsp + 64]
 	shl rdx, 3
 	movabs rcx, 9223372036854775744
@@ -508,11 +508,11 @@ bitpacking::expand::expand_portable:
 	add qword ptr [rsp + 40], rcx
 	add qword ptr [rsp + 48], rcx
 	xor edx, edx
-	jmp .LBB32_5
-.LBB32_6:
+	jmp .LBB35_5
+.LBB35_6:
 	mov qword ptr [rsp + 8], r13
 	xor r10d, r10d
-.LBB32_15:
+.LBB35_15:
 	test r9b, 64
 	shrx rsi, r11, r9
 	mov rcx, rsi
@@ -694,23 +694,23 @@ bitpacking::expand::expand_portable:
 	mov r11, qword ptr [rsp + 24]
 	cmp qword ptr [rsp + 56], rdx
 	mov r13, qword ptr [rsp + 8]
-	je .LBB32_16
-.LBB32_5:
+	je .LBB35_16
+.LBB35_5:
 	mov rcx, qword ptr [rsp + 40]
 	mov r14, qword ptr [rcx + 8*rdx]
 	popcnt r9, r14
 	cmp eax, r9d
 	mov qword ptr [rsp + 32], rdx
-	jae .LBB32_6
+	jae .LBB35_6
 	cmp r13, qword ptr [rsp + 16]
 	mov r10d, 0
-	jae .LBB32_12
+	jae .LBB35_12
 	mov rcx, qword ptr [rsp]
 	mov rsi, qword ptr [rcx + 8*r13]
-	jmp .LBB32_14
-.LBB32_12:
+	jmp .LBB35_14
+.LBB35_12:
 	xor esi, esi
-.LBB32_14:
+.LBB35_14:
 	inc r13
 	mov qword ptr [rsp + 8], r13
 	xor edi, edi
@@ -723,8 +723,8 @@ bitpacking::expand::expand_portable:
 	or r11, rdi
 	or r12, rcx
 	add eax, 64
-	jmp .LBB32_15
-.LBB32_16:
+	jmp .LBB35_15
+.LBB35_16:
 	add rsp, 120
 	pop rbx
 	pop r12
@@ -734,8 +734,8 @@ bitpacking::expand::expand_portable:
 	pop rbp
 	vzeroupper
 	ret
-.LBB32_57:
-	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.0]
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.57]
+.LBB35_57:
+	lea rdi, [rip + .Lanon.7f2c312b5472e5928991000022678349.0]
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.58]
 	mov esi, 41
 	call qword ptr [rip + core::panicking::panic@GOTPCREL]

@@ -52,7 +52,9 @@ fn bench_rank(c: &mut Criterion) {
         #[cfg(target_feature = "avx2")]
         b!("avx2", rank::rank_avx2);
         #[cfg(target_feature = "avx512bw")]
-        b!("avx512", rank::rank_avx512);
+        b!("avx512_lut", rank::rank_avx512);
+        #[cfg(target_feature = "avx512vpopcntdq")]
+        b!("avx512_vpopcnt", rank::rank_vpopcnt);
     }
     g.finish();
 }
@@ -148,6 +150,8 @@ fn bench_filter(c: &mut Criterion) {
         b!("bmi2_pext_branchless", filter::filter_bmi2_branchless);
         #[cfg(target_feature = "bmi2")]
         b!("vortex_pext", filter::filter_vortex_pext);
+        #[cfg(target_feature = "avx512vbmi2")]
+        b!("vbmi2_compressb", filter::filter_vbmi2);
     }
     g.finish();
 }
@@ -210,6 +214,8 @@ fn bench_indices(c: &mut Criterion) {
     b!("avx2_lut", indices::select_all64_avx2);
     #[cfg(target_feature = "avx512f")]
     b!("avx512_compress", indices::select_all64_avx512);
+    #[cfg(target_feature = "avx512vbmi2")]
+    b!("vbmi2_compressb", indices::select_all64_vbmi2);
     g.finish();
 
     // Streaming: 8 KiB bitmap at three densities.
@@ -233,6 +239,8 @@ fn bench_indices(c: &mut Criterion) {
         b!("avx2_lut", indices::bitmap_to_indices_avx2);
         #[cfg(target_feature = "avx512f")]
         b!("avx512_compress", indices::bitmap_to_indices_avx512);
+        #[cfg(target_feature = "avx512vbmi2")]
+        b!("vbmi2_compressb", indices::bitmap_to_indices_vbmi2);
     }
     g.finish();
 }
@@ -294,6 +302,8 @@ fn bench_expand(c: &mut Criterion) {
         b!("portable_u64x8", expand::expand_portable);
         #[cfg(target_feature = "bmi2")]
         b!("bmi2_pdep", expand::expand_bmi2);
+        #[cfg(target_feature = "avx512vbmi2")]
+        b!("vbmi2_expandb", expand::expand_vbmi2);
     }
     g.finish();
 }
@@ -301,7 +311,7 @@ fn bench_expand(c: &mut Criterion) {
 fn bench_unpack(c: &mut Criterion) {
     let mut rng = Rng::new(9);
     let n = 1usize << 14; // 16 KiB of output values
-    let packed = rng.bytes(n + 32, 8);
+    let packed = rng.bytes(n + 64, 8);
     let mut out = vec![0u8; n];
     let mut g = c.benchmark_group("unpack");
     g.throughput(Throughput::Elements(n as u64));
@@ -327,6 +337,8 @@ fn bench_unpack(c: &mut Criterion) {
             b!("avx2", unpack::unpack_avx2::<$k>);
             #[cfg(target_feature = "avx512bw")]
             b!("avx512", unpack::unpack_avx512::<$k>);
+            #[cfg(target_feature = "avx512vbmi")]
+            b!("vbmi_multishift", unpack::unpack_vbmi::<$k>);
         }};
     }
     k!(1);

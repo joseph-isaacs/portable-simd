@@ -11,10 +11,10 @@ bitpacking::filter::filter_naive:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB34_19
+	jne .LBB37_19
 	xor ecx, ecx
 	test rsi, rsi
-	je .LBB34_2
+	je .LBB37_2
 	mov qword ptr [rsp], r9
 	mov r11d, 1
 	xor ecx, ecx
@@ -22,29 +22,29 @@ bitpacking::filter::filter_naive:
 	xor ebx, ebx
 	xor r15d, r15d
 	xor r14d, r14d
-	jmp .LBB34_4
-.LBB34_10:
+	jmp .LBB37_4
+.LBB37_10:
 	mov rdi, qword ptr [rsp + 8]
 	mov qword ptr [rdi + 8*rax], rbx
 	inc rax
 	add ecx, -64
 	mov rbx, r12
 	xor r12d, r12d
-.LBB34_11:
+.LBB37_11:
 	inc r14
 	mov r15, r12
 	cmp r14, rsi
-	je .LBB34_12
-.LBB34_4:
+	je .LBB37_12
+.LBB37_4:
 	mov r10, qword ptr [rdx + 8*r14]
 	test r10, r10
-	je .LBB34_5
+	je .LBB37_5
 	mov rdi, qword ptr [rsp + 16]
 	mov rbp, qword ptr [rdi + 8*r14]
 	xor r13d, r13d
 	mov r12, r10
 	xor r9d, r9d
-.LBB34_7:
+.LBB37_7:
 	blsi r8, r12
 	and r8, rbp
 	shlx rdi, r11, r9
@@ -52,11 +52,11 @@ bitpacking::filter::filter_naive:
 	or r13, rdi
 	inc r9d
 	blsr r12, r12
-	jne .LBB34_7
-	jmp .LBB34_8
-.LBB34_5:
+	jne .LBB37_7
+	jmp .LBB37_8
+.LBB37_5:
 	xor r13d, r13d
-.LBB34_8:
+.LBB37_8:
 	popcnt rdi, r10
 	xor r12d, r12d
 	shld r12, r13, cl
@@ -69,29 +69,29 @@ bitpacking::filter::filter_naive:
 	or rbx, r8
 	add ecx, edi
 	cmp ecx, 63
-	jbe .LBB34_11
+	jbe .LBB37_11
 	cmp rax, qword ptr [rsp]
-	jb .LBB34_10
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.6]
+	jb .LBB37_10
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.6]
 	mov rdi, rax
 	mov rsi, qword ptr [rsp]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB34_12:
+.LBB37_12:
 	test ecx, ecx
-	je .LBB34_13
+	je .LBB37_13
 	mov rsi, qword ptr [rsp]
 	cmp rax, rsi
-	jae .LBB34_17
+	jae .LBB37_17
 	mov rdx, qword ptr [rsp + 8]
 	mov qword ptr [rdx + 8*rax], rbx
 	mov ecx, ecx
-	jmp .LBB34_16
-.LBB34_2:
+	jmp .LBB37_16
+.LBB37_2:
 	xor eax, eax
-	jmp .LBB34_16
-.LBB34_13:
+	jmp .LBB37_16
+.LBB37_13:
 	xor ecx, ecx
-.LBB34_16:
+.LBB37_16:
 	shl rax, 6
 	add rax, rcx
 	add rsp, 40
@@ -102,14 +102,14 @@ bitpacking::filter::filter_naive:
 	pop r15
 	pop rbp
 	ret
-.LBB34_19:
-	lea r9, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.4]
+.LBB37_19:
+	lea r9, [rip + .Lanon.7f2c312b5472e5928991000022678349.4]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB34_17:
-	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.5]
+.LBB37_17:
+	lea rdx, [rip + .Lanon.7f2c312b5472e5928991000022678349.5]
 	mov rdi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

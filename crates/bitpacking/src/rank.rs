@@ -149,6 +149,28 @@ pub fn popcount_avx512(words: &[u64]) -> usize {
     total + popcount_scalar(rem)
 }
 
+/// AVX-512 VPOPCNTDQ: one `vpopcntq` per 8 words.
+#[cfg(target_feature = "avx512vpopcntdq")]
+pub fn popcount_vpopcnt(words: &[u64]) -> usize {
+    use core::arch::x86_64::*;
+    let (chunks, rem) = words.as_chunks::<8>();
+    // SAFETY: avx512vpopcntdq compile-time feature; loads are one chunk wide.
+    let total = unsafe {
+        let mut acc = _mm512_setzero_si512();
+        for c in chunks {
+            acc = _mm512_add_epi64(acc, _mm512_popcnt_epi64(_mm512_loadu_si512(c.as_ptr() as *const __m512i)));
+        }
+        _mm512_reduce_add_epi64(acc) as usize
+    };
+    total + popcount_scalar(rem)
+}
+
+#[cfg(target_feature = "avx512vpopcntdq")]
+pub fn rank_vpopcnt(bits: &[u64], i: usize) -> usize {
+    let (words, partial) = split(bits, i);
+    popcount_vpopcnt(words) + partial.count_ones() as usize
+}
+
 pub fn rank_scalar(bits: &[u64], i: usize) -> usize {
     let (words, partial) = split(bits, i);
     popcount_scalar(words) + partial.count_ones() as usize
@@ -223,5 +245,10 @@ mod tests {
     #[test]
     fn avx512() {
         check(rank_avx512);
+    }
+    #[cfg(target_feature = "avx512vpopcntdq")]
+    #[test]
+    fn vpopcnt() {
+        check(rank_vpopcnt);
     }
 }

@@ -7,11 +7,11 @@ bitpacking::rank::popcount_portable_u8:
 	mov rdx, rsi
 	xor ecx, ecx
 	shr rdx, 3
-	je .LBB27_1
+	je .LBB29_1
 	vpxor xmm0, xmm0, xmm0
 	mov r8, rdi
-	jmp .LBB27_4
-.LBB27_9:
+	jmp .LBB29_4
+.LBB29_9:
 	sub rdx, r9
 	vpsadbw zmm1, zmm1, zmm0
 	vextracti64x4 ymm2, zmm1, 1
@@ -23,8 +23,8 @@ bitpacking::rank::popcount_portable_u8:
 	vpextrw r9d, xmm1, 0
 	add rcx, r9
 	test rdx, rdx
-	je .LBB27_1
-.LBB27_4:
+	je .LBB29_1
+.LBB29_4:
 	cmp rdx, 31
 	mov r9d, 31
 	cmovb r9, rdx
@@ -36,23 +36,23 @@ bitpacking::rank::popcount_portable_u8:
 	mov r10, r8
 	vpxor xmm1, xmm1, xmm1
 	test ebp, 448
-	je .LBB27_7
+	je .LBB29_7
 	mov r14d, ebx
 	shr r14d, 6
 	inc r14d
 	and r14d, 7
 	mov r10, r8
-.LBB27_6:
+.LBB29_6:
 	vpopcntb zmm2, zmmword ptr [r10]
 	add r10, 64
 	vpaddb zmm1, zmm2, zmm1
 	dec r14
-	jne .LBB27_6
-.LBB27_7:
+	jne .LBB29_6
+.LBB29_7:
 	add r8, r11
 	cmp rbx, 448
-	jb .LBB27_9
-.LBB27_8:
+	jb .LBB29_9
+.LBB29_8:
 	vpopcntb zmm2, zmmword ptr [r10]
 	vpaddb zmm1, zmm2, zmm1
 	vpopcntb zmm2, zmmword ptr [r10 + 64]
@@ -71,11 +71,11 @@ bitpacking::rank::popcount_portable_u8:
 	vpaddb zmm2, zmm3, zmm2
 	vpaddb zmm1, zmm2, zmm1
 	cmp r10, r8
-	jne .LBB27_8
-	jmp .LBB27_9
-.LBB27_1:
+	jne .LBB29_8
+	jmp .LBB29_9
+.LBB29_1:
 	test rax, rax
-	je .LBB27_2
+	je .LBB29_2
 	movabs rdx, 1152921504606846968
 	and rsi, rdx
 	lea rdx, [rdi + 8*rsi]
@@ -89,8 +89,8 @@ bitpacking::rank::popcount_portable_u8:
 	vpbroadcastq ymm0, rsi
 	vpxor xmm3, xmm3, xmm3
 	xor esi, esi
-	vmovdqa ymm2, ymmword ptr [rip + .LCPI27_0]
-.LBB27_11:
+	vmovdqa ymm2, ymmword ptr [rip + .LCPI29_0]
+.LBB29_11:
 	vmovdqa ymm1, ymm3
 	vpbroadcastq ymm3, rsi
 	vpor ymm3, ymm3, ymm2
@@ -100,17 +100,17 @@ bitpacking::rank::popcount_portable_u8:
 	vpaddq ymm3, ymm3, ymm1
 	add rsi, 4
 	cmp rax, rsi
-	jne .LBB27_11
+	jne .LBB29_11
 	vmovdqa64 ymm1 {k1}, ymm3
 	vextracti128 xmm0, ymm1, 1
 	vpaddq xmm0, xmm1, xmm0
 	vpshufd xmm1, xmm0, 238
 	vpaddq xmm0, xmm0, xmm1
 	vmovq rax, xmm0
-	jmp .LBB27_13
-.LBB27_2:
+	jmp .LBB29_13
+.LBB29_2:
 	xor eax, eax
-.LBB27_13:
+.LBB29_13:
 	add rax, rcx
 	pop rbx
 	pop r14
