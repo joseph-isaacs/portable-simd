@@ -1,0 +1,12 @@
+    Finished `bench` profile [optimized + debuginfo] target(s) in 0.03s
+     Running benches/bitpacking.rs (target/a64/aarch64-unknown-linux-gnu/release/deps/bitpacking-ebc87d9b299980f2)
+Benchmarking byte_to_bit/scalar
+Benchmarking byte_to_bit/scalar: Warming up for 1.0000 s
+Benchmarking byte_to_bit/scalar: Collecting 100 samples in estimated 2.0416 s (30k iterations)
+Benchmarking byte_to_bit/scalar: Analyzing
+byte_to_bit/scalar      time:   [67.401 µs 68.783 µs 69.867 µs]
+                        thrpt:  [223.64 MiB/s 227.16 MiB/s 231.82 MiB/s]
+Benchmarking byte_to_bit/swar
+Benchmarking byte_to_bit/swar: Warming up for 1.0000 s
+Benchmarking byte_to_bit/swar: Collecting 100 samples in estimated 2.0097 s (858k iterations)
+Benchmarking byte_to_bit/swar: Analyzing

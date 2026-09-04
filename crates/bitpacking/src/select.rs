@@ -90,6 +90,42 @@ pub fn select64_pdep(x: u64, k: u32) -> u32 {
     unsafe { _pdep_u64(1u64 << k, x).trailing_zeros() }
 }
 
+/// NEON in-word select: `cnt` on the 8 bytes, prefix sum via 64-bit shifts + `add`,
+/// `cmhs` + `addv` to count bytes whose prefix <= k, then the byte table.
+#[cfg(target_arch = "aarch64")]
+#[inline]
+pub fn select64_neon(x: u64, k: u32) -> u32 {
+    use core::arch::aarch64::*;
+    // SAFETY: NEON is baseline on aarch64.
+    unsafe {
+        let cnt = vcnt_u8(vcreate_u8(x));
+        let sh = |v: uint8x8_t, n: i32| -> uint8x8_t {
+            match n {
+                8 => vreinterpret_u8_u64(vshl_n_u64::<8>(vreinterpret_u64_u8(v))),
+                16 => vreinterpret_u8_u64(vshl_n_u64::<16>(vreinterpret_u64_u8(v))),
+                _ => vreinterpret_u8_u64(vshl_n_u64::<32>(vreinterpret_u64_u8(v))),
+            }
+        };
+        let mut p = cnt;
+        p = vadd_u8(p, sh(p, 8));
+        p = vadd_u8(p, sh(p, 16));
+        p = vadd_u8(p, sh(p, 32));
+        let le = vcle_u8(p, vdup_n_u8(k as u8));
+        let byte = (vaddv_u8(vshr_n_u8::<7>(le)) & 7) as usize;
+        let mut excl = [0u8; 8];
+        vst1_u8(excl.as_mut_ptr(), sh(p, 8));
+        let byte_rank = ((k as u8 - excl[byte]) & 7) as usize;
+        (byte as u32) * 8 + SELECT_IN_BYTE[byte_rank << 8 | ((x >> (byte * 8)) & 0xFF) as usize] as u32
+    }
+}
+
+/// SVE2 BitPerm: `bdep` of a single bit, then `rbit` + `clz` (what `trailing_zeros` is).
+#[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+#[inline]
+pub fn select64_sve2(x: u64, k: u32) -> u32 {
+    crate::expand::pdep_sve2(1u64 << k, x).trailing_zeros()
+}
+
 /// Scalar word scan with `count_ones`, generic in the in-word select.
 #[inline(always)]
 fn scan_scalar(bits: &[u64], mut n: usize, in_word: impl Fn(u64, u32) -> u32) -> Option<usize> {
@@ -159,6 +195,23 @@ pub fn select_portable(bits: &[u64], n: usize) -> Option<usize> {
 #[cfg(target_feature = "bmi2")]
 pub fn select_pdep(bits: &[u64], n: usize) -> Option<usize> {
     scan_scalar(bits, n, select64_pdep)
+}
+
+/// Unrolled scalar scan, broadword in-word (available on every arch).
+pub fn select_scan8_broadword(bits: &[u64], n: usize) -> Option<usize> {
+    scan_scalar8(bits, n, select64_broadword)
+}
+
+/// Vector scan, NEON in-word.
+#[cfg(target_arch = "aarch64")]
+pub fn select_neon(bits: &[u64], n: usize) -> Option<usize> {
+    scan_portable(bits, n, select64_neon)
+}
+
+/// Vector scan, SVE2 `bdep` in-word.
+#[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+pub fn select_sve2(bits: &[u64], n: usize) -> Option<usize> {
+    scan_portable(bits, n, select64_sve2)
 }
 
 /// Unrolled scalar scan, PDEP in-word.
@@ -234,6 +287,19 @@ mod tests {
     #[test]
     fn broadword() {
         check(select_broadword);
+        check(select_scan8_broadword);
+    }
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn neon() {
+        check64(select64_neon);
+        check(select_neon);
+    }
+    #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+    #[test]
+    fn sve2() {
+        check64(select64_sve2);
+        check(select_sve2);
     }
     #[test]
     fn portable() {

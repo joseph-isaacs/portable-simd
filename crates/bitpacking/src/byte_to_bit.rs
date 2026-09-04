@@ -108,6 +108,33 @@ pub fn bytes_to_bits_avx512(bytes: &[u8], out: &mut [u64]) {
     }
 }
 
+/// NEON: `cmtst` (v != 0 -> 0xFF), `and` with bit weights, then a pairwise-add tree
+/// (`addp` x3) folds four 16-byte vectors into one 64-bit mask. There is no movemask.
+#[cfg(target_arch = "aarch64")]
+pub fn bytes_to_bits_neon(bytes: &[u8], out: &mut [u64]) {
+    use core::arch::aarch64::*;
+    let (chunks, rem) = bytes.as_chunks::<64>();
+    // SAFETY: NEON is baseline on aarch64; chunk is 64 bytes.
+    unsafe {
+        let weights = vreinterpretq_u8_u64(vdupq_n_u64(0x8040_2010_0804_0201));
+        for (chunk, o) in chunks.iter().zip(out.iter_mut()) {
+            let p = chunk.as_ptr();
+            let nz = |q: *const u8| {
+                let v = vld1q_u8(q);
+                vandq_u8(vtstq_u8(v, v), weights)
+            };
+            let ab = vpaddq_u8(nz(p), nz(p.add(16)));
+            let cd = vpaddq_u8(nz(p.add(32)), nz(p.add(48)));
+            let abcd = vpaddq_u8(ab, cd);
+            let r = vpaddq_u8(abcd, abcd);
+            *o = vgetq_lane_u64::<0>(vreinterpretq_u64_u8(r));
+        }
+    }
+    if !rem.is_empty() {
+        out[chunks.len()] = tail(rem);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,5 +175,10 @@ mod tests {
     #[test]
     fn avx512() {
         check(bytes_to_bits_avx512);
+    }
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn neon() {
+        check(bytes_to_bits_neon);
     }
 }

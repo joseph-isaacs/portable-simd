@@ -15,6 +15,7 @@ fn check<const K: usize>(packed: &[u8], out: &[u8]) {
 }
 
 /// Byte-repeated field mask, e.g. `0x0707..07` for K = 3.
+#[allow(dead_code)]
 const fn byte_mask<const K: usize>() -> u64 {
     ((1u64 << K) - 1) * 0x0101_0101_0101_0101
 }
@@ -122,6 +123,7 @@ pub fn unpack_portable_shift<const K: usize>(packed: &[u8], out: &mut [u8]) {
 
 /// In-lane `vpshufb` gather indices: 8 values per 128-bit lane, source at byte offset `8K/8 = K`
 /// per lane, so each lane's 16 source bytes are loaded separately.
+#[allow(dead_code)]
 const fn lane_gather<const K: usize>() -> [u8; 16] {
     let mut idx = [0u8; 16];
     let mut t = 0;
@@ -133,6 +135,7 @@ const fn lane_gather<const K: usize>() -> [u8; 16] {
     idx
 }
 
+#[allow(dead_code)]
 const fn lane_muls<const K: usize>() -> [u16; 8] {
     let mut m = [0u16; 8];
     let mut t = 0;
@@ -248,6 +251,52 @@ pub fn unpack_vbmi<const K: usize>(packed: &[u8], out: &mut [u8]) {
     }
 }
 
+/// NEON, 16 values per step: `tbl` gathers the two bytes of each field into u16 lanes
+/// (8 per 16-byte load), `ushl` by a negative per-lane amount shifts right, `and`, `xtn` narrows.
+#[cfg(target_arch = "aarch64")]
+pub fn unpack_neon<const K: usize>(packed: &[u8], out: &mut [u8]) {
+    use core::arch::aarch64::*;
+    check::<K>(packed, out);
+    let (chunks, rem) = out.as_chunks_mut::<16>();
+    // SAFETY: NEON is baseline; the slack assertion covers every 16-byte load.
+    unsafe {
+        let idx = vld1q_u8(lane_gather::<K>().as_ptr());
+        let mut sh = [0i16; 8];
+        for t in 0..8 {
+            sh[t] = -(((t * K) % 8) as i16);
+        }
+        let sh = vld1q_s16(sh.as_ptr());
+        let mask = vdupq_n_u16((1u16 << K) - 1);
+        for (g, chunk) in chunks.iter_mut().enumerate() {
+            let p = packed.as_ptr().add(g * 2 * K);
+            let a = vreinterpretq_u16_u8(vqtbl1q_u8(vld1q_u8(p), idx));
+            let b = vreinterpretq_u16_u8(vqtbl1q_u8(vld1q_u8(p.add(K)), idx));
+            let fa = vandq_u16(vshlq_u16(a, sh), mask);
+            let fb = vandq_u16(vshlq_u16(b, sh), mask);
+            vst1q_u8(chunk.as_mut_ptr(), vcombine_u8(vmovn_u16(fa), vmovn_u16(fb)));
+        }
+    }
+    if !rem.is_empty() {
+        let g = chunks.len();
+        unpack_scalar::<K>(&packed[g * 2 * K..], rem);
+    }
+}
+
+/// SVE2 BitPerm `bdep`: the PDEP form, 8 values per instruction (plus the moves).
+#[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+pub fn unpack_sve2<const K: usize>(packed: &[u8], out: &mut [u8]) {
+    check::<K>(packed, out);
+    let (chunks, rem) = out.as_chunks_mut::<8>();
+    for (g, chunk) in chunks.iter_mut().enumerate() {
+        let w = u64::from_le_bytes(packed[g * K..g * K + 8].try_into().unwrap());
+        *chunk = crate::expand::pdep_sve2(w, byte_mask::<K>()).to_le_bytes();
+    }
+    if !rem.is_empty() {
+        let g = chunks.len();
+        unpack_scalar::<K>(&packed[g * K..], rem);
+    }
+}
+
 // Non-generic K = 3 instantiations so the asm can be dumped by name.
 pub fn unpack3_scalar(packed: &[u8], out: &mut [u8]) {
     unpack_scalar::<3>(packed, out)
@@ -273,6 +322,14 @@ pub fn unpack3_avx512(packed: &[u8], out: &mut [u8]) {
 #[cfg(target_feature = "avx512vbmi")]
 pub fn unpack3_vbmi(packed: &[u8], out: &mut [u8]) {
     unpack_vbmi::<3>(packed, out)
+}
+#[cfg(target_arch = "aarch64")]
+pub fn unpack3_neon(packed: &[u8], out: &mut [u8]) {
+    unpack_neon::<3>(packed, out)
+}
+#[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+pub fn unpack3_sve2(packed: &[u8], out: &mut [u8]) {
+    unpack_sve2::<3>(packed, out)
 }
 
 #[cfg(test)]
@@ -307,6 +364,10 @@ mod tests {
             ("avx512", unpack_avx512::<K>),
             #[cfg(target_feature = "avx512vbmi")]
             ("vbmi", unpack_vbmi::<K>),
+            #[cfg(target_arch = "aarch64")]
+            ("neon", unpack_neon::<K>),
+            #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+            ("sve2", unpack_sve2::<K>),
         ];
         for &n in &[0usize, 1, 7, 8, 15, 16, 17, 31, 32, 33, 100, 1000] {
             let packed = rng.bytes((n * K).div_ceil(8) + 64, 8).iter().map(|b| b ^ 0x5a).collect::<Vec<u8>>();

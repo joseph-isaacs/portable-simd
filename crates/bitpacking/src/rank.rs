@@ -172,6 +172,33 @@ pub fn rank_vpopcnt(bits: &[u64], i: usize) -> usize {
     popcount_vpopcnt(words) + partial.count_ones() as usize
 }
 
+/// NEON: `cnt` (byte popcount) accumulated with `uadalp` into u16 lanes, folded to u64
+/// every 1024 vectors.
+#[cfg(target_arch = "aarch64")]
+pub fn popcount_neon(words: &[u64]) -> usize {
+    use core::arch::aarch64::*;
+    let (chunks, rem) = words.as_chunks::<2>();
+    // SAFETY: NEON is baseline on aarch64; loads are 16 bytes inside `chunks`.
+    let total = unsafe {
+        let mut acc = vdupq_n_u64(0);
+        for block in chunks.chunks(1024) {
+            let mut acc16 = vdupq_n_u16(0);
+            for c in block {
+                acc16 = vpadalq_u8(acc16, vcntq_u8(vld1q_u8(c.as_ptr() as *const u8)));
+            }
+            acc = vpadalq_u32(acc, vpaddlq_u16(acc16));
+        }
+        vaddvq_u64(acc) as usize
+    };
+    total + popcount_scalar(rem)
+}
+
+#[cfg(target_arch = "aarch64")]
+pub fn rank_neon(bits: &[u64], i: usize) -> usize {
+    let (words, partial) = split(bits, i);
+    popcount_neon(words) + partial.count_ones() as usize
+}
+
 pub fn rank_scalar(bits: &[u64], i: usize) -> usize {
     let (words, partial) = split(bits, i);
     popcount_scalar(words) + partial.count_ones() as usize
@@ -251,5 +278,10 @@ mod tests {
     #[test]
     fn vpopcnt() {
         check(rank_vpopcnt);
+    }
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn neon() {
+        check(rank_neon);
     }
 }

@@ -28,6 +28,8 @@ fn bench_byte_to_bit(c: &mut Criterion) {
     b!("avx2", byte_to_bit::bytes_to_bits_avx2);
     #[cfg(target_feature = "avx512bw")]
     b!("avx512", byte_to_bit::bytes_to_bits_avx512);
+    #[cfg(target_arch = "aarch64")]
+    b!("neon", byte_to_bit::bytes_to_bits_neon);
     g.finish();
 }
 
@@ -55,6 +57,8 @@ fn bench_rank(c: &mut Criterion) {
         b!("avx512_lut", rank::rank_avx512);
         #[cfg(target_feature = "avx512vpopcntdq")]
         b!("avx512_vpopcnt", rank::rank_vpopcnt);
+        #[cfg(target_arch = "aarch64")]
+        b!("neon", rank::rank_neon);
     }
     g.finish();
 }
@@ -90,6 +94,10 @@ fn bench_select(c: &mut Criterion) {
     b!("portable_u8x8", select::select64_portable);
     #[cfg(target_feature = "bmi2")]
     b!("pdep", select::select64_pdep);
+    #[cfg(target_arch = "aarch64")]
+    b!("neon", select::select64_neon);
+    #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+    b!("sve2_bdep", select::select64_sve2);
     g.finish();
 
     // Whole-bitmap select: 8 KiB bitmap, 50% density, n at 3/4 of the set bits.
@@ -106,6 +114,11 @@ fn bench_select(c: &mut Criterion) {
     }
     b!("scalar_scan+naive", select::select_naive);
     b!("scalar_scan+broadword", select::select_broadword);
+    b!("scalar_scan8+broadword", select::select_scan8_broadword);
+    #[cfg(target_arch = "aarch64")]
+    b!("portable_scan+neon", select::select_neon);
+    #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+    b!("portable_scan+sve2", select::select_sve2);
     b!("portable_scan+portable", select::select_portable);
     #[cfg(target_feature = "bmi2")]
     b!("scalar_scan+pdep", select::select_pdep);
@@ -152,6 +165,8 @@ fn bench_filter(c: &mut Criterion) {
         b!("vortex_pext", filter::filter_vortex_pext);
         #[cfg(target_feature = "avx512vbmi2")]
         b!("vbmi2_compressb", filter::filter_vbmi2);
+        #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+        b!("sve2_bext", filter::filter_sve2);
     }
     g.finish();
 }
@@ -272,6 +287,8 @@ fn bench_bit_to_byte(c: &mut Criterion) {
     b!("avx512", bit_to_byte::bits_to_bytes_avx512);
     #[cfg(target_feature = "bmi2")]
     b!("pdep", bit_to_byte::bits_to_bytes_pdep);
+    #[cfg(target_arch = "aarch64")]
+    b!("neon", bit_to_byte::bits_to_bytes_neon);
     g.finish();
 }
 
@@ -304,6 +321,8 @@ fn bench_expand(c: &mut Criterion) {
         b!("bmi2_pdep", expand::expand_bmi2);
         #[cfg(target_feature = "avx512vbmi2")]
         b!("vbmi2_expandb", expand::expand_vbmi2);
+        #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+        b!("sve2_bdep", expand::expand_sve2);
     }
     g.finish();
 }
@@ -339,6 +358,10 @@ fn bench_unpack(c: &mut Criterion) {
             b!("avx512", unpack::unpack_avx512::<$k>);
             #[cfg(target_feature = "avx512vbmi")]
             b!("vbmi_multishift", unpack::unpack_vbmi::<$k>);
+            #[cfg(target_arch = "aarch64")]
+            b!("neon", unpack::unpack_neon::<$k>);
+            #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+            b!("sve2_bdep", unpack::unpack_sve2::<$k>);
         }};
     }
     k!(1);

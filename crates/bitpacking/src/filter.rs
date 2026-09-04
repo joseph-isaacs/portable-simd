@@ -208,6 +208,19 @@ pub fn pext_vbmi2(x: u64, m: u64) -> u64 {
     unsafe { _mm512_movepi8_mask(_mm512_maskz_compress_epi8(m, _mm512_movm_epi8(x))) }
 }
 
+/// SVE2 BitPerm `bext` on lane 0 of a Z register (the scalar <-> vector moves are the cost;
+/// a real SVE2 kernel would keep whole vectors of words in Z registers).
+#[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+#[inline]
+pub fn pext_sve2(x: u64, m: u64) -> u64 {
+    let r: u64;
+    // SAFETY: sve2-bitperm is a compile-time feature; only lane 0 of z0/z1 is used.
+    unsafe {
+        core::arch::asm!("bext z0.d, z0.d, z1.d", inout("v0") x => r, in("v1") m, options(pure, nomem, nostack));
+    }
+    r
+}
+
 #[inline(always)]
 fn filter_with<const BRANCHLESS: bool>(
     values: &[u64],
@@ -313,6 +326,11 @@ pub fn filter_vortex_pext(values: &[u64], mask: &[u64], out: &mut [u64]) -> usiz
 #[cfg(target_feature = "avx512vbmi2")]
 pub fn filter_vbmi2(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
     filter_with::<false>(values, mask, out, pext_vbmi2)
+}
+
+#[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+pub fn filter_sve2(values: &[u64], mask: &[u64], out: &mut [u64]) -> usize {
+    filter_with::<false>(values, mask, out, pext_sve2)
 }
 
 /// `pext` + branchless writer. `out` needs `values.len() + 1` words of capacity.
@@ -436,6 +454,12 @@ mod tests {
     #[test]
     fn pext_bmi2_matches() {
         check_pext(pext_bmi2);
+    }
+    #[cfg(all(target_arch = "aarch64", target_feature = "sve2-bitperm"))]
+    #[test]
+    fn pext_sve2_matches() {
+        check_pext(pext_sve2);
+        check(filter_sve2);
     }
     #[cfg(target_feature = "avx512vbmi2")]
     #[test]

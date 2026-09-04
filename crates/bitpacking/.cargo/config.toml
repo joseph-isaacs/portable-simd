@@ -1,0 +1,7 @@
+# Cross-compile + run under qemu-user for the aarch64 comparison:
+#   cargo test --release --target aarch64-unknown-linux-gnu
+#   cargo bench --target aarch64-unknown-linux-gnu
+# Needs: rustup target add aarch64-unknown-linux-gnu; apt: qemu-user gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"
+runner = ["qemu-aarch64", "-cpu", "max", "-L", "/usr/aarch64-linux-gnu"]

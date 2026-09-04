@@ -102,6 +102,27 @@ pub fn bits_to_bytes_pdep(bits: &[u64], out: &mut [u8]) {
     }
 }
 
+/// NEON: `dup` each mask byte to 8 lanes, `cmtst` against bit weights, `and` 1, store 16.
+#[cfg(target_arch = "aarch64")]
+pub fn bits_to_bytes_neon(bits: &[u64], out: &mut [u8]) {
+    use core::arch::aarch64::*;
+    assert!(out.len() >= bits.len() * 64);
+    // SAFETY: NEON is baseline on aarch64; chunk is 64 bytes.
+    unsafe {
+        let weights = vreinterpretq_u8_u64(vdupq_n_u64(0x8040_2010_0804_0201));
+        let one = vdupq_n_u8(1);
+        for (&w, chunk) in bits.iter().zip(out.chunks_exact_mut(64)) {
+            let lo = vcreate_u8(w);
+            let o = chunk.as_mut_ptr();
+            let bc = |a: uint8x16_t| vandq_u8(vtstq_u8(a, weights), one);
+            vst1q_u8(o, bc(vcombine_u8(vdup_lane_u8::<0>(lo), vdup_lane_u8::<1>(lo))));
+            vst1q_u8(o.add(16), bc(vcombine_u8(vdup_lane_u8::<2>(lo), vdup_lane_u8::<3>(lo))));
+            vst1q_u8(o.add(32), bc(vcombine_u8(vdup_lane_u8::<4>(lo), vdup_lane_u8::<5>(lo))));
+            vst1q_u8(o.add(48), bc(vcombine_u8(vdup_lane_u8::<6>(lo), vdup_lane_u8::<7>(lo))));
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,5 +169,10 @@ mod tests {
     #[test]
     fn pdep() {
         check(bits_to_bytes_pdep);
+    }
+    #[cfg(target_arch = "aarch64")]
+    #[test]
+    fn neon() {
+        check(bits_to_bytes_neon);
     }
 }
