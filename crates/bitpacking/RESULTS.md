@@ -18,6 +18,40 @@ random in-word queries; `select` finds the bit at 3/4 of a 50%-dense 8 KiB bitma
 `rank_index` builds the per-word prefix table; `select_all64` is 4096 random words; `bitmap_to_indices`
 lists set bits of an 8 KiB bitmap; `bit_to_byte` expands 256 words; `unpack` decodes 16384 k-bit values.
 
+## Three tiers: auto-vectorised scalar → portable SIMD → intrinsics
+
+Best variant of each tier per kernel and build (representative parameters: 8 KiB bitmaps, mask
+4/8, k = 3). "auto→portable" is how much portable SIMD gains over the best scalar code (LLVM may
+auto-vectorise it); "portable→intr" is how much is still left on the table for hand-written
+intrinsics. A hole in portable SIMD is a row where the second ratio is well above 1, or where the
+first is at or below 1.
+
+| kernel | build | auto-vec (best) | portable (best) | intrinsics (best) | auto→portable | portable→intr |
+|---|---|---|---|---|---|---|
+| byte→bit | v3 | swar 1000ns | portable_u8x32 205ns | avx2 201ns | 4.9x | 1.0x |
+| byte→bit | native | swar 846ns | portable_u8x32 126ns | avx2 130ns | 6.7x | 1.0x |
+| rank/popcount | v3 | scalar 165ns | portable_u8x64 142ns | avx2 144ns | 1.2x | 1.0x |
+| rank/popcount | native | scalar 65ns | portable_u64x8 56ns | avx512_vpopcnt 55ns | 1.2x | 1.0x |
+| select64 in-word | v3 | broadword 10.7µs | portable_u8x8 13.2µs | pdep 2.5µs | 0.8x | 5.4x |
+| select64 in-word | native | broadword 12.2µs | portable_u8x8 10.5µs | pdep 2.6µs | 1.2x | 4.1x |
+| select whole | v3 | scalar_scan+naive 318ns | portable_scan+portable 212ns | portable_scan+pdep 210ns | 1.5x | 1.0x |
+| select whole | native | scalar_scan+naive 293ns | portable_scan+portable 140ns | portable_scan+pdep 135ns | 2.1x | 1.0x |
+| filter (PEXT) | v3 | scalar_byte_lut_branchless 26.8µs | portable_u64x4 27.6µs | bmi2_pext 6.5µs | 1.0x | 4.2x |
+| filter (PEXT) | native | vortex_lut_branchless 27.2µs | portable_u64x8 18.0µs | bmi2_pext_branchless 6.4µs | 1.5x | 2.8x |
+| expand (PDEP) | v3 | scalar_hd 81.9µs | portable_u64x8 28.7µs | bmi2_pdep 8.4µs | 2.9x | 3.4x |
+| expand (PDEP) | native | scalar_hd 78.0µs | portable_u64x8 16.6µs | bmi2_pdep 8.1µs | 4.7x | 2.1x |
+| rank index | v3 | scalar 323ns | portable_u64x8 465ns | avx2 464ns | 0.7x | 1.0x |
+| rank index | native | scalar 322ns | portable_u64x8 268ns | avx512 268ns | 1.2x | 1.0x |
+| select_all64 | v3 | scalar_tzcnt 65.6µs | portable_lut 15.8µs | avx2_lut 16.5µs | 4.2x | 1.0x |
+| select_all64 | native | scalar_tzcnt 58.1µs | portable_lut 17.3µs | vbmi2_compressb 12.8µs | 3.4x | 1.4x |
+| bitmap→indices | v3 | scalar_tzcnt 10.2µs | portable_lut 7.4µs | avx2_lut 7.9µs | 1.4x | 0.9x |
+| bitmap→indices | native | scalar_tzcnt 10.6µs | portable_lut 5.6µs | vbmi2_compressb 3.4µs | 1.9x | 1.7x |
+| bit→byte | v3 | swar 640ns | portable_select 286ns | avx2 291ns | 2.2x | 1.0x |
+| bit→byte | native | swar 463ns | portable_select 100ns | avx512 95ns | 4.6x | 1.1x |
+| unpack k=3 | v3 | scalar 3.5µs | portable_mul 791ns | pdep 698ns | 4.4x | 1.1x |
+| unpack k=3 | native | scalar 2.6µs | portable_mul 666ns | vbmi_multishift 201ns | 4.0x | 3.3x |
+
+
 ## Numbers
 
 ### byte_to_bit
