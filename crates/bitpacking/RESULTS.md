@@ -1,17 +1,22 @@
 # Results
 
-Machine: Intel Xeon (Cascade-Lake-class, 2.8 GHz, 4 vCPU VM) with AVX2, BMI1/2, POPCNT,
-AVX-512 F/BW/VL/DQ/VNNI. **No** AVX-512 VBMI2 (`vpcompressb`) and **no** VPOPCNTDQ.
+Machine: Intel Xeon VM, 4 vCPU. The first runs were on a Cascade-Lake-class host (2.8 GHz,
+AVX-512 F/BW/VL/DQ/VNNI, no VBMI/VPOPCNTDQ); the VM was migrated mid-way to an Ice-Lake-class host
+(2.1 GHz model string, AVX-512 + VBMI, VBMI2, BITALG, VPOPCNTDQ, GFNI). **Every number below is
+from one final run on the Ice-Lake host.**
 Toolchain: `nightly-2026-04-28`, `core_simd` from this tree, criterion 0.5, `-C codegen-units=1`.
 
 Two builds: `v3` = `-C target-cpu=x86-64-v3` (AVX2 + BMI2), `native` = `-C target-cpu=native`
-(adds AVX-512). Intrinsic variants exist only where their feature is enabled at compile time.
-Inputs are L1-resident (8–64 KiB) so the numbers measure compute, not bandwidth; the `rank/65536`
-rows are 512 KiB (L2). Times are criterion medians; see `results/bench-*.txt` for the full output.
+(adds AVX-512 incl. VBMI/VBMI2/VPOPCNTDQ). Intrinsic variants exist only where their feature is
+enabled at compile time. Inputs are L1-resident (8–64 KiB) so the numbers measure compute, not
+bandwidth; the `/65536` rows are 512 KiB (L2). Times are criterion medians; absolute times on this
+VM drift between runs, so compare within a run. See `results/bench-*.txt` for the full output.
 
-Benchmarks: `byte_to_bit` packs 16 KiB of bytes; `rank` counts 3/4 of a bitmap; `select64` is
-4096 random in-word queries; `select` finds the bit at 3/4 of a 50%-dense 8 KiB bitmap;
-`filter` compresses 4096 words (32 KiB values + 32 KiB mask) at three mask densities.
+Benchmarks: `byte_to_bit` packs 16 KiB of bytes; `rank` counts 3/4 of a bitmap; `select64` is 4096
+random in-word queries; `select` finds the bit at 3/4 of a 50%-dense 8 KiB bitmap; `filter` /
+`expand` compress / expand 4096 words at three mask densities (+ a run-structured mask for filter);
+`rank_index` builds the per-word prefix table; `select_all64` is 4096 random words; `bitmap_to_indices`
+lists set bits of an 8 KiB bitmap; `bit_to_byte` expands 256 words; `unpack` decodes 16384 k-bit values.
 
 ## Numbers
 
@@ -19,100 +24,207 @@ Benchmarks: `byte_to_bit` packs 16 KiB of bytes; `rank` counts 3/4 of a bitmap; 
 
 | variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
 |---|---|---|---|---|
-| scalar | 4.18 µs | 3.6514 GiB/s | 3.76 µs | 4.0571 GiB/s |
-| swar | 1.10 µs | 13.909 GiB/s | 952.5 ns | 16.020 GiB/s |
-| portable_u8x64 | 219.9 ns | 69.375 GiB/s | 139.4 ns | 109.42 GiB/s |
-| portable_u8x32 | 221.5 ns | 68.882 GiB/s | 143.5 ns | 106.31 GiB/s |
-| avx2 | 222.8 ns | 68.495 GiB/s | 139.2 ns | 109.60 GiB/s |
-| avx512 | – | – | 140.6 ns | 108.52 GiB/s |
+| scalar | 3.69 µs | 4.1384 GiB/s | 3.30 µs | 4.6173 GiB/s |
+| swar | 1000.0 ns | 15.259 GiB/s | 845.6 ns | 18.044 GiB/s |
+| portable_u8x64 | 205.6 ns | 74.201 GiB/s | 130.4 ns | 116.98 GiB/s |
+| portable_u8x32 | 204.8 ns | 74.487 GiB/s | 126.4 ns | 120.74 GiB/s |
+| avx2 | 200.9 ns | 75.942 GiB/s | 130.2 ns | 117.16 GiB/s |
+| avx512 | – | – | 133.6 ns | 114.20 GiB/s |
 
 ### rank
 
 | variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
 |---|---|---|---|---|
-| scalar/1024 | 187.0 ns | 30.598 GiB/s | 69.3 ns | 82.617 GiB/s |
-| portable_u64x8/1024 | 186.5 ns | 30.675 GiB/s | 52.3 ns | 109.38 GiB/s |
-| portable_u8x64/1024 | 164.3 ns | 34.822 GiB/s | 59.2 ns | 96.680 GiB/s |
-| avx2/1024 | 163.8 ns | 34.926 GiB/s | 165.0 ns | 34.686 GiB/s |
-| scalar/65536 | 12.12 µs | 30.206 GiB/s | 6.93 µs | 52.846 GiB/s |
-| portable_u64x8/65536 | 12.02 µs | 30.480 GiB/s | 5.81 µs | 63.081 GiB/s |
-| portable_u8x64/65536 | 10.60 µs | 34.546 GiB/s | 5.88 µs | 62.241 GiB/s |
-| avx2/65536 | 10.80 µs | 33.900 GiB/s | 10.60 µs | 34.534 GiB/s |
-| avx512/1024 | – | – | 132.6 ns | 43.144 GiB/s |
-| avx512/65536 | – | – | 8.35 µs | 43.864 GiB/s |
+| scalar/1024 | 165.0 ns | 34.673 GiB/s | 65.0 ns | 88.020 GiB/s |
+| portable_u64x8/1024 | 162.6 ns | 35.195 GiB/s | 56.0 ns | 102.14 GiB/s |
+| portable_u8x64/1024 | 141.8 ns | 40.341 GiB/s | 64.5 ns | 88.706 GiB/s |
+| avx2/1024 | 144.3 ns | 39.650 GiB/s | 145.1 ns | 39.431 GiB/s |
+| scalar/65536 | 10.51 µs | 34.851 GiB/s | 5.77 µs | 63.450 GiB/s |
+| portable_u64x8/65536 | 10.66 µs | 34.347 GiB/s | 4.70 µs | 77.913 GiB/s |
+| portable_u8x64/65536 | 10.15 µs | 36.077 GiB/s | 5.65 µs | 64.810 GiB/s |
+| avx2/65536 | 10.11 µs | 36.222 GiB/s | 9.88 µs | 37.062 GiB/s |
+| avx512_lut/1024 | – | – | 127.8 ns | 44.767 GiB/s |
+| avx512_vpopcnt/1024 | – | – | 54.9 ns | 104.26 GiB/s |
+| avx512_lut/65536 | – | – | 8.47 µs | 43.241 GiB/s |
+| avx512_vpopcnt/65536 | – | – | 5.24 µs | 69.855 GiB/s |
 
 ### select64
 
 | variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
 |---|---|---|---|---|
-| naive | 29.78 µs | 137.56 Melem/s | 28.12 µs | 145.65 Melem/s |
-| broadword | 12.39 µs | 330.66 Melem/s | 13.97 µs | 293.09 Melem/s |
-| portable_u8x8 | 15.19 µs | 269.66 Melem/s | 12.03 µs | 340.45 Melem/s |
-| pdep | 2.93 µs | 1.3987 Gelem/s | 2.94 µs | 1.3934 Gelem/s |
+| naive | 22.48 µs | 182.24 Melem/s | 22.38 µs | 183.06 Melem/s |
+| broadword | 10.65 µs | 384.59 Melem/s | 12.24 µs | 334.62 Melem/s |
+| portable_u8x8 | 13.18 µs | 310.68 Melem/s | 10.52 µs | 389.53 Melem/s |
+| pdep | 2.46 µs | 1.6642 Gelem/s | 2.57 µs | 1.5946 Gelem/s |
 
 ### select
 
 | variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
 |---|---|---|---|---|
-| scalar_scan+naive | 382.4 ns | 14.964 GiB/s | 350.9 ns | 16.308 GiB/s |
-| scalar_scan+broadword | 386.5 ns | 14.806 GiB/s | 350.3 ns | 16.333 GiB/s |
-| portable_scan+portable | 245.6 ns | 23.297 GiB/s | 143.2 ns | 39.971 GiB/s |
-| scalar_scan+pdep | 575.7 ns | 9.9386 GiB/s | 354.1 ns | 16.159 GiB/s |
-| scalar_scan8+pdep | 277.5 ns | 20.621 GiB/s | 277.4 ns | 20.626 GiB/s |
-| portable_scan+pdep | 238.6 ns | 23.986 GiB/s | 139.3 ns | 41.083 GiB/s |
+| scalar_scan+naive | 318.1 ns | 17.991 GiB/s | 293.3 ns | 19.511 GiB/s |
+| scalar_scan+broadword | 341.4 ns | 16.762 GiB/s | 299.5 ns | 19.106 GiB/s |
+| portable_scan+portable | 212.5 ns | 26.927 GiB/s | 139.6 ns | 40.987 GiB/s |
+| scalar_scan+pdep | 343.3 ns | 16.670 GiB/s | 305.3 ns | 18.745 GiB/s |
+| scalar_scan8+pdep | 255.0 ns | 22.436 GiB/s | 244.9 ns | 23.368 GiB/s |
+| portable_scan+pdep | 209.9 ns | 27.263 GiB/s | 135.2 ns | 42.339 GiB/s |
 
 ### filter
 
 | variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
 |---|---|---|---|---|
-| naive/mask1/8 | 70.76 µs | 883.23 MiB/s | 58.16 µs | 1.0495 GiB/s |
-| scalar_hd/mask1/8 | 90.39 µs | 691.46 MiB/s | 90.28 µs | 692.30 MiB/s |
-| scalar_byte_lut/mask1/8 | 101.19 µs | 617.62 MiB/s | 97.35 µs | 642.02 MiB/s |
-| scalar_byte_lut_branchless/mask1/8 | 31.34 µs | 1.9476 GiB/s | 32.30 µs | 1.8898 GiB/s |
-| vortex_lut/mask1/8 | 104.66 µs | 597.20 MiB/s | 99.14 µs | 630.45 MiB/s |
-| vortex_lut_branchless/mask1/8 | 40.59 µs | 1.5037 GiB/s | 37.30 µs | 1.6363 GiB/s |
-| portable_u64x4/mask1/8 | 31.93 µs | 1.9113 GiB/s | 28.97 µs | 2.1069 GiB/s |
-| portable_u64x8/mask1/8 | 31.06 µs | 1.9653 GiB/s | 20.47 µs | 2.9820 GiB/s |
-| portable_u64x8_branchless/mask1/8 | 32.24 µs | 1.8933 GiB/s | 21.67 µs | 2.8161 GiB/s |
-| bmi2_pext/mask1/8 | 6.09 µs | 10.028 GiB/s | 5.94 µs | 10.271 GiB/s |
-| bmi2_pext_branchless/mask1/8 | 7.68 µs | 7.9524 GiB/s | 7.80 µs | 7.8297 GiB/s |
-| vortex_pext/mask1/8 | 7.83 µs | 7.7986 GiB/s | 7.22 µs | 8.4523 GiB/s |
-| naive/mask4/8 | 160.02 µs | 390.58 MiB/s | 159.95 µs | 390.76 MiB/s |
-| scalar_hd/mask4/8 | 90.66 µs | 689.36 MiB/s | 89.94 µs | 694.94 MiB/s |
-| scalar_byte_lut/mask4/8 | 44.11 µs | 1.3837 GiB/s | 43.12 µs | 1.4154 GiB/s |
-| scalar_byte_lut_branchless/mask4/8 | 34.00 µs | 1.7954 GiB/s | 36.51 µs | 1.6720 GiB/s |
-| vortex_lut/mask4/8 | 45.23 µs | 1.3495 GiB/s | 44.51 µs | 1.3712 GiB/s |
-| vortex_lut_branchless/mask4/8 | 40.38 µs | 1.5116 GiB/s | 36.25 µs | 1.6838 GiB/s |
-| portable_u64x4/mask4/8 | 31.15 µs | 1.9594 GiB/s | 29.27 µs | 2.0850 GiB/s |
-| portable_u64x8/mask4/8 | 31.25 µs | 1.9533 GiB/s | 20.58 µs | 2.9659 GiB/s |
-| portable_u64x8_branchless/mask4/8 | 31.61 µs | 1.9306 GiB/s | 21.72 µs | 2.8096 GiB/s |
-| bmi2_pext/mask4/8 | 6.49 µs | 9.4023 GiB/s | 6.01 µs | 10.158 GiB/s |
-| bmi2_pext_branchless/mask4/8 | 7.63 µs | 8.0008 GiB/s | 7.97 µs | 7.6629 GiB/s |
-| vortex_pext/mask4/8 | 7.43 µs | 8.2171 GiB/s | 7.27 µs | 8.3929 GiB/s |
-| naive/mask7/8 | 244.45 µs | 255.67 MiB/s | 247.92 µs | 252.10 MiB/s |
-| scalar_hd/mask7/8 | 90.79 µs | 688.41 MiB/s | 91.46 µs | 683.37 MiB/s |
-| scalar_byte_lut/mask7/8 | 46.82 µs | 1.3037 GiB/s | 45.07 µs | 1.3541 GiB/s |
-| scalar_byte_lut_branchless/mask7/8 | 33.51 µs | 1.8215 GiB/s | 37.81 µs | 1.6141 GiB/s |
-| vortex_lut/mask7/8 | 46.89 µs | 1.3018 GiB/s | 46.62 µs | 1.3091 GiB/s |
-| vortex_lut_branchless/mask7/8 | 39.27 µs | 1.5544 GiB/s | 39.01 µs | 1.5645 GiB/s |
-| portable_u64x4/mask7/8 | 31.42 µs | 1.9424 GiB/s | 29.70 µs | 2.0550 GiB/s |
-| portable_u64x8/mask7/8 | 31.13 µs | 1.9608 GiB/s | 21.09 µs | 2.8938 GiB/s |
-| portable_u64x8_branchless/mask7/8 | 31.43 µs | 1.9417 GiB/s | 21.87 µs | 2.7908 GiB/s |
-| bmi2_pext/mask7/8 | 7.26 µs | 8.4078 GiB/s | 6.95 µs | 8.7801 GiB/s |
-| bmi2_pext_branchless/mask7/8 | 7.56 µs | 8.0783 GiB/s | 8.06 µs | 7.5768 GiB/s |
-| vortex_pext/mask7/8 | 7.59 µs | 8.0378 GiB/s | 7.56 µs | 8.0689 GiB/s |
-| naive/runs64 | 153.25 µs | 407.84 MiB/s | 142.12 µs | 439.78 MiB/s |
-| scalar_hd/runs64 | 91.60 µs | 682.32 MiB/s | 90.40 µs | 691.38 MiB/s |
-| scalar_byte_lut/runs64 | 31.37 µs | 1.9458 GiB/s | 30.19 µs | 2.0215 GiB/s |
-| scalar_byte_lut_branchless/runs64 | 33.14 µs | 1.8417 GiB/s | 35.68 µs | 1.7105 GiB/s |
-| vortex_lut/runs64 | 38.82 µs | 1.5723 GiB/s | 23.91 µs | 2.5525 GiB/s |
-| vortex_lut_branchless/runs64 | 25.38 µs | 2.4047 GiB/s | 23.05 µs | 2.6483 GiB/s |
-| portable_u64x4/runs64 | 31.31 µs | 1.9494 GiB/s | 29.25 µs | 2.0864 GiB/s |
-| portable_u64x8/runs64 | 31.35 µs | 1.9467 GiB/s | 20.86 µs | 2.9264 GiB/s |
-| portable_u64x8_branchless/runs64 | 31.29 µs | 1.9508 GiB/s | 21.62 µs | 2.8228 GiB/s |
-| bmi2_pext/runs64 | 6.44 µs | 9.4819 GiB/s | 6.14 µs | 9.9380 GiB/s |
-| bmi2_pext_branchless/runs64 | 7.52 µs | 8.1171 GiB/s | 7.99 µs | 7.6412 GiB/s |
-| vortex_pext/runs64 | 6.91 µs | 8.8266 GiB/s | 7.21 µs | 8.4693 GiB/s |
+| naive/mask1/8 | 56.90 µs | 1.0726 GiB/s | 47.63 µs | 1.2814 GiB/s |
+| scalar_hd/mask1/8 | 79.88 µs | 782.42 MiB/s | 78.22 µs | 799.03 MiB/s |
+| scalar_byte_lut/mask1/8 | 82.25 µs | 759.89 MiB/s | 86.58 µs | 721.86 MiB/s |
+| scalar_byte_lut_branchless/mask1/8 | 26.16 µs | 2.3332 GiB/s | 25.60 µs | 2.3842 GiB/s |
+| vortex_lut/mask1/8 | 79.00 µs | 791.15 MiB/s | 82.10 µs | 761.24 MiB/s |
+| vortex_lut_branchless/mask1/8 | 28.55 µs | 2.1381 GiB/s | 26.89 µs | 2.2699 GiB/s |
+| portable_u64x4/mask1/8 | 26.51 µs | 2.3026 GiB/s | 24.72 µs | 2.4692 GiB/s |
+| portable_u64x8/mask1/8 | 26.80 µs | 2.2777 GiB/s | 18.41 µs | 3.3158 GiB/s |
+| portable_u64x8_branchless/mask1/8 | 27.25 µs | 2.2399 GiB/s | 18.64 µs | 3.2742 GiB/s |
+| bmi2_pext/mask1/8 | 5.29 µs | 11.547 GiB/s | 5.23 µs | 11.670 GiB/s |
+| bmi2_pext_branchless/mask1/8 | 6.79 µs | 8.9931 GiB/s | 6.61 µs | 9.2396 GiB/s |
+| vortex_pext/mask1/8 | 6.93 µs | 8.8064 GiB/s | 7.05 µs | 8.6628 GiB/s |
+| naive/mask4/8 | 137.09 µs | 455.91 MiB/s | 146.11 µs | 427.77 MiB/s |
+| scalar_hd/mask4/8 | 76.45 µs | 817.52 MiB/s | 79.17 µs | 789.46 MiB/s |
+| scalar_byte_lut/mask4/8 | 32.72 µs | 1.8656 GiB/s | 35.44 µs | 1.7220 GiB/s |
+| scalar_byte_lut_branchless/mask4/8 | 26.79 µs | 2.2779 GiB/s | 27.21 µs | 2.2428 GiB/s |
+| vortex_lut/mask4/8 | 36.68 µs | 1.6641 GiB/s | 37.73 µs | 1.6179 GiB/s |
+| vortex_lut_branchless/mask4/8 | 30.52 µs | 1.9996 GiB/s | 27.20 µs | 2.2440 GiB/s |
+| portable_u64x4/mask4/8 | 27.63 µs | 2.2089 GiB/s | 24.82 µs | 2.4592 GiB/s |
+| portable_u64x8/mask4/8 | 27.71 µs | 2.2028 GiB/s | 17.98 µs | 3.3942 GiB/s |
+| portable_u64x8_branchless/mask4/8 | 27.71 µs | 2.2023 GiB/s | 18.75 µs | 3.2558 GiB/s |
+| bmi2_pext/mask4/8 | 6.54 µs | 9.3385 GiB/s | 6.72 µs | 9.0825 GiB/s |
+| bmi2_pext_branchless/mask4/8 | 6.86 µs | 8.8930 GiB/s | 6.40 µs | 9.5438 GiB/s |
+| vortex_pext/mask4/8 | 7.34 µs | 8.3111 GiB/s | 7.10 µs | 8.5963 GiB/s |
+| naive/mask7/8 | 213.90 µs | 292.19 MiB/s | 217.76 µs | 287.02 MiB/s |
+| scalar_hd/mask7/8 | 78.33 µs | 797.85 MiB/s | 70.97 µs | 880.69 MiB/s |
+| scalar_byte_lut/mask7/8 | 39.27 µs | 1.5545 GiB/s | 36.81 µs | 1.6583 GiB/s |
+| scalar_byte_lut_branchless/mask7/8 | 25.70 µs | 2.3747 GiB/s | 27.11 µs | 2.2513 GiB/s |
+| vortex_lut/mask7/8 | 43.33 µs | 1.4086 GiB/s | 38.58 µs | 1.5822 GiB/s |
+| vortex_lut_branchless/mask7/8 | 30.73 µs | 1.9863 GiB/s | 26.82 µs | 2.2757 GiB/s |
+| portable_u64x4/mask7/8 | 28.15 µs | 2.1685 GiB/s | 24.75 µs | 2.4658 GiB/s |
+| portable_u64x8/mask7/8 | 26.98 µs | 2.2623 GiB/s | 18.05 µs | 3.3820 GiB/s |
+| portable_u64x8_branchless/mask7/8 | 25.96 µs | 2.3508 GiB/s | 18.22 µs | 3.3491 GiB/s |
+| bmi2_pext/mask7/8 | 5.87 µs | 10.405 GiB/s | 5.84 µs | 10.444 GiB/s |
+| bmi2_pext_branchless/mask7/8 | 6.98 µs | 8.7393 GiB/s | 6.52 µs | 9.3565 GiB/s |
+| vortex_pext/mask7/8 | 6.54 µs | 9.3290 GiB/s | 6.79 µs | 8.9899 GiB/s |
+| naive/runs64 | 129.69 µs | 481.93 MiB/s | 134.31 µs | 465.36 MiB/s |
+| scalar_hd/runs64 | 72.52 µs | 861.81 MiB/s | 78.78 µs | 793.32 MiB/s |
+| scalar_byte_lut/runs64 | 26.66 µs | 2.2898 GiB/s | 30.16 µs | 2.0236 GiB/s |
+| scalar_byte_lut_branchless/runs64 | 25.64 µs | 2.3808 GiB/s | 26.44 µs | 2.3084 GiB/s |
+| vortex_lut/runs64 | 20.03 µs | 3.0465 GiB/s | 20.19 µs | 3.0231 GiB/s |
+| vortex_lut_branchless/runs64 | 18.69 µs | 3.2661 GiB/s | 18.03 µs | 3.3855 GiB/s |
+| portable_u64x4/runs64 | 27.64 µs | 2.2081 GiB/s | 25.67 µs | 2.3779 GiB/s |
+| portable_u64x8/runs64 | 27.34 µs | 2.2326 GiB/s | 18.45 µs | 3.3082 GiB/s |
+| portable_u64x8_branchless/runs64 | 27.75 µs | 2.1997 GiB/s | 17.67 µs | 3.4544 GiB/s |
+| bmi2_pext/runs64 | 5.51 µs | 11.077 GiB/s | 5.32 µs | 11.472 GiB/s |
+| bmi2_pext_branchless/runs64 | 6.74 µs | 9.0537 GiB/s | 6.77 µs | 9.0108 GiB/s |
+| vortex_pext/runs64 | 6.05 µs | 10.092 GiB/s | 5.88 µs | 10.375 GiB/s |
+| vbmi2_compressb/mask1/8 | – | – | 8.91 µs | 6.8495 GiB/s |
+| vbmi2_compressb/mask4/8 | – | – | 9.36 µs | 6.5191 GiB/s |
+| vbmi2_compressb/mask7/8 | – | – | 9.27 µs | 6.5861 GiB/s |
+| vbmi2_compressb/runs64 | – | – | 9.41 µs | 6.4841 GiB/s |
+
+### rank_index
+
+| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+|---|---|---|---|---|
+| scalar/1024 | 322.9 ns | 23.628 GiB/s | 322.2 ns | 23.678 GiB/s |
+| portable_u64x8/1024 | 464.6 ns | 16.422 GiB/s | 268.3 ns | 28.439 GiB/s |
+| avx2/1024 | 463.5 ns | 16.459 GiB/s | 462.1 ns | 16.510 GiB/s |
+| scalar/65536 | 28.06 µs | 17.402 GiB/s | 22.76 µs | 21.454 GiB/s |
+| portable_u64x8/65536 | 29.00 µs | 16.838 GiB/s | 18.68 µs | 26.145 GiB/s |
+| avx2/65536 | 31.00 µs | 15.749 GiB/s | 29.25 µs | 16.691 GiB/s |
+| avx512/1024 | – | – | 268.5 ns | 28.416 GiB/s |
+| avx512/65536 | – | – | 18.14 µs | 26.909 GiB/s |
+
+### select_all64
+
+| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+|---|---|---|---|---|
+| scalar_tzcnt | 65.60 µs | 62.435 Melem/s | 58.13 µs | 70.468 Melem/s |
+| portable_lut | 15.78 µs | 259.56 Melem/s | 17.28 µs | 237.05 Melem/s |
+| avx2_lut | 16.49 µs | 248.41 Melem/s | 17.13 µs | 239.14 Melem/s |
+| avx512_compress | – | – | 15.32 µs | 267.32 Melem/s |
+| vbmi2_compressb | – | – | 12.79 µs | 320.27 Melem/s |
+
+### bitmap_to_indices
+
+| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+|---|---|---|---|---|
+| scalar_tzcnt/mask1/8 | 3.73 µs | 2.0459 GiB/s | 4.39 µs | 1.7376 GiB/s |
+| portable_lut/mask1/8 | 7.89 µs | 989.84 MiB/s | 5.57 µs | 1.3694 GiB/s |
+| avx2_lut/mask1/8 | 7.50 µs | 1.0166 GiB/s | 5.60 µs | 1.3632 GiB/s |
+| scalar_tzcnt/mask4/8 | 10.16 µs | 768.80 MiB/s | 10.56 µs | 740.01 MiB/s |
+| portable_lut/mask4/8 | 7.37 µs | 1.0350 GiB/s | 5.59 µs | 1.3648 GiB/s |
+| avx2_lut/mask4/8 | 7.91 µs | 987.92 MiB/s | 5.53 µs | 1.3799 GiB/s |
+| scalar_tzcnt/mask7/8 | 18.84 µs | 414.78 MiB/s | 18.11 µs | 431.51 MiB/s |
+| portable_lut/mask7/8 | 7.22 µs | 1.0566 GiB/s | 5.53 µs | 1.3787 GiB/s |
+| avx2_lut/mask7/8 | 7.60 µs | 1.0044 GiB/s | 5.61 µs | 1.3600 GiB/s |
+| avx512_compress/mask1/8 | – | – | 5.25 µs | 1.4543 GiB/s |
+| vbmi2_compressb/mask1/8 | – | – | 3.73 µs | 2.0480 GiB/s |
+| avx512_compress/mask4/8 | – | – | 5.03 µs | 1.5169 GiB/s |
+| vbmi2_compressb/mask4/8 | – | – | 3.36 µs | 2.2693 GiB/s |
+| avx512_compress/mask7/8 | – | – | 5.00 µs | 1.5244 GiB/s |
+| vbmi2_compressb/mask7/8 | – | – | 7.22 µs | 1.0566 GiB/s |
+
+### bit_to_byte
+
+| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+|---|---|---|---|---|
+| scalar | 2.03 µs | 7.5330 GiB/s | 1.63 µs | 9.3642 GiB/s |
+| swar | 640.4 ns | 23.827 GiB/s | 463.0 ns | 32.954 GiB/s |
+| portable_select | 286.0 ns | 53.359 GiB/s | 99.9 ns | 152.75 GiB/s |
+| portable_to_simd | 295.2 ns | 51.684 GiB/s | 101.4 ns | 150.45 GiB/s |
+| avx2 | 290.8 ns | 52.467 GiB/s | 221.8 ns | 68.785 GiB/s |
+| pdep | 652.9 ns | 23.370 GiB/s | 616.4 ns | 24.755 GiB/s |
+| avx512 | – | – | 94.7 ns | 161.05 GiB/s |
+
+### expand
+
+| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+|---|---|---|---|---|
+| naive/mask1/8 | 46.68 µs | 1.3076 GiB/s | 46.93 µs | 1.3007 GiB/s |
+| scalar_hd/mask1/8 | 75.58 µs | 826.94 MiB/s | 80.02 µs | 781.07 MiB/s |
+| portable_u64x8/mask1/8 | 27.06 µs | 2.2558 GiB/s | 15.66 µs | 3.8973 GiB/s |
+| bmi2_pdep/mask1/8 | 7.62 µs | 8.0144 GiB/s | 7.67 µs | 7.9549 GiB/s |
+| naive/mask4/8 | 130.56 µs | 478.70 MiB/s | 117.87 µs | 530.24 MiB/s |
+| scalar_hd/mask4/8 | 81.92 µs | 762.94 MiB/s | 78.01 µs | 801.14 MiB/s |
+| portable_u64x8/mask4/8 | 28.69 µs | 2.1271 GiB/s | 16.59 µs | 3.6792 GiB/s |
+| bmi2_pdep/mask4/8 | 8.43 µs | 7.2424 GiB/s | 8.08 µs | 7.5512 GiB/s |
+| naive/mask7/8 | 192.27 µs | 325.07 MiB/s | 186.18 µs | 335.70 MiB/s |
+| scalar_hd/mask7/8 | 83.21 µs | 751.10 MiB/s | 81.38 µs | 767.99 MiB/s |
+| portable_u64x8/mask7/8 | 27.66 µs | 2.2064 GiB/s | 17.18 µs | 3.5533 GiB/s |
+| bmi2_pdep/mask7/8 | 8.93 µs | 6.8371 GiB/s | 8.24 µs | 7.4066 GiB/s |
+| vbmi2_expandb/mask1/8 | – | – | 10.47 µs | 5.8298 GiB/s |
+| vbmi2_expandb/mask4/8 | – | – | 10.85 µs | 5.6233 GiB/s |
+| vbmi2_expandb/mask7/8 | – | – | 10.15 µs | 6.0104 GiB/s |
+
+### unpack
+
+| variant | v3 (AVX2+BMI2) time | v3 thrpt | native (AVX-512) time | native thrpt |
+|---|---|---|---|---|
+| scalar/k1 | 3.83 µs | 4.2799 Gelem/s | 2.58 µs | 6.3572 Gelem/s |
+| portable_mul/k1 | 980.8 ns | 16.705 Gelem/s | 679.0 ns | 24.128 Gelem/s |
+| portable_shift/k1 | 997.1 ns | 16.432 Gelem/s | 676.3 ns | 24.227 Gelem/s |
+| pdep/k1 | 665.8 ns | 24.607 Gelem/s | 623.5 ns | 26.280 Gelem/s |
+| avx2/k1 | 716.6 ns | 22.863 Gelem/s | 695.0 ns | 23.574 Gelem/s |
+| scalar/k3 | 3.51 µs | 4.6637 Gelem/s | 2.64 µs | 6.2080 Gelem/s |
+| portable_mul/k3 | 790.8 ns | 20.720 Gelem/s | 665.8 ns | 24.607 Gelem/s |
+| portable_shift/k3 | 819.0 ns | 20.004 Gelem/s | 681.6 ns | 24.037 Gelem/s |
+| pdep/k3 | 697.5 ns | 23.489 Gelem/s | 762.6 ns | 21.485 Gelem/s |
+| avx2/k3 | 792.6 ns | 20.672 Gelem/s | 711.0 ns | 23.043 Gelem/s |
+| scalar/k7 | 3.94 µs | 4.1557 Gelem/s | 2.54 µs | 6.4586 Gelem/s |
+| portable_mul/k7 | 881.8 ns | 18.581 Gelem/s | 733.0 ns | 22.352 Gelem/s |
+| portable_shift/k7 | 867.0 ns | 18.896 Gelem/s | 695.0 ns | 23.574 Gelem/s |
+| pdep/k7 | 673.9 ns | 24.314 Gelem/s | 704.7 ns | 23.249 Gelem/s |
+| avx2/k7 | 738.5 ns | 22.184 Gelem/s | 648.1 ns | 25.279 Gelem/s |
+| avx512/k1 | – | – | 908.8 ns | 18.027 Gelem/s |
+| vbmi_multishift/k1 | – | – | 196.5 ns | 83.367 Gelem/s |
+| avx512/k3 | – | – | 958.9 ns | 17.086 Gelem/s |
+| vbmi_multishift/k3 | – | – | 200.8 ns | 81.599 Gelem/s |
+| avx512/k7 | – | – | 895.3 ns | 18.299 Gelem/s |
+| vbmi_multishift/k7 | – | – | 189.9 ns | 86.279 Gelem/s |
 
 
 ## What the asm shows (`asm/{v3,native}/*.s`)
@@ -132,18 +244,18 @@ Benchmarks: `byte_to_bit` packs 16 KiB of bytes; `rank` counts 3/4 of a bitmap; 
 
 ### rank / popcount
 
-* No `vpopcntdq` on this CPU, so everything is the nibble-LUT (`vpand`, `vpsrlw`,
-  `vpshufb` x2, `vpaddb`) + `vpsadbw` scheme.
+* On v3 (no VPOPCNTDQ) everything is the nibble-LUT (`vpand`, `vpsrlw`, `vpshufb` x2,
+  `vpaddb`) + `vpsadbw` scheme. On native `Simd::count_ones` lowers straight to `vpopcntq`,
+  which beats the hand-written LUT by 2.3x; the explicit `_mm512_popcnt_epi64` version ties it.
 * `rank_scalar`'s `count_ones` loop is auto-vectorised by LLVM into that same LUT
-  scheme (4 accumulators, `vpsadbw` per vector). On v3 it therefore ties
-  `portable_u64x8`. On native it stays on **ymm** (LLVM's default
-  `prefer-vector-width=256` for the auto-vectoriser) while `Simd<u64, 8>` is an explicit
-  **zmm**, which is why the portable version pulls ahead there.
-* `Simd<u64, 8>::count_ones()` lowers to LUT + `vpsadbw` **every iteration**.
-  `Simd<u8, 64>::count_ones()` lowers to just the LUT, and accumulating bytes for 31
-  iterations before one `vpsadbw` (`popcount_portable_u8`) reproduces the Muła AVX2
-  popcount by hand; its inner loop is instruction-for-instruction the same as the
-  intrinsic `popcount_avx2` / `popcount_avx512`, and the numbers match within noise.
+  scheme on v3 (4 accumulators, `vpsadbw` per vector) and into `vpopcntq` on native, so it
+  ties `portable_u64x8` on v3 and comes within 10% on native (it stays on **ymm**, LLVM's
+  default `prefer-vector-width=256`, while `Simd<u64, 8>` is an explicit **zmm**).
+* On v3 `Simd<u64, 8>::count_ones()` lowers to LUT + `vpsadbw` **every iteration**, while
+  `Simd<u8, 64>::count_ones()` lowers to just the LUT; accumulating bytes for 31 iterations
+  before one `vpsadbw` (`popcount_portable_u8`) reproduces the Muła AVX2 popcount by hand,
+  instruction-for-instruction the same as `popcount_avx2`, and the numbers match. On native
+  the byte trick is counter-productive (`vpopcntb` is not what LLVM picks; it stays LUT).
 
 ### select (n-th set bit)
 
@@ -176,9 +288,73 @@ Benchmarks: `byte_to_bit` packs 16 KiB of bytes; `rank` counts 3/4 of a bitmap; 
   (mask 7/8), so the loop is frontend-bound, not mispredict-bound. The next step
   would be to cut bookkeeping per word, e.g. by pairing words into a 128-bit chunk
   before appending.
-* Nothing better is available without AVX-512 VBMI2 (`vpcompressb`); with only
-  AVX-512F `vpcompressd` would need 16 dword lanes per 16 bits, which is not
-  competitive with one `pext` per 64 bits.
+* The VBMI2 route (`vpmovm2b` + `vpcompressb` + `vpmovb2m`, a 3-instruction PEXT) is
+  1.5–1.7x slower than `pext` in the same writer loop: the same bookkeeping bound, plus
+  mask-register round trips.
+
+
+
+### rank index (exclusive prefix popcount per word)
+
+* Portable `u64x8::count_ones()` + three `shift_elements_right` + add steps lowers to
+  `vpopcntq` + three `valignq`/`vpaddq` pairs + `vpmovqd` on native: the same shape as the
+  hand-written AVX-512 version (which uses masked `vpermq` for the shifts). On v3 the scan
+  becomes `vpermq`/`vpblendd`/`vperm2i128` juggling across the two 128-bit lanes (about 12
+  extra shuffles per 8 words), while the AVX2 intrinsic version does it in 4.
+* The first version carried the running total through `incl[7]` (a `vextracti32x4` +
+  `vpextrq` + scalar add + `vpbroadcastq` per 8 words): that loop-carried chain made even the
+  intrinsic versions slower than the scalar `popcnt; add` loop. Keeping the carry as a
+  broadcast vector (`carry += simd_swizzle!(incl, [7; 8])`, one `vpermq` + `vpaddq`) is the
+  fix, and it is expressible in portable code.
+* The scalar loop is a serial `popcnt; add` chain (one word per cycle at best) and does not
+  auto-vectorise, because the running sum is a loop-carried dependency.
+
+### set-bit indices (`select_all64` / `bitmap_to_indices`)
+
+* Portable byte-table version: `movzx` + `vpmovzxbd [table]` + `vpaddd` + store + `popcnt`
+  per byte — exactly the AVX2 intrinsic sequence. Density-independent (8 stores per word).
+* `vpcompressd` (AVX-512F): 4 compress + 4 stores per word; `vpcompressb` (VBMI2): 1
+  compress + 4 widen/add/store. Both are also density-independent.
+* The `tzcnt`/`blsr` scalar loop is the only density-dependent variant and wins at 1/8.
+
+### bit → byte expand
+
+* Portable `Mask::from_bitmask(w).select(1, 0)` and the `to_simd() & 1` spelling compile to
+  the same code: `kmovq` + zero-masked `vmovdqu8` broadcast on native (the AVX-512BW intrinsic
+  is one instruction, `vpbroadcastb{k}{z}`, and LLVM emits the equivalent), and
+  `vpbroadcastq` + `vpshufb` + `vpand` + `vpcmpeqb` + `vpand` per 32 bytes on v3 (the intrinsic
+  uses `vpminub` instead of `vpcmpeqb`+`vpand`, one op fewer).
+* `pdep` (8 per word) and SWAR are far behind a vector store per 32/64 bytes.
+
+### bit expand (`expand` = inverse of `filter`, PDEP per word)
+
+* Same story as compress: `pdep` is one instruction, the Hacker's Delight expand is ~110
+  lane-local ops per 8 words (with `vpternlogq` folding on native), and both sit behind the
+  serial variable-width bit reader.
+* `vpexpandb` (VBMI2) gives a 3-instruction PDEP (`vpmovm2b`, `vpexpandb`, `vpmovb2m`) that
+  is the only vector-side PDEP; it is measured against `pdep`.
+
+### k-bit unpack (`unpack::<K>`)
+
+* The portable multiply-align (`(w * 2^(8-s)) >> 8`) and the natural per-lane shift
+  (`w >> s`) spellings compile to *identical* code: LLVM canonicalises both to
+  `vpmulhuw` + `vpblendw` on v3 (no `vpsrlvw` there) and to `vpsrlvw` on native. The static
+  `Swizzle` byte gather becomes a `vbroadcasti128` load + one `vpshufb`, and the u16 -> u8
+  narrow is `vpackuswb` (v3) or `vpmovwb` (native). ~9 instructions per 16 values, the same as
+  the AVX2 intrinsic version.
+* `pdep` unpacks 8 values per instruction from a byte-aligned group (8K bits = K bytes).
+* `vpermb` + `vpmultishiftqb` (VBMI) does 64 values in 4 instructions; there is no portable
+  spelling of either (a 64-lane `swizzle_dyn` does become `vpermb` on native, but nothing
+  expresses the multishift).
+
+### Note: the host changed mid-way
+
+The first runs (the original four kernels and the vortex comparison) were on a
+Cascade-Lake-class host (2.8 GHz, AVX-512 F/BW/VL/DQ/VNNI only; `Simd::count_ones` lowered to the
+`vpshufb` LUT there). The VM was later migrated to an Ice-Lake-class host (2.1 GHz model string,
+plus AVX-512 VBMI, VBMI2, BITALG, VPOPCNTDQ, GFNI). All numbers in this file are from one final
+run on the Ice-Lake host, so on native `Simd::count_ones` is `vpopcntq`, the LUT popcount is the
+slow one, and `vpcompressb`/`vpexpandb`/`vpmultishiftqb` are available and measured.
 
 
 ## Comparison with vortex's bit filter
@@ -198,36 +374,67 @@ loop + their LUT PEXT), `scalar_byte_lut` (their LUT PEXT with the plain writer 
 `*_branchless` LUT versions described below. The `runs64` mask (alternating runs, mean length 64)
 mirrors their `make_correlated_runs` benchmark input and is where the word fast paths apply.
 
-What the numbers say (within-run ratios; absolute times on this VM drift ~25% between runs):
+Filter of 4096 words, v3 build (AVX2 + BMI2), this run:
+
+| variant | mask 1/8 | mask 4/8 | mask 7/8 | runs64 |
+|---|---|---|---|---|
+| scalar Hacker's Delight | 79.9 µs | 76.5 µs | 78.3 µs | 72.5 µs |
+| vortex byte-LUT (as is) | 82.2 µs | 32.7 µs | 39.3 µs | 26.7 µs |
+| byte-LUT, branch removed | 26.2 µs | 26.8 µs | 25.7 µs | 25.6 µs |
+| vortex loop + LUT | 79.0 µs | 36.7 µs | 43.3 µs | 20.0 µs |
+| vortex loop + branchless LUT | 28.5 µs | 30.5 µs | 30.7 µs | 18.7 µs |
+| portable `u64x8` HD | 26.8 µs | 27.7 µs | 27.0 µs | 27.3 µs |
+| `pext`, plain writer | 5.3 µs | 6.5 µs | 5.9 µs | 5.5 µs |
+| vortex loop + `pext` | 6.9 µs | 7.3 µs | 6.5 µs | 6.0 µs |
 
 * **Hardware PEXT loop**: `vortex_pext` and `bmi2_pext` are the same loop and within noise of
-  each other (6–8 µs per 4096 words). The all-ones/all-zero fast paths cost ~10–20% on uniform
-  masks (two extra compare-and-branch per word) and only break even on `runs64`; the per-word
-  cost is the accumulator bookkeeping, not `pext`.
+  each other. The all-ones/all-zero fast paths cost a little on uniform masks (two extra
+  compare-and-branch per word) and only pay off on `runs64`; the per-word cost is the
+  accumulator bookkeeping, not `pext`.
 * **Software PEXT fallback**: vortex's byte-LUT is 2x faster than the Hacker's Delight compress
-  at 50% density (44 vs 91 µs) but *slower* than it at 1/8 density (101 vs 90 µs): the
-  `mask_byte != 0` branch mispredicts (a mask byte is non-zero with p = 1-(7/8)^8 = 66%).
-  Dropping the branch (`scalar_byte_lut_branchless`; row 0 of the table is all zeros, and the
-  offset advances by `popcount(0) = 0`, so the test is redundant) makes it density-insensitive:
-  31–34 µs at every density, 3x faster at 1/8 and 25% faster at 4/8 and 7/8 than vortex's
-  version, and equal to the portable `u64x8` Hacker's Delight compress on AVX2 (which stays
-  1.5x ahead on AVX-512 thanks to `vpternlogq` and 512-bit lanes).
-* **vortex's loop + branchless LUT** (`vortex_lut_branchless`) is the best non-BMI2 kernel on
-  the run-structured mask (25 vs 33 µs) because whole words skip the LUT entirely, but it is
-  ~20% slower than the plain writer on uniform masks. Which to prefer depends on the mask
-  statistics vortex sees in practice; for a `Mask` that already knows its density or run
-  structure, choosing per-buffer is cheap.
-* Suggested change for vortex: remove the `if m != 0` guard in `pext_byte_lut` (strictly
-  better on every input measured), and consider the SIMD Hacker's Delight compress as the
-  fallback on AVX-512 machines without BMI2 (rare in practice, so low priority).
+  at 50% density but no faster than it at 1/8 density: the `mask_byte != 0` branch mispredicts
+  (a mask byte is non-zero with p = 1-(7/8)^8 = 66%). Dropping the branch (row 0 of the table
+  is all zeros and the offset advances by `popcount(0) = 0`, so the test is redundant) makes it
+  density-insensitive, 3–4x faster at 1/8 and ~40% faster at 4/8 and 7/8, and equal to the
+  portable `u64x8` Hacker's Delight compress on AVX2 (which is 1.5x ahead on AVX-512 thanks to
+  `vpternlogq` and 512-bit lanes).
+* **vortex's loop + branchless LUT** is the best non-BMI2 kernel on the run-structured mask
+  because whole words skip the LUT entirely, and ~10–15% slower than the plain writer on
+  uniform masks.
+* Suggested change for vortex: remove the `if m != 0` guard in `pext_byte_lut` (strictly better
+  on every input measured).
 
+## Scorecard: best portable-SIMD variant vs best variant of any kind
 
-## Summary
+Representative parameter per group: 8 KiB bitmaps, mask 4/8, k = 3. Ratio = portable ÷ best.
 
-| op | portable SIMD vs best intrinsic | note |
-|---|---|---|
-| byte → bit | identical code, identical speed | `to_bitmask()` is the intrinsic |
-| rank / popcount | matches the intrinsic LUT popcount when written with `u8x64::count_ones` | `u64x8::count_ones` pays a `vpsadbw` per iteration; scalar auto-vectorises but only to ymm on AVX-512 |
-| select, word scan | portable `u64x8` scan ≈ unrolled scalar popcnt scan, both 3–4x the naive loop | |
-| select, in-word | portable `u8x8` is 1.4x slower than broadword and 7x slower than `pdep` | no portable equivalent of PDEP; dynamic lane index spills |
-| filter | portable HD compress is 3–5x slower than `pext` | `pext` variant is limited by the bit writer, not by `pext`; branchless byte-LUT ties portable SIMD on AVX2 |
+| kernel | best portable v3 | best any v3 | ratio | best portable native | best any native | ratio | what portable-simd lacks |
+|---|---|---|---|---|---|---|---|
+| byte → bit | portable_u8x32 205 ns | avx2 201 ns | 1.0x | portable_u8x32 126 ns | portable_u8x32 126 ns | 1.0x | none: `to_bitmask()` is the intrinsic |
+| rank (popcount) | portable_u8x64 142 ns | portable_u8x64 142 ns | 1.0x | portable_u64x8 56 ns | avx512_vpopcnt 55 ns | 1.0x | v3: byte-lane popcount idiom is user knowledge; no `vpsadbw`-style horizontal byte sum |
+| select64 (in-word) | portable_u8x8 13.2 µs | pdep 2.5 µs | 5.4x | portable_u8x8 10.5 µs | pdep 2.6 µs | 4.1x | no PDEP/bit-deposit op; dynamic lane index spills; no lane prefix-sum |
+| select (scan + in-word) | portable_scan+pdep 210 ns | portable_scan+pdep 210 ns | 1.0x | portable_scan+pdep 135 ns | portable_scan+pdep 135 ns | 1.0x | as above; the scan half is fully closed |
+| filter (bit compress) | portable_u64x4/mask4 27.6 µs | bmi2_pext/mask4 6.5 µs | 4.2x | portable_u64x8/mask4 18.0 µs | bmi2_pext_branchless/mask4 6.4 µs | 2.8x | no PEXT / `Mask::compress`; no lane compress (`vpcompressb`) |
+| expand (bit deposit) | portable_u64x8/mask4 28.7 µs | bmi2_pdep/mask4 8.4 µs | 3.4x | portable_u64x8/mask4 16.6 µs | bmi2_pdep/mask4 8.1 µs | 2.1x | no PDEP; no lane expand (`vpexpandb`) |
+| rank index (prefix popcount) | portable_u64x8 465 ns | scalar 323 ns | 1.4x | portable_u64x8 268 ns | portable_u64x8 268 ns | 1.0x | v3: cross-lane element shifts cost 3 shuffles each; a `scan`/prefix-sum op would fix it |
+| select_all64 (set-bit positions) | portable_lut 15.8 µs | portable_lut 15.8 µs | 1.0x | portable_lut 17.3 µs | vbmi2_compressb 12.8 µs | 1.4x | no lane compress; byte-table version ties AVX2 but not `vpcompressb` |
+| bitmap → indices | portable_lut/mask4 7.4 µs | portable_lut/mask4 7.4 µs | 1.0x | portable_lut/mask4 5.6 µs | vbmi2_compressb/mask4 3.4 µs | 1.7x | same; scalar `tzcnt` loop still wins at low density |
+| bit → byte expand | portable_select 286 ns | portable_select 286 ns | 1.0x | portable_select 100 ns | avx512 95 ns | 1.1x | none: `Mask::from_bitmask().select()` is the intrinsic |
+| k-bit unpack (k=3) | portable_mul 791 ns | pdep 698 ns | 1.1x | portable_mul 666 ns | vbmi_multishift 201 ns | 3.3x | no `vpmultishiftqb` / bit-field extract; `vpermb`-class 64-byte table lookup only via `swizzle_dyn` |
+
+Cross-cutting gaps, in order of how many kernels they cost:
+
+1. **No bit-manipulation tier** (PEXT / PDEP / bit-field extract): filter, expand, in-word
+   select, and k-bit unpack are the four losses, all for this reason. A `u64xN::bit_compress(mask)`
+   / `bit_expand(mask)` pair would lower to `pext`/`pdep` on x86 (and `vpcompressb`/`vpexpandb`
+   or the Hacker's Delight sequence elsewhere).
+2. **No lane compress / expand** (`vpcompressb/d/q`, `vpexpandb`): set-bit indices and any
+   filter-style kernel.
+3. **No prefix-sum / scan** and cheap cross-lane element shifts: rank index on AVX2 pays 3
+   shuffles per `shift_elements_right`.
+4. **Dynamic lane indexing** (`v[i]` with runtime `i`) goes through the stack.
+5. **No multishift / per-byte bit-field gather** (`vpmultishiftqb`): k-bit unpack is 3x off.
+
+Where portable SIMD is already at parity: `to_bitmask`, `from_bitmask().select()`,
+`count_ones` (with `vpopcntq` where available), the lane compare + bitmask + popcount idiom,
+static `Swizzle` byte gathers (they become `vpshufb`), and LLVM's `vpternlogq` folding.

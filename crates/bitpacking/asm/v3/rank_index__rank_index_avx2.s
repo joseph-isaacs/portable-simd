@@ -3,42 +3,38 @@ bitpacking::rank_index::rank_index_avx2:
 	jb .LBB3_10
 	mov eax, esi
 	and eax, 3
-	mov r8, rsi
-	shr r8, 2
+	mov rcx, rsi
+	shr rcx, 2
 	je .LBB3_2
-	shl r8, 4
-	xor ecx, ecx
-	vpbroadcastd ymm0, dword ptr [rip + .LCPI3_3]
-	vbroadcasti128 ymm1, xmmword ptr [rip + .LCPI3_4]
-	vpxor xmm2, xmm2, xmm2
-	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI3_5]
-	xor r9d, r9d
+	shl rcx, 4
+	vpxor xmm1, xmm1, xmm1
+	xor r8d, r8d
+	vpbroadcastd ymm2, dword ptr [rip + .LCPI3_3]
+	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI3_4]
+	vbroadcasti128 ymm4, xmmword ptr [rip + .LCPI3_5]
+	vpxor xmm0, xmm0, xmm0
 .LBB3_4:
-	mov r10, rcx
-	vmovdqu ymm4, ymmword ptr [rdi + 2*r9]
-	vpsrlw ymm5, ymm4, 4
-	vpand ymm4, ymm4, ymm0
-	vpshufb ymm4, ymm1, ymm4
-	vpand ymm5, ymm5, ymm0
-	vpshufb ymm5, ymm1, ymm5
-	vpaddb ymm4, ymm5, ymm4
-	vpsadbw ymm4, ymm4, ymm2
-	vpslldq ymm5, ymm4, 8
-	vpaddq ymm5, ymm4, ymm5
-	vpermq ymm6, ymm5, 85
-	vpblendd ymm6, ymm2, ymm6, 240
+	vmovdqu ymm5, ymmword ptr [rdi + 2*r8]
+	vpsrlw ymm6, ymm5, 4
+	vpand ymm5, ymm5, ymm2
+	vpshufb ymm5, ymm3, ymm5
+	vpand ymm6, ymm6, ymm2
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm5, ymm6, ymm5
+	vpsadbw ymm5, ymm5, ymm1
+	vpslldq ymm6, ymm5, 8
+	vpaddq ymm6, ymm5, ymm6
+	vpermq ymm7, ymm6, 85
+	vpblendd ymm7, ymm1, ymm7, 240
+	vpaddq ymm6, ymm6, ymm7
+	vpsubq ymm5, ymm0, ymm5
 	vpaddq ymm5, ymm5, ymm6
-	vmovq xmm6, rcx
-	vpbroadcastq ymm6, xmm6
-	vpsubq ymm4, ymm6, ymm4
-	vpaddq ymm4, ymm4, ymm5
-	vpermd ymm4, ymm3, ymm4
-	vmovdqu xmmword ptr [rdx + r9], xmm4
-	vextracti128 xmm4, ymm5, 1
-	vpextrq rcx, xmm4, 1
-	add rcx, r10
-	add r9, 16
-	cmp r8, r9
+	vpermd ymm5, ymm4, ymm5
+	vmovdqu xmmword ptr [rdx + r8], xmm5
+	vpermq ymm5, ymm6, 255
+	vpaddq ymm0, ymm5, ymm0
+	add r8, 16
+	cmp rcx, r8
 	jne .LBB3_4
 	test rax, rax
 	jne .LBB3_6
@@ -46,17 +42,18 @@ bitpacking::rank_index::rank_index_avx2:
 	vzeroupper
 	ret
 .LBB3_2:
-	xor ecx, ecx
+	vpxor xmm0, xmm0, xmm0
 	test rax, rax
 	je .LBB3_9
 .LBB3_6:
-	movabs r8, 1152921504606846972
-	and rsi, r8
-	mov r8, qword ptr [rdi + 8*rsi]
-	mov dword ptr [rdx + 4*rsi], ecx
+	movabs rcx, 1152921504606846972
+	and rsi, rcx
+	mov rcx, qword ptr [rdi + 8*rsi]
+	vmovd dword ptr [rdx + 4*rsi], xmm0
 	cmp eax, 1
 	je .LBB3_9
-	popcnt r8, r8
+	vmovd r8d, xmm0
+	popcnt rcx, rcx
 	add ecx, r8d
 	mov rdi, qword ptr [rdi + 8*rsi + 8]
 	mov dword ptr [rdx + 4*rsi + 4], ecx

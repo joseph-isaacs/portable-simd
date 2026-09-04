@@ -1,4 +1,3 @@
- `release` profile [optimized + debuginfo] target(s) in 0.02s
 bitpacking::select::select_pdep:
 	test rsi, rsi
 	je .LBB40_1

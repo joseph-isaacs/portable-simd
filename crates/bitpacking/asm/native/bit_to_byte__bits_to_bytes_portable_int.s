@@ -1,3 +1,11 @@
+warning: function `popcount_epi64_avx512` is never used
+  --> src/rank.rs:77:22
+   |
+77 | pub(crate) unsafe fn popcount_epi64_avx512(v: core::arch::x86_64::__m512i) -> core::arch::x86_64::__m512i {
+   |                      ^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+warning: `bitpacking` (lib) generated 1 warning
 bitpacking::bit_to_byte::bits_to_bytes_portable_int:
 	push rax
 	mov rax, rsi

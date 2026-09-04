@@ -3,58 +3,56 @@ bitpacking::rank_index::rank_index_portable:
 	jb .LBB5_14
 	mov eax, esi
 	and eax, 7
-	mov r8, rsi
-	shr r8, 3
+	mov rcx, rsi
+	shr rcx, 3
 	je .LBB5_2
-	shl r8, 5
-	xor ecx, ecx
-	vpbroadcastd ymm0, dword ptr [rip + .LCPI5_2]
-	vbroadcasti128 ymm1, xmmword ptr [rip + .LCPI5_3]
-	vpxor xmm2, xmm2, xmm2
-	xor r9d, r9d
+	shl rcx, 5
+	vpxor xmm1, xmm1, xmm1
+	xor r8d, r8d
+	vpbroadcastd ymm2, dword ptr [rip + .LCPI5_2]
+	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI5_3]
+	vpxor xmm0, xmm0, xmm0
+	vpxor xmm4, xmm4, xmm4
 .LBB5_4:
-	mov r10, rcx
-	vmovdqu ymm3, ymmword ptr [rdi + 2*r9]
-	vmovdqu ymm4, ymmword ptr [rdi + 2*r9 + 32]
-	vpand ymm5, ymm3, ymm0
-	vpshufb ymm5, ymm1, ymm5
-	vpsrlw ymm3, ymm3, 4
-	vpand ymm3, ymm3, ymm0
-	vpshufb ymm3, ymm1, ymm3
-	vpaddb ymm3, ymm3, ymm5
-	vpsadbw ymm3, ymm3, ymm2
-	vpand ymm5, ymm4, ymm0
-	vpshufb ymm5, ymm1, ymm5
-	vpsrlw ymm4, ymm4, 4
-	vpand ymm4, ymm4, ymm0
-	vpshufb ymm4, ymm1, ymm4
-	vpaddb ymm4, ymm4, ymm5
-	vpsadbw ymm4, ymm4, ymm2
-	vpblendd ymm5, ymm4, ymm3, 192
-	vpermq ymm5, ymm5, 147
-	vpermq ymm6, ymm3, 144
-	vpblendd ymm6, ymm6, ymm2, 3
-	vpaddq ymm5, ymm5, ymm4
-	vpaddq ymm6, ymm6, ymm3
-	vperm2i128 ymm7, ymm6, ymm5, 33
-	vperm2i128 ymm8, ymm6, ymm6, 8
-	vpaddq ymm5, ymm7, ymm5
-	vpaddq ymm6, ymm8, ymm6
-	vpaddq ymm5, ymm6, ymm5
-	vmovq xmm7, rcx
-	vpbroadcastq ymm7, xmm7
-	vpsubq ymm3, ymm7, ymm3
-	vpsubq ymm4, ymm7, ymm4
-	vpaddq ymm4, ymm4, ymm5
-	vpaddq ymm3, ymm3, ymm6
-	vshufps ymm3, ymm3, ymm4, 136
-	vpermpd ymm3, ymm3, 216
-	vmovups ymmword ptr [rdx + r9], ymm3
-	vextracti128 xmm3, ymm5, 1
-	vpextrq rcx, xmm3, 1
-	add rcx, r10
-	add r9, 32
-	cmp r8, r9
+	vmovdqu ymm5, ymmword ptr [rdi + 2*r8]
+	vmovdqu ymm6, ymmword ptr [rdi + 2*r8 + 32]
+	vpand ymm7, ymm5, ymm2
+	vpshufb ymm7, ymm3, ymm7
+	vpsrlw ymm5, ymm5, 4
+	vpand ymm5, ymm5, ymm2
+	vpshufb ymm5, ymm3, ymm5
+	vpaddb ymm5, ymm5, ymm7
+	vpsadbw ymm5, ymm5, ymm1
+	vpand ymm7, ymm6, ymm2
+	vpshufb ymm7, ymm3, ymm7
+	vpsrlw ymm6, ymm6, 4
+	vpand ymm6, ymm6, ymm2
+	vpshufb ymm6, ymm3, ymm6
+	vpaddb ymm6, ymm6, ymm7
+	vpsadbw ymm6, ymm6, ymm1
+	vpblendd ymm7, ymm6, ymm5, 192
+	vpermq ymm7, ymm7, 147
+	vpermq ymm8, ymm5, 144
+	vpblendd ymm8, ymm8, ymm1, 3
+	vpaddq ymm7, ymm7, ymm6
+	vpaddq ymm8, ymm8, ymm5
+	vperm2i128 ymm9, ymm8, ymm7, 33
+	vperm2i128 ymm10, ymm8, ymm8, 8
+	vpaddq ymm7, ymm9, ymm7
+	vpaddq ymm8, ymm10, ymm8
+	vpaddq ymm7, ymm8, ymm7
+	vpsubq ymm5, ymm0, ymm5
+	vpsubq ymm6, ymm4, ymm6
+	vpaddq ymm6, ymm6, ymm7
+	vpaddq ymm5, ymm8, ymm5
+	vshufps ymm5, ymm5, ymm6, 136
+	vpermpd ymm5, ymm5, 216
+	vmovups ymmword ptr [rdx + r8], ymm5
+	vpermq ymm5, ymm7, 255
+	vpaddq ymm4, ymm5, ymm4
+	vpaddq ymm0, ymm5, ymm0
+	add r8, 32
+	cmp rcx, r8
 	jne .LBB5_4
 	test rax, rax
 	jne .LBB5_6
@@ -62,17 +60,18 @@ bitpacking::rank_index::rank_index_portable:
 	vzeroupper
 	ret
 .LBB5_2:
-	xor ecx, ecx
+	vpxor xmm0, xmm0, xmm0
 	test rax, rax
 	je .LBB5_13
 .LBB5_6:
-	movabs r8, 1152921504606846968
-	and rsi, r8
-	mov r8, qword ptr [rdi + 8*rsi]
-	mov dword ptr [rdx + 4*rsi], ecx
+	movabs rcx, 1152921504606846968
+	and rsi, rcx
+	mov rcx, qword ptr [rdi + 8*rsi]
+	vmovd dword ptr [rdx + 4*rsi], xmm0
 	cmp eax, 1
 	je .LBB5_13
-	popcnt r8, r8
+	vmovd r8d, xmm0
+	popcnt rcx, rcx
 	add ecx, r8d
 	mov r8, qword ptr [rdi + 8*rsi + 8]
 	mov dword ptr [rdx + 4*rsi + 4], ecx

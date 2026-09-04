@@ -1,3 +1,12 @@
+warning: function `popcount_epi64_avx512` is never used
+  --> src/rank.rs:77:22
+   |
+77 | pub(crate) unsafe fn popcount_epi64_avx512(v: core::arch::x86_64::__m512i) -> core::arch::x86_64::__m512i {
+   |                      ^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+warning: `bitpacking` (lib) generated 1 warning
+ `release` profile [optimized + debuginfo] target(s) in 0.02s
 bitpacking::bit_to_byte::bits_to_bytes_avx2:
 	push rax
 	mov rax, rsi
@@ -21,66 +30,55 @@ bitpacking::bit_to_byte::bits_to_bytes_avx2:
 	lea r8, [rdx + 224]
 	xor esi, esi
 	vmovdqa ymm0, ymmword ptr [rip + .LCPI7_0]
-	vpbroadcastq ymm1, qword ptr [rip + .LCPI7_1]
-	vpbroadcastd ymm2, dword ptr [rip + .LCPI7_3]
+	vmovdqa ymm1, ymmword ptr [rip + .LCPI7_1]
+	vpbroadcastq ymm2, qword ptr [rip + .LCPI7_2]
+	vpbroadcastd ymm3, dword ptr [rip + .LCPI7_4]
 .LBB7_5:
-	mov r9, qword ptr [rdi + 8*rsi]
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 224], ymm3
-	shr r9, 32
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 192], ymm3
-	mov r9, qword ptr [rdi + 8*rsi + 8]
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 160], ymm3
-	shr r9, 32
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 128], ymm3
-	mov r9, qword ptr [rdi + 8*rsi + 16]
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 96], ymm3
-	shr r9, 32
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 64], ymm3
-	mov r9, qword ptr [rdi + 8*rsi + 24]
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8 - 32], ymm3
-	shr r9, 32
-	vpbroadcastd ymm3, r9d
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [r8], ymm3
+	vpbroadcastq ymm4, qword ptr [rdi + 8*rsi]
+	vpshufb ymm5, ymm4, ymm0
+	vpshufb ymm4, ymm4, ymm1
+	vpand ymm5, ymm5, ymm2
+	vpcmpeqb ymm5, ymm5, ymm2
+	vpand ymm5, ymm5, ymm3
+	vmovdqu ymmword ptr [r8 - 224], ymm5
+	vpand ymm4, ymm4, ymm2
+	vpcmpeqb ymm4, ymm4, ymm2
+	vpand ymm4, ymm4, ymm3
+	vmovdqu ymmword ptr [r8 - 192], ymm4
+	vpbroadcastq ymm4, qword ptr [rdi + 8*rsi + 8]
+	vpshufb ymm5, ymm4, ymm0
+	vpand ymm5, ymm5, ymm2
+	vpcmpeqb ymm5, ymm5, ymm2
+	vpand ymm5, ymm5, ymm3
+	vmovdqu ymmword ptr [r8 - 160], ymm5
+	vpshufb ymm4, ymm4, ymm1
+	vpand ymm4, ymm4, ymm2
+	vpcmpeqb ymm4, ymm4, ymm2
+	vpand ymm4, ymm4, ymm3
+	vmovdqu ymmword ptr [r8 - 128], ymm4
+	vpbroadcastq ymm4, qword ptr [rdi + 8*rsi + 16]
+	vpshufb ymm5, ymm4, ymm0
+	vpshufb ymm4, ymm4, ymm1
+	vpand ymm5, ymm5, ymm2
+	vpcmpeqb ymm5, ymm5, ymm2
+	vpand ymm5, ymm5, ymm3
+	vmovdqu ymmword ptr [r8 - 96], ymm5
+	vpand ymm4, ymm4, ymm2
+	vpcmpeqb ymm4, ymm4, ymm2
+	vpand ymm4, ymm4, ymm3
+	vmovdqu ymmword ptr [r8 - 64], ymm4
+	vpbroadcastq ymm4, qword ptr [rdi + 8*rsi + 24]
 	add rsi, 4
+	vpshufb ymm5, ymm4, ymm0
+	vpshufb ymm4, ymm4, ymm1
+	vpand ymm5, ymm5, ymm2
+	vpcmpeqb ymm5, ymm5, ymm2
+	vpand ymm5, ymm5, ymm3
+	vmovdqu ymmword ptr [r8 - 32], ymm5
+	vpand ymm4, ymm4, ymm2
+	vpcmpeqb ymm4, ymm4, ymm2
+	vpand ymm4, ymm4, ymm3
+	vmovdqu ymmword ptr [r8], ymm4
 	add r8, 256
 	cmp rcx, rsi
 	jne .LBB7_5
@@ -93,23 +91,21 @@ bitpacking::bit_to_byte::bits_to_bytes_avx2:
 	shl eax, 3
 	xor esi, esi
 	vmovdqa ymm0, ymmword ptr [rip + .LCPI7_0]
-	vpbroadcastq ymm1, qword ptr [rip + .LCPI7_1]
-	vpbroadcastd ymm2, dword ptr [rip + .LCPI7_3]
+	vmovdqa ymm1, ymmword ptr [rip + .LCPI7_1]
+	vpbroadcastq ymm2, qword ptr [rip + .LCPI7_2]
+	vpbroadcastd ymm3, dword ptr [rip + .LCPI7_4]
 .LBB7_8:
-	mov rdi, qword ptr [rcx + rsi]
-	vpbroadcastd ymm3, edi
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [rdx + 8*rsi - 32], ymm3
-	shr rdi, 32
-	vpbroadcastd ymm3, edi
-	vpshufb ymm3, ymm3, ymm0
-	vpand ymm3, ymm3, ymm1
-	vpcmpeqb ymm3, ymm3, ymm1
-	vpand ymm3, ymm3, ymm2
-	vmovdqu ymmword ptr [rdx + 8*rsi], ymm3
+	vpbroadcastq ymm4, qword ptr [rcx + rsi]
+	vpshufb ymm5, ymm4, ymm0
+	vpshufb ymm4, ymm4, ymm1
+	vpand ymm5, ymm5, ymm2
+	vpcmpeqb ymm5, ymm5, ymm2
+	vpand ymm5, ymm5, ymm3
+	vmovdqu ymmword ptr [rdx + 8*rsi - 32], ymm5
+	vpand ymm4, ymm4, ymm2
+	vpcmpeqb ymm4, ymm4, ymm2
+	vpand ymm4, ymm4, ymm3
+	vmovdqu ymmword ptr [rdx + 8*rsi], ymm4
 	add rsi, 8
 	cmp rax, rsi
 	jne .LBB7_8
