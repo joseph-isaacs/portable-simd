@@ -64,7 +64,7 @@ read from `asm/a64/*.s`. Same three tiers as the x86 table.
 |---|---|---|---|---|---|
 | byte → bit | 64 B | SWAR ~12 scalar ops / 8 B (~100) | 4 x (`cmeq`,`bic`,`ext`,`zip1`,`addv h`,`str h`) + 2 `ldp` = 26 | 4 x (`ld`,`cmtst`,`and`) + 3 `addp` + `str` = 16 | portable 1.6x more instrs and 4 horizontal `addv` |
 | bit → byte | 64 B | SWAR ~45 | **~150** (`ubfx` + `mov v.b[i]` per bit) | 28 (8 `dup`, 4 `and`/`cmeq`/`bic`, 2 `stp`) | **scalarised `from_bitmask`**: 5x NEON, 3x worse than SWAR |
-| popcount | 16 B | `fmov`,`cnt`,`addv`,`fmov` x2 = 8 | `cnt`,`uaddlp`,`uaddlp`,`uadalp` = 4 | `cnt`,`uadalp` = 2 | portable re-widens every vector |
+| popcount | 16 B | `fmov`,`cnt`,`addv`,`fmov` x2 = 8 | `u64x8`: `cnt`,`uaddlp`,`uaddlp`,`uadalp` = 4; `u8x64`: `cnt`,`add` = 2 | `cnt`,`uadalp` = 2 | parity with the byte-lane idiom |
 | rank index | 8 words | 8 x (`fmov`,`cnt`,`addv`,`fmov`,`add`,`str`) ≈ 48 | 4 x (`cnt` + 3 `uaddlp`) + ~20 `ext`/`zip1`/`add`/`sub` + stores ≈ 50 | (not written) | parity; the 8-lane scan is 4 two-lane vectors |
 | select64 in-word | 1 query | broadword ~30 scalar | `cnt`, 3 x (`shl`,`add`), `cmhs`, `addv`, stack round trip ≈ 20 | the same instructions | tie; both pay `addv` + spill; scalar broadword is competitive |
 | filter / expand | 1 word | HD compress ~90 scalar | 2-lane HD: ~½ the ops per word, 4 vectors for `u64x8` | none (no NEON PEXT); `bext` on SVE2 only | 128-bit lanes give ≤2x; the hole is the missing instruction |
@@ -446,7 +446,7 @@ Per-loop instruction counts, `a64` build (same source as x86):
 |---|---|---|---|
 | byte → bit (`to_bitmask`) | 6 / 16 B: `cmeq`, `bic`, `ext`, `zip1`, **`addv h`**, `str h` | 1.75 / 16 B: `cmtst`, `and`, 3 `addp` per 64 B, one `str` | LLVM's bitmask lowering uses a horizontal `addv` per 16 lanes and four 2-byte stores; the pairwise-add tree is the known idiom |
 | bit → byte (`Mask::from_bitmask().select`) | **~150 / 64 B**: `ubfx` per bit + `mov v.b[i]` lane insert | 28 / 64 B: 8 `dup` lane, `and`, `cmeq`, `bic`, 2 `stp` | **scalarised** — the biggest aarch64 hole; x86 gets `kmov`+masked broadcast |
-| popcount (`u64x8::count_ones`) | 4 / 16 B: `cnt`, `uaddlp` x2, `uadalp` | 2 / 16 B: `cnt`, `uadalp` into u16, fold rarely | portable widens to u64 every vector; `u8x64` variant does not help (LLVM re-widens) |
+| popcount (`u64x8::count_ones`) | 4 / 16 B: `cnt`, `uaddlp` x2, `uadalp` | 2 / 16 B: `cnt`, `uadalp` into u16, fold rarely | `u64x8` widens to u64 every vector; the `u8x64` variant keeps bytes (`cnt` + `add .16b`, 2 / 16 B) and matches the intrinsic |
 | rank index | 8 words: 4x(`cnt`+3 `uaddlp`) + ~20 `ext`/`zip1`/`add`/`sub` | — | the 8-lane scan is 4 two-lane vectors: every `shift_elements_right` becomes `ext` pairs |
 | select64 in-word (`u8x8`) | `cnt`, 3x(`shl`+`add`), `cmhs`, `addv b`, stack round-trip for the dynamic lane | same instructions written by hand | tie; both pay the `addv` and the spill |
 | filter / expand (Hacker's Delight) | 2-lane vectors: ~110 ops per 8 words become 4x that in `eor`/`shl`/`and`/`orr` (239 `eor`, 124 `shl` in the function) | no NEON PEXT; `bext` on SVE2 only | 128-bit vectors give no lane-count advantage over scalar; the win vs scalar is just ILP |
@@ -464,9 +464,9 @@ Portable-simd holes specific to aarch64, ranked:
    `from_bitmask` itself, the way `swizzle_dyn` special-cases NEON.
 2. `Mask::<i8, 64>::to_bitmask()` lowers to `addv` + 2-byte stores; the `addp` tree is ~3x fewer
    instructions and avoids the horizontal reduction.
-3. `Simd<u64, N>::count_ones()` re-widens to u64 every vector (`uaddlp` x2 + `uadalp`); there
-   is no way to say "keep byte counts and fold later" that survives LLVM (it re-widens
-   `Simd<u8, 64>::count_ones()` too).
+3. `Simd<u64, N>::count_ones()` widens to u64 every vector (`uaddlp` x2 + `uadalp`); as on x86
+   the fast form is the `Simd<u8, 64>::count_ones()` byte-accumulate idiom, which LLVM does keep
+   in bytes here (`cnt` + `add .16b`), so this is user knowledge rather than a lowering bug.
 4. Anything that needs cross-lane movement on 8 x u64 (rank index scan, `shift_elements_right`)
    is 4 vectors wide on NEON and turns into `ext`/`zip` chains.
 5. As on x86: no PEXT/PDEP-class op. On NEON there is no instruction to lower it to at all; on
