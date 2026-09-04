@@ -475,6 +475,29 @@ Portable-simd holes specific to aarch64, ranked:
 The qemu numbers in the table above bear this out only in sign: e.g. NEON `bits_to_bytes` at 4.8 µs
 vs portable 8.0 µs, and the SVE2 `bext` rows at ~2 ms are pure helper-call cost.
 
+## Where each hole lives (Rust vs LLVM)
+
+Traced through `rustc_codegen_llvm/src/intrinsic.rs` (what IR the portable-simd intrinsics
+become) and the LLVM 22.1.2 backends the nightly bundles. `ir/bitmask_repro.rs` and the emitted
+`.ll`/`.s` next to it are the minimal reproducers for the two lowering bugs.
+
+| hole | IR rustc emits | layer | exact place | fix |
+|---|---|---|---|---|
+| **`Mask::from_bitmask` scalarises on AArch64** (~150 instrs / 64 B, 38 / 16 B) | `trunc i64 -> i16`, `bitcast i16 -> <16 x i1>`, `zext/select` (ideal IR) | **LLVM, AArch64 backend** | no counterpart of X86's `combineToExtendBoolVectorInReg` (`X86ISelLowering.cpp` "Convert (vXiY *ext(vXi1 bitcast(iX))) to extend_in_reg(broadcast(iX))"); AArch64 falls into generic scalarisation | DAG combine in `AArch64ISelLowering.cpp`: `(zext\|sext\|any_ext (bitcast iN -> vNi1))` -> `dup` scalar into byte lanes (per 8 lanes), `and` bit weights, `cmtst`; `and #1` for zext. Rust-side interim: a `cfg(target_arch = "aarch64")` path in `Mask::from_bitmask`, the way `swizzle_dyn` does it |
+| **`to_bitmask` via `addv` on AArch64** (`cmeq`, `bic`, `ext`, `zip1`, `addv h`, `str h` per 16 B) | `icmp ne <16 x i8>`, `bitcast <16 x i1> -> i16` (ideal IR) | **LLVM / rustc's LLVM snapshot** | `vectorToScalarBitmask` in `AArch64ISelLowering.cpp` has a `v16i8` `ADDP` x3 special case in the `llvmorg-22.1.2` tag, but the nightly's 22.1.2 still emits the `VECREDUCE_ADD` path — pending an `llc` from HEAD on `ir/bitmask_repro.aarch64.ll` to tell "not yet in rust-lang/llvm-project's branch" from "special case not reached for this shape" | if HEAD emits `addp`: bump/backport in `rust-lang/llvm-project`. Either way, 32/64-lane masks split into 4 x i16 + `shl`/`orr`; a >128-bit path that keeps the `addp` tree across vectors (as `bytes_to_bits_neon` does) is a further LLVM improvement in the same function |
+| **PEXT / PDEP** (filter, expand, in-word select) | nothing: no intrinsic exists | **Rust: API + `rustc_codegen_llvm`** | LLVM has only target intrinsics (`llvm.x86.bmi.pext.64`, `llvm.aarch64.sve.bext.x`), no generic one | add `simd_bit_compress`/`simd_bit_expand` (or scalar `u64::bit_compress`) in `core::intrinsics::simd` + portable-simd API; codegen emits the target intrinsic per lane when `bmi2` / `sve2-bitperm` is on, else the Hacker's Delight sequence (or propose a generic `llvm.bitcompress` upstream, which is the bigger lift) |
+| **lane compress** (`vpcompressb`, set-bit indices, any filter-style kernel) | nothing | **Rust: API + `rustc_codegen_llvm`** | LLVM already has `llvm.experimental.vector.compress` (`Intrinsics.td`), lowered on X86 (AVX-512 legal, else custom expansion) and AArch64 (SVE `compact`, NEON custom via SVE where available); rustc emits nothing for it | add `simd_compress` intrinsic -> `llvm.experimental.vector.compress`; portable-simd `Mask::compress(Simd)`. This is the cheapest of the API holes. `expand` has no generic LLVM intrinsic, so it would need per-target lowering |
+| **prefix-sum / cross-lane element shift on AVX2** (rank index 1.4x slower than scalar) | `shufflevector` with constant indices | **ISA + Rust API** | LLVM's `lowerV4I64Shuffle` already does the AVX2 minimum (`vperm2i128` + `vpblendd`/`vpalignr`); AVX-512 gets `valignq`. The cost is 3 such shuffles per scan step x 2 halves | portable-simd `prefix_sum`/`scan` op with per-target implementations (in-lane scan + lane broadcast on AVX2); not an LLVM bug |
+| **dynamic lane index `v[i]`** (in-word select) | `Index` returns `&T` through `as_array()`, so a store + indexed load by construction | **Rust API (design), LLVM secondary** | `X86ISelLowering.cpp` `LowerEXTRACT_VECTOR_ELT` handles constant indices only; variable-index extract goes through the stack in generic legalisation | portable-simd `extract_dyn(i)` implemented via `swizzle_dyn`/`vpermd` (or `Simd::select_lane`); LLVM could add `vpermd`+`vmovd` for variable extract on AVX2, `vpermb` on VBMI |
+| **`vpmultishiftqb` / bit-field gather** (k-bit unpack 3.3x on AVX-512) | per-lane shifts + `and` | **Rust API** (or LLVM pattern match) | no generic op; `X86ISD::MULTISHIFT` is only formed from the target intrinsic | a `Simd<u64, N>::bitfield_gather(offsets: Simd<u8, 8N>)` style op is very x86-specific; lower priority |
+| popcount widening every vector (`u64xN::count_ones` on AVX2/NEON) | `ctpop <N x i64>` | **neither** | per-op lowering is right; keeping byte counts across iterations changes overflow behaviour, so no compiler may do it | documentation: the `Simd<u8, 64>::count_ones()` + deferred widening idiom; LLVM keeps it in bytes on both targets |
+| filter byte-LUT scalar == portable on AVX2 | – | not a hole | a 64 KiB table is competitive with 4-lane Hacker's Delight | – |
+
+Priority if the goal is fixing things: (1) the AArch64 `from_bitmask` combine (LLVM, self-contained,
+clear win: 5x), (2) `simd_compress` plumbing onto `llvm.experimental.vector.compress` (Rust,
+LLVM side already done), (3) `to_bitmask` `addp` tree for >16 lanes on AArch64 (LLVM), (4) the
+bit compress/expand intrinsics (Rust API + codegen; largest payoff, most design work).
+
 ## Comparison with vortex's bit filter
 
 `vortex-data/vortex` (`vortex-array/src/arrays/bool/compute/filter.rs`, commit 265b705) filters a
