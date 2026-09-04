@@ -1,5 +1,5 @@
 use bitpacking::util::Rng;
-use bitpacking::{byte_to_bit, filter, rank, select};
+use bitpacking::{bit_to_byte, byte_to_bit, expand, filter, indices, rank, rank_index, select, unpack};
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
 
 fn bench_byte_to_bit(c: &mut Criterion) {
@@ -152,5 +152,199 @@ fn bench_filter(c: &mut Criterion) {
     g.finish();
 }
 
-criterion_group!(benches, bench_byte_to_bit, bench_rank, bench_select, bench_filter);
+fn bench_rank_index(c: &mut Criterion) {
+    let mut rng = Rng::new(5);
+    let mut g = c.benchmark_group("rank_index");
+    for &words in &[1usize << 10, 1 << 16] {
+        let bits = rng.words(words, 4);
+        let mut out = vec![0u32; words];
+        g.throughput(Throughput::Bytes((words * 8) as u64));
+        macro_rules! b {
+            ($name:literal, $f:path) => {
+                g.bench_with_input(BenchmarkId::new($name, words), &words, |b, _| {
+                    b.iter(|| {
+                        $f(black_box(&bits), black_box(&mut out));
+                        black_box(&out);
+                    })
+                });
+            };
+        }
+        b!("scalar", rank_index::rank_index_scalar);
+        b!("portable_u64x8", rank_index::rank_index_portable);
+        #[cfg(target_feature = "avx2")]
+        b!("avx2", rank_index::rank_index_avx2);
+        #[cfg(target_feature = "avx512bw")]
+        b!("avx512", rank_index::rank_index_avx512);
+    }
+    g.finish();
+}
+
+fn bench_indices(c: &mut Criterion) {
+    let mut rng = Rng::new(6);
+    // In-word select-all: 4096 random words of mixed density.
+    let words: Vec<u64> = (0..4096)
+        .map(|_| {
+            let d = (rng.next_u64() % 8) as u32 + 1;
+            rng.word_with_density(d)
+        })
+        .collect();
+    let mut out = vec![0u32; 64 + 64];
+    let mut g = c.benchmark_group("select_all64");
+    g.throughput(Throughput::Elements(words.len() as u64));
+    macro_rules! b {
+        ($name:literal, $f:path) => {
+            g.bench_function($name, |b| {
+                b.iter(|| {
+                    let mut n = 0usize;
+                    for &w in black_box(&words) {
+                        n += $f(w, 0, black_box(&mut out));
+                    }
+                    n
+                })
+            });
+        };
+    }
+    b!("scalar_tzcnt", indices::select_all64_scalar);
+    b!("portable_lut", indices::select_all64_portable);
+    #[cfg(target_feature = "avx2")]
+    b!("avx2_lut", indices::select_all64_avx2);
+    #[cfg(target_feature = "avx512f")]
+    b!("avx512_compress", indices::select_all64_avx512);
+    g.finish();
+
+    // Streaming: 8 KiB bitmap at three densities.
+    let words = 1usize << 10;
+    let mut g = c.benchmark_group("bitmap_to_indices");
+    g.throughput(Throughput::Bytes((words * 8) as u64));
+    for density in [1u32, 4, 7] {
+        let bits = rng.words(words, density);
+        let mut out = vec![0u32; words * 64 + 64];
+        let label = format!("mask{}/8", density);
+        macro_rules! b {
+            ($name:literal, $f:path) => {
+                g.bench_with_input(BenchmarkId::new($name, &label), &bits, |b, bits| {
+                    b.iter(|| $f(black_box(bits), black_box(&mut out)))
+                });
+            };
+        }
+        b!("scalar_tzcnt", indices::bitmap_to_indices_scalar);
+        b!("portable_lut", indices::bitmap_to_indices_portable);
+        #[cfg(target_feature = "avx2")]
+        b!("avx2_lut", indices::bitmap_to_indices_avx2);
+        #[cfg(target_feature = "avx512f")]
+        b!("avx512_compress", indices::bitmap_to_indices_avx512);
+    }
+    g.finish();
+}
+
+fn bench_bit_to_byte(c: &mut Criterion) {
+    let mut rng = Rng::new(7);
+    let words = 256usize; // 16 KiB of output bytes
+    let bits = rng.words(words, 4);
+    let mut out = vec![0u8; words * 64];
+    let mut g = c.benchmark_group("bit_to_byte");
+    g.throughput(Throughput::Bytes((words * 64) as u64));
+    macro_rules! b {
+        ($name:literal, $f:path) => {
+            g.bench_function($name, |b| {
+                b.iter(|| {
+                    $f(black_box(&bits), black_box(&mut out));
+                    black_box(&out);
+                })
+            });
+        };
+    }
+    b!("scalar", bit_to_byte::bits_to_bytes_scalar);
+    b!("swar", bit_to_byte::bits_to_bytes_swar);
+    b!("portable_select", bit_to_byte::bits_to_bytes_portable);
+    b!("portable_to_simd", bit_to_byte::bits_to_bytes_portable_int);
+    #[cfg(target_feature = "avx2")]
+    b!("avx2", bit_to_byte::bits_to_bytes_avx2);
+    #[cfg(target_feature = "avx512bw")]
+    b!("avx512", bit_to_byte::bits_to_bytes_avx512);
+    #[cfg(target_feature = "bmi2")]
+    b!("pdep", bit_to_byte::bits_to_bytes_pdep);
+    g.finish();
+}
+
+fn bench_expand(c: &mut Criterion) {
+    let mut rng = Rng::new(8);
+    let words = 1usize << 12;
+    let values = rng.words(words, 4);
+    let mut out = vec![0u64; words];
+    let mut g = c.benchmark_group("expand");
+    g.throughput(Throughput::Bytes((words * 16) as u64));
+    for density in [1u32, 4, 7] {
+        let mask = rng.words(words, density);
+        let mut packed = vec![0u64; words + 1];
+        filter::filter_naive(&values, &mask, &mut packed);
+        let label = format!("mask{}/8", density);
+        macro_rules! b {
+            ($name:literal, $f:path) => {
+                g.bench_with_input(BenchmarkId::new($name, &label), &mask, |b, mask| {
+                    b.iter(|| {
+                        $f(black_box(&packed), black_box(mask), black_box(&mut out));
+                        black_box(&out);
+                    })
+                });
+            };
+        }
+        b!("naive", expand::expand_naive);
+        b!("scalar_hd", expand::expand_scalar);
+        b!("portable_u64x8", expand::expand_portable);
+        #[cfg(target_feature = "bmi2")]
+        b!("bmi2_pdep", expand::expand_bmi2);
+    }
+    g.finish();
+}
+
+fn bench_unpack(c: &mut Criterion) {
+    let mut rng = Rng::new(9);
+    let n = 1usize << 14; // 16 KiB of output values
+    let packed = rng.bytes(n + 32, 8);
+    let mut out = vec![0u8; n];
+    let mut g = c.benchmark_group("unpack");
+    g.throughput(Throughput::Elements(n as u64));
+    macro_rules! k {
+        ($k:literal) => {{
+            let label = format!("k{}", $k);
+            macro_rules! b {
+                ($name:literal, $f:expr) => {
+                    g.bench_with_input(BenchmarkId::new($name, &label), &n, |b, _| {
+                        b.iter(|| {
+                            $f(black_box(&packed), black_box(&mut out));
+                            black_box(&out);
+                        })
+                    });
+                };
+            }
+            b!("scalar", unpack::unpack_scalar::<$k>);
+            b!("portable_mul", unpack::unpack_portable_mul::<$k>);
+            b!("portable_shift", unpack::unpack_portable_shift::<$k>);
+            #[cfg(target_feature = "bmi2")]
+            b!("pdep", unpack::unpack_pdep::<$k>);
+            #[cfg(target_feature = "avx2")]
+            b!("avx2", unpack::unpack_avx2::<$k>);
+            #[cfg(target_feature = "avx512bw")]
+            b!("avx512", unpack::unpack_avx512::<$k>);
+        }};
+    }
+    k!(1);
+    k!(3);
+    k!(7);
+    g.finish();
+}
+
+criterion_group!(
+    benches,
+    bench_byte_to_bit,
+    bench_rank,
+    bench_select,
+    bench_filter,
+    bench_rank_index,
+    bench_indices,
+    bench_bit_to_byte,
+    bench_expand,
+    bench_unpack
+);
 criterion_main!(benches);

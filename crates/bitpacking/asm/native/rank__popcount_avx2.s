@@ -3,20 +3,20 @@ bitpacking::rank::popcount_avx2:
 	and ecx, 3
 	mov rax, rsi
 	shr rax, 2
-	je .LBB11_1
+	je .LBB22_1
 	push rbx
 	vpxor xmm0, xmm0, xmm0
-	vpbroadcastd ymm1, dword ptr [rip + .LCPI11_3]
-	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI11_4]
+	vpbroadcastd ymm1, dword ptr [rip + .LCPI22_3]
+	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI22_4]
 	mov rdx, rdi
 	vpxor xmm2, xmm2, xmm2
-	jmp .LBB11_3
-.LBB11_8:
+	jmp .LBB22_3
+.LBB22_8:
 	vpsadbw ymm4, ymm4, ymm0
 	vpaddq ymm2, ymm4, ymm2
 	sub rax, r8
-	je .LBB11_9
-.LBB11_3:
+	je .LBB22_9
+.LBB22_3:
 	cmp rax, 31
 	mov r8d, 31
 	cmovb r8, rax
@@ -28,13 +28,13 @@ bitpacking::rank::popcount_avx2:
 	mov r9, rdx
 	vpxor xmm4, xmm4, xmm4
 	test bl, -32
-	je .LBB11_6
+	je .LBB22_6
 	mov ebx, r11d
 	shr ebx, 5
 	inc ebx
 	and ebx, 7
 	mov r9, rdx
-.LBB11_5:
+.LBB22_5:
 	vmovdqu ymm5, ymmword ptr [r9]
 	add r9, 32
 	vpsrlw ymm6, ymm5, 4
@@ -45,12 +45,12 @@ bitpacking::rank::popcount_avx2:
 	vpshufb ymm5, ymm3, ymm5
 	vpaddb ymm4, ymm4, ymm5
 	dec rbx
-	jne .LBB11_5
-.LBB11_6:
+	jne .LBB22_5
+.LBB22_6:
 	add rdx, r10
 	cmp r11, 224
-	jb .LBB11_8
-.LBB11_7:
+	jb .LBB22_8
+.LBB22_7:
 	vmovdqu ymm5, ymmword ptr [r9]
 	vmovdqu ymm6, ymmword ptr [r9 + 32]
 	vmovdqu ymm7, ymmword ptr [r9 + 64]
@@ -117,9 +117,9 @@ bitpacking::rank::popcount_avx2:
 	vpaddb ymm4, ymm5, ymm4
 	add r9, 256
 	cmp r9, rdx
-	jne .LBB11_7
-	jmp .LBB11_8
-.LBB11_9:
+	jne .LBB22_7
+	jmp .LBB22_8
+.LBB22_9:
 	vextracti128 xmm0, ymm2, 1
 	vpaddq xmm0, xmm2, xmm0
 	vpshufd xmm1, xmm0, 238
@@ -127,8 +127,8 @@ bitpacking::rank::popcount_avx2:
 	vmovq rax, xmm0
 	pop rbx
 	test rcx, rcx
-	je .LBB11_11
-.LBB11_12:
+	je .LBB22_11
+.LBB22_12:
 	movabs rdx, 1152921504606846972
 	and rsi, rdx
 	lea rdx, [rdi + 8*rsi]
@@ -142,8 +142,8 @@ bitpacking::rank::popcount_avx2:
 	vpbroadcastq ymm0, rsi
 	vpxor xmm3, xmm3, xmm3
 	xor esi, esi
-	vmovdqa ymm2, ymmword ptr [rip + .LCPI11_2]
-.LBB11_13:
+	vmovdqa ymm2, ymmword ptr [rip + .LCPI22_2]
+.LBB22_13:
 	vmovdqa ymm1, ymm3
 	vpbroadcastq ymm3, rsi
 	vpor ymm3, ymm3, ymm2
@@ -153,7 +153,7 @@ bitpacking::rank::popcount_avx2:
 	vpaddq ymm3, ymm3, ymm1
 	add rsi, 4
 	cmp rcx, rsi
-	jne .LBB11_13
+	jne .LBB22_13
 	vmovdqa64 ymm1 {k1}, ymm3
 	vextracti128 xmm0, ymm1, 1
 	vpaddq xmm0, xmm1, xmm0
@@ -163,11 +163,11 @@ bitpacking::rank::popcount_avx2:
 	add rax, rcx
 	vzeroupper
 	ret
-.LBB11_1:
+.LBB22_1:
 	xor eax, eax
 	test rcx, rcx
-	jne .LBB11_12
-.LBB11_11:
+	jne .LBB22_12
+.LBB22_11:
 	xor ecx, ecx
 	add rax, rcx
 	vzeroupper

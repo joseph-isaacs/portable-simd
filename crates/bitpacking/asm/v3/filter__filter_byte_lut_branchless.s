@@ -12,10 +12,10 @@ bitpacking::filter::filter_byte_lut_branchless:
 	mov qword ptr [rsp + 40], rsi
 	mov qword ptr [rsp + 48], rcx
 	cmp rsi, rcx
-	jne .LBB24_15
+	jne .LBB37_15
 	xor ecx, ecx
 	test rsi, rsi
-	je .LBB24_2
+	je .LBB37_2
 	mov qword ptr [rsp + 8], r9
 	mov rax, qword ptr [rip + bitpacking::filter::BYTE_PEXT_LUT@GOTPCREL]
 	xor r13d, r13d
@@ -23,13 +23,13 @@ bitpacking::filter::filter_byte_lut_branchless:
 	xor r14d, r14d
 	xor r12d, r12d
 	xor r15d, r15d
-	jmp .LBB24_4
-.LBB24_7:
+	jmp .LBB37_4
+.LBB37_7:
 	inc r15
 	mov r12, r10
 	cmp rsi, r15
-	je .LBB24_8
-.LBB24_4:
+	je .LBB37_8
+.LBB37_4:
 	mov rcx, qword ptr [rsp + 24]
 	mov rdx, qword ptr [rcx + 8*r15]
 	mov rcx, qword ptr [rsp + 32]
@@ -148,10 +148,10 @@ bitpacking::filter::filter_byte_lut_branchless:
 	or r14, rdi
 	add r13d, ecx
 	cmp r13d, 63
-	jbe .LBB24_7
+	jbe .LBB37_7
 	mov rdi, qword ptr [rsp]
 	cmp rdi, qword ptr [rsp + 8]
-	jae .LBB24_14
+	jae .LBB37_14
 	mov rcx, qword ptr [rsp + 16]
 	mov qword ptr [rcx + 8*rdi], r14
 	inc rdi
@@ -159,25 +159,25 @@ bitpacking::filter::filter_byte_lut_branchless:
 	add r13d, -64
 	mov r14, r10
 	xor r10d, r10d
-	jmp .LBB24_7
-.LBB24_8:
+	jmp .LBB37_7
+.LBB37_8:
 	test r13d, r13d
-	je .LBB24_9
+	je .LBB37_9
 	mov rsi, qword ptr [rsp + 8]
 	mov rax, qword ptr [rsp]
 	cmp rax, rsi
-	jae .LBB24_13
+	jae .LBB37_13
 	mov rcx, qword ptr [rsp + 16]
 	mov qword ptr [rcx + 8*rax], r14
 	mov ecx, r13d
-	jmp .LBB24_12
-.LBB24_2:
+	jmp .LBB37_12
+.LBB37_2:
 	xor eax, eax
-	jmp .LBB24_12
-.LBB24_9:
+	jmp .LBB37_12
+.LBB37_9:
 	xor ecx, ecx
 	mov rax, qword ptr [rsp]
-.LBB24_12:
+.LBB37_12:
 	shl rax, 6
 	add rax, rcx
 	add rsp, 56
@@ -188,18 +188,18 @@ bitpacking::filter::filter_byte_lut_branchless:
 	pop r15
 	pop rbp
 	ret
-.LBB24_15:
-	lea r9, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.1]
+.LBB37_15:
+	lea r9, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.4]
 	lea rsi, [rsp + 40]
 	lea rdx, [rsp + 48]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB24_14:
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.3]
+.LBB37_14:
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.6]
 	mov rsi, qword ptr [rsp + 8]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB24_13:
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.2]
+.LBB37_13:
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.5]
 	mov rdi, rax
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

@@ -8,22 +8,22 @@ bitpacking::filter::filter_vortex_pext:
 	mov qword ptr [rsp], rsi
 	mov qword ptr [rsp + 8], rcx
 	cmp rsi, rcx
-	jne .LBB22_18
+	jne .LBB35_18
 	cmp r9, rsi
-	jbe .LBB22_19
+	jbe .LBB35_19
 	xor r9d, r9d
 	xor eax, eax
 	test rsi, rsi
-	je .LBB22_17
+	je .LBB35_17
 	xor r15d, r15d
 	xor r14d, r14d
 	xor ecx, ecx
 	xor r10d, r10d
-.LBB22_4:
+.LBB35_4:
 	mov r11, r15
 	mov rbx, r14
-	jmp .LBB22_5
-.LBB22_12:
+	jmp .LBB35_5
+.LBB35_12:
 	xor r15d, r15d
 	shld r15, r14, cl
 	shlx r14, r14, rcx
@@ -36,17 +36,17 @@ bitpacking::filter::filter_vortex_pext:
 	inc rax
 	mov r11, r15
 	xor ebx, ebx
-.LBB22_13:
+.LBB35_13:
 	inc r10
 	cmp r10, rsi
-	jae .LBB22_10
-.LBB22_5:
+	jae .LBB35_10
+.LBB35_5:
 	mov r14, qword ptr [rdi + 8*r10]
 	mov r15, qword ptr [rdx + 8*r10]
 	cmp r15, -1
-	je .LBB22_12
+	je .LBB35_12
 	test r15, r15
-	je .LBB22_13
+	je .LBB35_13
 	pext r13, r14, r15
 	xor r14d, r14d
 	shld r14, r13, cl
@@ -60,7 +60,7 @@ bitpacking::filter::filter_vortex_pext:
 	or r15, r11
 	add r12d, ecx
 	cmp r12d, 64
-	jb .LBB22_8
+	jb .LBB35_8
 	mov qword ptr [r8 + 8*rax], r15
 	inc rax
 	add r12d, -64
@@ -69,24 +69,24 @@ bitpacking::filter::filter_vortex_pext:
 	xor r14d, r14d
 	inc r10
 	cmp r10, rsi
-	jb .LBB22_4
-	jmp .LBB22_9
-.LBB22_8:
+	jb .LBB35_4
+	jmp .LBB35_9
+.LBB35_8:
 	mov ecx, r12d
 	inc r10
 	cmp r10, rsi
-	jb .LBB22_4
-.LBB22_9:
+	jb .LBB35_4
+.LBB35_9:
 	mov r11, r15
-.LBB22_10:
+.LBB35_10:
 	test ecx, ecx
-	je .LBB22_11
+	je .LBB35_11
 	mov qword ptr [r8 + 8*rax], r11
 	mov r9d, ecx
-	jmp .LBB22_17
-.LBB22_11:
+	jmp .LBB35_17
+.LBB35_11:
 	xor r9d, r9d
-.LBB22_17:
+.LBB35_17:
 	shl rax, 6
 	add rax, r9
 	add rsp, 16
@@ -96,15 +96,15 @@ bitpacking::filter::filter_vortex_pext:
 	pop r14
 	pop r15
 	ret
-.LBB22_18:
-	lea r9, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.5]
+.LBB35_18:
+	lea r9, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.8]
 	mov rsi, rsp
 	lea rdx, [rsp + 8]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB22_19:
-	lea rdi, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.6]
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.7]
+.LBB35_19:
+	lea rdi, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.9]
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.10]
 	mov esi, 95
 	call qword ptr [rip + core::panicking::panic_fmt@GOTPCREL]

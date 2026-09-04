@@ -9,23 +9,23 @@ bitpacking::filter::filter_vortex_lut_branchless:
 	mov qword ptr [rsp + 40], rsi
 	mov qword ptr [rsp + 48], rcx
 	cmp rsi, rcx
-	jne .LBB29_19
+	jne .LBB44_19
 	cmp r9, rsi
-	jbe .LBB29_20
+	jbe .LBB44_20
 	xor r13d, r13d
 	test rsi, rsi
-	je .LBB29_3
+	je .LBB44_3
 	mov r12, rdx
 	xor eax, eax
 	xor r10d, r10d
 	xor edx, edx
 	xor ecx, ecx
 	xor r11d, r11d
-.LBB29_5:
+.LBB44_5:
 	mov r15, r10
 	mov r14, rdx
-	jmp .LBB29_6
-.LBB29_13:
+	jmp .LBB44_6
+.LBB44_13:
 	xor r9d, r9d
 	shld r9, rdx, cl
 	shlx rdx, rdx, rcx
@@ -38,17 +38,17 @@ bitpacking::filter::filter_vortex_lut_branchless:
 	inc rax
 	mov r15, r9
 	xor r14d, r14d
-.LBB29_14:
+.LBB44_14:
 	inc r11
 	cmp r11, rsi
-	jae .LBB29_11
-.LBB29_6:
+	jae .LBB44_11
+.LBB44_6:
 	mov rdx, qword ptr [rdi + 8*r11]
 	mov rbx, qword ptr [r12 + 8*r11]
 	cmp rbx, -1
-	je .LBB29_13
+	je .LBB44_13
 	test rbx, rbx
-	je .LBB29_14
+	je .LBB44_14
 	mov qword ptr [rsp + 32], r8
 	mov r9d, ebx
 	and r9d, 65280
@@ -170,7 +170,7 @@ bitpacking::filter::filter_vortex_lut_branchless:
 	or r10, r15
 	add r9d, ecx
 	cmp r9d, 64
-	jb .LBB29_9
+	jb .LBB44_9
 	mov r8, qword ptr [rsp + 32]
 	mov qword ptr [r8 + 8*rax], r10
 	inc rax
@@ -180,28 +180,28 @@ bitpacking::filter::filter_vortex_lut_branchless:
 	xor edx, edx
 	inc r11
 	cmp r11, rsi
-	jb .LBB29_5
-	jmp .LBB29_10
-.LBB29_9:
+	jb .LBB44_5
+	jmp .LBB44_10
+.LBB44_9:
 	mov ecx, r9d
 	mov r8, qword ptr [rsp + 32]
 	inc r11
 	cmp r11, rsi
-	jb .LBB29_5
-.LBB29_10:
+	jb .LBB44_5
+.LBB44_10:
 	mov r15, r10
-.LBB29_11:
+.LBB44_11:
 	test ecx, ecx
-	je .LBB29_12
+	je .LBB44_12
 	mov qword ptr [r8 + 8*rax], r15
 	mov r13d, ecx
-	jmp .LBB29_18
-.LBB29_3:
+	jmp .LBB44_18
+.LBB44_3:
 	xor eax, eax
-	jmp .LBB29_18
-.LBB29_12:
+	jmp .LBB44_18
+.LBB44_12:
 	xor r13d, r13d
-.LBB29_18:
+.LBB44_18:
 	shl rax, 6
 	add rax, r13
 	add rsp, 56
@@ -212,15 +212,15 @@ bitpacking::filter::filter_vortex_lut_branchless:
 	pop r15
 	pop rbp
 	ret
-.LBB29_19:
-	lea r9, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.5]
+.LBB44_19:
+	lea r9, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.8]
 	lea rsi, [rsp + 40]
 	lea rdx, [rsp + 48]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB29_20:
-	lea rdi, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.6]
-	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.7]
+.LBB44_20:
+	lea rdi, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.9]
+	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.10]
 	mov esi, 95
 	call qword ptr [rip + core::panicking::panic_fmt@GOTPCREL]

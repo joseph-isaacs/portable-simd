@@ -1,27 +1,27 @@
 bitpacking::select::select_broadword:
 	test rsi, rsi
-	je .LBB30_1
+	je .LBB43_1
 	shl rsi, 3
 	xor eax, eax
 	xor ecx, ecx
 	xor r9d, r9d
 	mov r10, rdx
-.LBB30_3:
+.LBB43_3:
 	mov r8, qword ptr [rdi + r9]
 	xor r11d, r11d
 	popcnt r11, r8
 	sub r10, r11
-	jb .LBB30_6
+	jb .LBB43_6
 	add r9, 8
 	add rcx, -64
 	mov rdx, r10
 	cmp rsi, r9
-	jne .LBB30_3
+	jne .LBB43_3
 	ret
-.LBB30_1:
+.LBB43_1:
 	xor eax, eax
 	ret
-.LBB30_6:
+.LBB43_6:
 	mov rax, r8
 	shr rax
 	movabs rsi, 6148914691236517205

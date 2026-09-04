@@ -10,33 +10,33 @@ bitpacking::filter::filter_portable4:
 	mov qword ptr [rsp + 24], rsi
 	mov qword ptr [rsp + 32], rcx
 	cmp rsi, rcx
-	jne .LBB20_30
+	jne .LBB33_30
 	mov r14, rsi
 	shr r14, 2
-	je .LBB20_2
+	je .LBB33_2
 	shl r14, 5
 	xor r15d, r15d
 	vpcmpeqd ymm0, ymm0, ymm0
-	vpbroadcastd ymm1, dword ptr [rip + .LCPI20_2]
-	vbroadcasti128 ymm2, xmmword ptr [rip + .LCPI20_3]
+	vpbroadcastd ymm1, dword ptr [rip + .LCPI33_2]
+	vbroadcasti128 ymm2, xmmword ptr [rip + .LCPI33_3]
 	vpxor xmm3, xmm3, xmm3
 	xor r12d, r12d
 	xor ecx, ecx
 	xor r11d, r11d
 	xor ebx, ebx
 	xor edi, edi
-	jmp .LBB20_9
-.LBB20_28:
+	jmp .LBB33_9
+.LBB33_28:
 	mov qword ptr [r8 + 8*rdi], r11
 	inc rdi
 	add ecx, -64
 	mov r11, rbx
 	xor ebx, ebx
-.LBB20_29:
+.LBB33_29:
 	add r12, 32
 	cmp r14, r12
-	je .LBB20_3
-.LBB20_9:
+	je .LBB33_3
+.LBB33_9:
 	vmovdqu ymm4, ymmword ptr [rdx + r12]
 	mov rax, qword ptr [rsp + 16]
 	vpand ymm5, ymm4, ymmword ptr [rax + r12]
@@ -184,15 +184,15 @@ bitpacking::filter::filter_portable4:
 	or rbp, r11
 	add r10d, ecx
 	cmp r10d, 63
-	jbe .LBB20_20
+	jbe .LBB33_20
 	cmp rdi, r9
-	jae .LBB20_11
+	jae .LBB33_11
 	mov qword ptr [r8 + 8*rdi], rbp
 	inc rdi
 	add r10d, -64
 	mov rbp, r13
 	xor r13d, r13d
-.LBB20_20:
+.LBB33_20:
 	vpextrq rax, xmm5, 1
 	xor r11d, r11d
 	mov ecx, r10d
@@ -206,15 +206,15 @@ bitpacking::filter::filter_portable4:
 	or rbx, rbp
 	add ecx, r10d
 	cmp ecx, 64
-	jb .LBB20_23
+	jb .LBB33_23
 	cmp rdi, r9
-	jae .LBB20_11
+	jae .LBB33_11
 	mov qword ptr [r8 + 8*rdi], rbx
 	inc rdi
 	add ecx, -64
 	mov rbx, r11
 	xor r11d, r11d
-.LBB20_23:
+.LBB33_23:
 	vextracti128 xmm5, ymm5, 1
 	vmovq rax, xmm5
 	xor r13d, r13d
@@ -229,15 +229,15 @@ bitpacking::filter::filter_portable4:
 	or rbp, rbx
 	add r10d, ecx
 	cmp r10d, 64
-	jb .LBB20_26
+	jb .LBB33_26
 	cmp rdi, r9
-	jae .LBB20_11
+	jae .LBB33_11
 	mov qword ptr [r8 + 8*rdi], rbp
 	inc rdi
 	add r10d, -64
 	mov rbp, r13
 	xor r13d, r13d
-.LBB20_26:
+.LBB33_26:
 	vpextrq rax, xmm5, 1
 	xor ebx, ebx
 	mov ecx, r10d
@@ -251,38 +251,38 @@ bitpacking::filter::filter_portable4:
 	or r11, rbp
 	add ecx, r10d
 	cmp ecx, 64
-	jb .LBB20_29
+	jb .LBB33_29
 	cmp rdi, r9
-	jb .LBB20_28
-.LBB20_11:
+	jb .LBB33_28
+.LBB33_11:
 	mov rsi, r9
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.3]
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.6]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB20_2:
+.LBB33_2:
 	xor edi, edi
 	xor r11d, r11d
 	xor ebx, ebx
 	xor ecx, ecx
-.LBB20_3:
+.LBB33_3:
 	mov qword ptr [rsp + 8], r9
 	mov r9d, esi
 	and r9d, 3
-	je .LBB20_12
+	je .LBB33_12
 	shl rsi, 3
 	movabs rax, 9223372036854775776
 	and rax, rsi
 	add qword ptr [rsp + 16], rax
 	add rdx, rax
 	xor r15d, r15d
-	jmp .LBB20_5
-.LBB20_18:
+	jmp .LBB33_5
+.LBB33_18:
 	mov rdx, r10
 	inc r15
 	mov rbx, r13
 	cmp r9, r15
-	je .LBB20_12
-.LBB20_5:
+	je .LBB33_12
+.LBB33_5:
 	mov esi, ecx
 	mov r10, rdx
 	mov r12, qword ptr [rdx + 8*r15]
@@ -460,23 +460,23 @@ bitpacking::filter::filter_portable4:
 	or r11, rax
 	add ecx, esi
 	cmp ecx, 63
-	jbe .LBB20_18
+	jbe .LBB33_18
 	cmp rdi, qword ptr [rsp + 8]
-	jae .LBB20_7
+	jae .LBB33_7
 	mov qword ptr [r8 + 8*rdi], r11
 	inc rdi
 	add ecx, -64
 	mov r11, r13
 	xor r13d, r13d
-	jmp .LBB20_18
-.LBB20_12:
+	jmp .LBB33_18
+.LBB33_12:
 	test ecx, ecx
 	mov rsi, qword ptr [rsp + 8]
-	je .LBB20_15
+	je .LBB33_15
 	cmp rdi, rsi
-	jae .LBB20_16
+	jae .LBB33_16
 	mov qword ptr [r8 + 8*rdi], r11
-.LBB20_15:
+.LBB33_15:
 	shl rdi, 6
 	mov eax, ecx
 	add rax, rdi
@@ -489,19 +489,19 @@ bitpacking::filter::filter_portable4:
 	pop rbp
 	vzeroupper
 	ret
-.LBB20_30:
-	lea r9, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.21]
+.LBB33_30:
+	lea r9, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.54]
 	lea rsi, [rsp + 24]
 	lea rdx, [rsp + 32]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB20_7:
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.3]
+.LBB33_7:
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.6]
 	mov rsi, qword ptr [rsp + 8]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB20_16:
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.2]
+.LBB33_16:
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.5]
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

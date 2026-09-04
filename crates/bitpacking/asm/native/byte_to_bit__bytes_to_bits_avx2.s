@@ -9,19 +9,19 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	mov r10, rdi
 	cmovb r10, rcx
 	test r10, r10
-	je .LBB3_8
+	je .LBB14_8
 	mov r9d, r10d
 	and r9d, 7
 	cmp r10, 8
-	jae .LBB3_3
+	jae .LBB14_3
 	xor r11d, r11d
-	jmp .LBB3_6
-.LBB3_3:
+	jmp .LBB14_6
+.LBB14_3:
 	movabs r11, 144115188075855864
 	and r10, r11
 	lea rbx, [rax + 480]
 	xor r11d, r11d
-.LBB3_4:
+.LBB14_4:
 	vmovdqu64 zmm0, zmmword ptr [rbx - 480]
 	vptestmb k0, zmm0, zmm0
 	kmovq qword ptr [rdx + 8*r11], k0
@@ -49,55 +49,55 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	add r11, 8
 	add rbx, 512
 	cmp r10, r11
-	jne .LBB3_4
+	jne .LBB14_4
 	test r9, r9
-	je .LBB3_8
-.LBB3_6:
+	je .LBB14_8
+.LBB14_6:
 	lea r10, [rdx + 8*r11]
 	shl r11, 6
 	lea r11, [r11 + rax + 32]
 	shl r9d, 3
 	xor ebx, ebx
-.LBB3_7:
+.LBB14_7:
 	vmovdqu64 zmm0, zmmword ptr [r11 + 8*rbx - 32]
 	vptestmb k0, zmm0, zmm0
 	kmovq qword ptr [r10 + rbx], k0
 	add rbx, 8
 	cmp r9, rbx
-	jne .LBB3_7
-.LBB3_8:
+	jne .LBB14_7
+.LBB14_8:
 	test r8, r8
-	je .LBB3_25
+	je .LBB14_25
 	movabs r11, 9223372036854775744
 	and r11, rsi
 	lea r9, [rax + r11]
 	cmp r8, 4
-	jae .LBB3_11
+	jae .LBB14_11
 	xor eax, eax
 	xor r10d, r10d
 	mov rsi, r9
-	jmp .LBB3_21
-.LBB3_11:
+	jmp .LBB14_21
+.LBB14_11:
 	cmp r8d, 16
-	jae .LBB3_16
+	jae .LBB14_16
 	xor r10d, r10d
 	xor eax, eax
-	jmp .LBB3_13
-.LBB3_16:
+	jmp .LBB14_13
+.LBB14_16:
 	mov r10d, esi
 	and r10d, 48
 	lea rax, [r11 + rax + 12]
-	vmovdqa ymm1, ymmword ptr [rip + .LCPI3_0]
+	vmovdqa ymm1, ymmword ptr [rip + .LCPI14_0]
 	vpxor xmm0, xmm0, xmm0
 	xor r11d, r11d
-	vpbroadcastq ymm2, qword ptr [rip + .LCPI3_1]
-	vpbroadcastq ymm3, qword ptr [rip + .LCPI3_2]
-	vpbroadcastq ymm4, qword ptr [rip + .LCPI3_3]
-	vpbroadcastq ymm5, qword ptr [rip + .LCPI3_4]
+	vpbroadcastq ymm2, qword ptr [rip + .LCPI14_1]
+	vpbroadcastq ymm3, qword ptr [rip + .LCPI14_2]
+	vpbroadcastq ymm4, qword ptr [rip + .LCPI14_3]
+	vpbroadcastq ymm5, qword ptr [rip + .LCPI14_4]
 	vpxor xmm6, xmm6, xmm6
 	vpxor xmm8, xmm8, xmm8
 	vpxor xmm7, xmm7, xmm7
-.LBB3_17:
+.LBB14_17:
 	vpaddq ymm9, ymm1, ymm2
 	vpaddq ymm10, ymm1, ymm3
 	vpaddq ymm11, ymm1, ymm4
@@ -128,7 +128,7 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	add r11, 16
 	vpaddq ymm1, ymm1, ymm5
 	cmp r10, r11
-	jne .LBB3_17
+	jne .LBB14_17
 	vpor ymm1, ymm8, ymm6
 	vpternlogq ymm0, ymm7, ymm1, 254
 	vextracti128 xmm1, ymm0, 1
@@ -137,19 +137,19 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	vpor xmm0, xmm0, xmm1
 	vmovq rax, xmm0
 	cmp r8d, r10d
-	je .LBB3_23
+	je .LBB14_23
 	test sil, 12
-	je .LBB3_20
-.LBB3_13:
+	je .LBB14_20
+.LBB14_13:
 	mov r11, r10
 	mov r10d, esi
 	and r10d, 60
 	lea rsi, [r9 + r10]
 	vmovq xmm0, rax
 	vpbroadcastq ymm1, r11
-	vpor ymm1, ymm1, ymmword ptr [rip + .LCPI3_0]
-	vpbroadcastq ymm2, qword ptr [rip + .LCPI3_1]
-.LBB3_14:
+	vpor ymm1, ymm1, ymmword ptr [rip + .LCPI14_0]
+	vpbroadcastq ymm2, qword ptr [rip + .LCPI14_1]
+.LBB14_14:
 	vmovd xmm3, dword ptr [r9 + r11]
 	vptestmb k0, xmm3, xmm3
 	vpmovm2q ymm3, k0
@@ -159,17 +159,17 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	add r11, 4
 	vpaddq ymm1, ymm1, ymm2
 	cmp r10, r11
-	jne .LBB3_14
+	jne .LBB14_14
 	vextracti128 xmm1, ymm0, 1
 	vpor xmm0, xmm0, xmm1
 	vpshufd xmm1, xmm0, 238
 	vpor xmm0, xmm0, xmm1
 	vmovq rax, xmm0
 	cmp r8d, r10d
-	je .LBB3_23
-.LBB3_21:
+	je .LBB14_23
+.LBB14_21:
 	add r9, r8
-.LBB3_22:
+.LBB14_22:
 	xor r8d, r8d
 	cmp byte ptr [rsi], 0
 	setne r8b
@@ -178,20 +178,20 @@ bitpacking::byte_to_bit::bytes_to_bits_avx2:
 	inc rsi
 	or rax, r8
 	cmp rsi, r9
-	jne .LBB3_22
-.LBB3_23:
+	jne .LBB14_22
+.LBB14_23:
 	cmp rdi, rcx
-	jae .LBB3_26
+	jae .LBB14_26
 	mov qword ptr [rdx + 8*rdi], rax
-.LBB3_25:
+.LBB14_25:
 	pop rbx
 	vzeroupper
 	ret
-.LBB3_20:
+.LBB14_20:
 	lea rsi, [r9 + r10]
-	jmp .LBB3_21
-.LBB3_26:
-	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.12]
+	jmp .LBB14_21
+.LBB14_26:
+	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.47]
 	mov rsi, rcx
 	vzeroupper
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

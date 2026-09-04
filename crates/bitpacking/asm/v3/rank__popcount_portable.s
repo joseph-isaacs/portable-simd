@@ -4,16 +4,16 @@ bitpacking::rank::popcount_portable:
 	lea r8, [8*rsi]
 	mov rcx, r8
 	and rcx, -64
-	je .LBB12_1
+	je .LBB21_1
 	add r8, -64
 	test r8b, 64
-	jne .LBB12_3
+	jne .LBB21_3
 	lea rdx, [rdi + 64]
 	vmovdqu ymm0, ymmword ptr [rdi]
 	vmovdqu ymm1, ymmword ptr [rdi + 32]
-	vpbroadcastd ymm2, dword ptr [rip + .LCPI12_4]
+	vpbroadcastd ymm2, dword ptr [rip + .LCPI21_4]
 	vpand ymm3, ymm1, ymm2
-	vbroadcasti128 ymm4, xmmword ptr [rip + .LCPI12_5]
+	vbroadcasti128 ymm4, xmmword ptr [rip + .LCPI21_5]
 	vpshufb ymm3, ymm4, ymm3
 	vpsrlw ymm1, ymm1, 4
 	vpand ymm1, ymm1, ymm2
@@ -29,29 +29,29 @@ bitpacking::rank::popcount_portable:
 	vpaddb ymm0, ymm0, ymm5
 	vpsadbw ymm0, ymm0, ymm3
 	cmp r8, 64
-	jae .LBB12_6
-	jmp .LBB12_8
-.LBB12_1:
+	jae .LBB21_6
+	jmp .LBB21_8
+.LBB21_1:
 	xor ecx, ecx
 	test rax, rax
-	jne .LBB12_11
-.LBB12_10:
+	jne .LBB21_11
+.LBB21_10:
 	xor eax, eax
 	add rax, rcx
 	vzeroupper
 	ret
-.LBB12_3:
+.LBB21_3:
 	vpxor xmm0, xmm0, xmm0
 	vpxor xmm1, xmm1, xmm1
 	mov rdx, rdi
 	cmp r8, 64
-	jb .LBB12_8
-.LBB12_6:
+	jb .LBB21_8
+.LBB21_6:
 	add rcx, rdi
-	vpbroadcastd ymm2, dword ptr [rip + .LCPI12_4]
-	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI12_5]
+	vpbroadcastd ymm2, dword ptr [rip + .LCPI21_4]
+	vbroadcasti128 ymm3, xmmword ptr [rip + .LCPI21_5]
 	vpxor xmm4, xmm4, xmm4
-.LBB12_7:
+.LBB21_7:
 	vmovdqu ymm5, ymmword ptr [rdx]
 	vmovdqu ymm6, ymmword ptr [rdx + 32]
 	vmovdqu ymm7, ymmword ptr [rdx + 64]
@@ -90,8 +90,8 @@ bitpacking::rank::popcount_portable:
 	vpsadbw ymm5, ymm5, ymm4
 	vpaddq ymm1, ymm5, ymm1
 	cmp rdx, rcx
-	jne .LBB12_7
-.LBB12_8:
+	jne .LBB21_7
+.LBB21_8:
 	vpaddq ymm0, ymm0, ymm1
 	vextracti128 xmm1, ymm0, 1
 	vpaddq xmm0, xmm0, xmm1
@@ -99,8 +99,8 @@ bitpacking::rank::popcount_portable:
 	vpaddq xmm0, xmm0, xmm1
 	vmovq rcx, xmm0
 	test rax, rax
-	je .LBB12_10
-.LBB12_11:
+	je .LBB21_10
+.LBB21_11:
 	movabs rdx, 1152921504606846968
 	and rsi, rdx
 	lea rdx, [rdi + 8*rsi]
@@ -116,14 +116,14 @@ bitpacking::rank::popcount_portable:
 	vpbroadcastq ymm3, xmm0
 	vpxor xmm0, xmm0, xmm0
 	xor esi, esi
-	vmovdqa ymm1, ymmword ptr [rip + .LCPI12_2]
-	vpbroadcastq ymm2, qword ptr [rip + .LCPI12_3]
+	vmovdqa ymm1, ymmword ptr [rip + .LCPI21_2]
+	vpbroadcastq ymm2, qword ptr [rip + .LCPI21_3]
 	vpor ymm3, ymm3, ymm2
 	vpcmpeqd ymm4, ymm4, ymm4
-	vpbroadcastd ymm5, dword ptr [rip + .LCPI12_4]
-	vbroadcasti128 ymm6, xmmword ptr [rip + .LCPI12_5]
+	vpbroadcastd ymm5, dword ptr [rip + .LCPI21_4]
+	vbroadcasti128 ymm6, xmmword ptr [rip + .LCPI21_5]
 	vpxor xmm8, xmm8, xmm8
-.LBB12_12:
+.LBB21_12:
 	vmovq xmm7, rsi
 	vpbroadcastq ymm7, xmm7
 	vpor ymm7, ymm7, ymm1
@@ -142,7 +142,7 @@ bitpacking::rank::popcount_portable:
 	vpaddq ymm8, ymm8, ymm9
 	add rsi, 4
 	cmp rax, rsi
-	jne .LBB12_12
+	jne .LBB21_12
 	vblendvpd ymm0, ymm8, ymm9, ymm7
 	vextractf128 xmm1, ymm0, 1
 	vpaddq xmm0, xmm0, xmm1

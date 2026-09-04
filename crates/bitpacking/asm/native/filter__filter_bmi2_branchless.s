@@ -8,18 +8,18 @@ bitpacking::filter::filter_bmi2_branchless:
 	mov qword ptr [rsp], rsi
 	mov qword ptr [rsp + 8], rcx
 	cmp rsi, rcx
-	jne .LBB26_14
+	jne .LBB41_14
 	xor r10d, r10d
 	test rsi, rsi
-	je .LBB26_2
+	je .LBB41_2
 	xor ecx, ecx
 	xor eax, eax
 	xor r11d, r11d
 	xor r14d, r14d
 	xor ebx, ebx
-.LBB26_4:
+.LBB41_4:
 	cmp rax, r9
-	jae .LBB26_13
+	jae .LBB41_13
 	mov r15, qword ptr [rdi + 8*rbx]
 	mov r12, qword ptr [rdx + 8*rbx]
 	pext r13, r15, r12
@@ -45,20 +45,20 @@ bitpacking::filter::filter_bmi2_branchless:
 	mov ecx, r15d
 	and ecx, 63
 	cmp rsi, rbx
-	jne .LBB26_4
+	jne .LBB41_4
 	test ecx, ecx
-	je .LBB26_7
+	je .LBB41_7
 	cmp rax, r9
-	jae .LBB26_11
+	jae .LBB41_11
 	mov qword ptr [r8 + 8*rax], r11
 	mov r10d, ecx
-	jmp .LBB26_10
-.LBB26_2:
+	jmp .LBB41_10
+.LBB41_2:
 	xor eax, eax
-	jmp .LBB26_10
-.LBB26_7:
+	jmp .LBB41_10
+.LBB41_7:
 	xor r10d, r10d
-.LBB26_10:
+.LBB41_10:
 	shl rax, 6
 	or rax, r10
 	add rsp, 16
@@ -68,20 +68,20 @@ bitpacking::filter::filter_bmi2_branchless:
 	pop r14
 	pop r15
 	ret
-.LBB26_14:
-	lea r9, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.1]
+.LBB41_14:
+	lea r9, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.4]
 	mov rsi, rsp
 	lea rdx, [rsp + 8]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB26_13:
-	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.4]
+.LBB41_13:
+	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.7]
 	mov rdi, rax
 	mov rsi, r9
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB26_11:
-	lea rdx, [rip + .Lanon.3f31a1251e1a19459a541c87c7cffd2b.2]
+.LBB41_11:
+	lea rdx, [rip + .Lanon.d29534ef304efb84a2a169aa7d971929.5]
 	mov rdi, rax
 	mov rsi, r9
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]

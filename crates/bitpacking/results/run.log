@@ -1,0 +1,21 @@
+=== v3 (target-cpu=x86-64-v3)
+    Finished `bench` profile [optimized + debuginfo] target(s) in 0.03s
+     Running benches/bitpacking.rs (target/v3/release/deps/bitpacking-542600a385b6fbac)
+Benchmarking byte_to_bit/scalar
+Benchmarking byte_to_bit/scalar: Warming up for 1.0000 s
+Benchmarking byte_to_bit/scalar: Collecting 100 samples in estimated 2.0131 s (550k iterations)
+Benchmarking byte_to_bit/scalar: Analyzing
+byte_to_bit/scalar      time:   [3.6490 µs 3.6620 µs 3.6754 µs]
+                        thrpt:  [4.1516 GiB/s 4.1667 GiB/s 4.1817 GiB/s]
+                 change:
+                        time:   [-14.555% -13.225% -12.431%] (p = 0.00 < 0.05)
+                        thrpt:  [+14.196% +15.241% +17.034%]
+                        Performance has improved.
+Found 18 outliers among 100 measurements (18.00%)
+  5 (5.00%) low severe
+  3 (3.00%) low mild
+  1 (1.00%) high mild
+  9 (9.00%) high severe
+Benchmarking byte_to_bit/swar
+Benchmarking byte_to_bit/swar: Warming up for 1.0000 s
+Benchmarking byte_to_bit/swar: Collecting 100 samples in estimated 2.0017 s (2.0M iterations)

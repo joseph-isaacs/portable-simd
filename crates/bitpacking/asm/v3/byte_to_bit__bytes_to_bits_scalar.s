@@ -1,13 +1,13 @@
 bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	test rsi, rsi
-	je .LBB5_21
+	je .LBB14_21
 	mov r9, rsi
 	lea rax, [rsi + 63]
 	shr rax, 6
 	cmp rcx, rax
 	cmovb rax, rcx
 	test rax, rax
-	je .LBB5_21
+	je .LBB14_21
 	push rbp
 	push r15
 	push r14
@@ -17,29 +17,29 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	lea rcx, [rdi + 12]
 	xor r8d, r8d
 	mov r15d, 64
-	vmovdqa ymm0, ymmword ptr [rip + .LCPI5_0]
+	vmovdqa ymm0, ymmword ptr [rip + .LCPI14_0]
 	vpxor xmm1, xmm1, xmm1
 	vpcmpeqd xmm2, xmm2, xmm2
-	vpbroadcastq ymm3, qword ptr [rip + .LCPI5_4]
-	vpbroadcastq ymm4, qword ptr [rip + .LCPI5_5]
-	vpbroadcastq ymm5, qword ptr [rip + .LCPI5_1]
-	vpbroadcastq ymm6, qword ptr [rip + .LCPI5_2]
-	vpbroadcastq ymm7, qword ptr [rip + .LCPI5_3]
-	vpbroadcastq ymm8, qword ptr [rip + .LCPI5_6]
+	vpbroadcastq ymm3, qword ptr [rip + .LCPI14_4]
+	vpbroadcastq ymm4, qword ptr [rip + .LCPI14_5]
+	vpbroadcastq ymm5, qword ptr [rip + .LCPI14_1]
+	vpbroadcastq ymm6, qword ptr [rip + .LCPI14_2]
+	vpbroadcastq ymm7, qword ptr [rip + .LCPI14_3]
+	vpbroadcastq ymm8, qword ptr [rip + .LCPI14_6]
 	mov r10, rdi
 	mov r11, r9
-	jmp .LBB5_3
-.LBB5_4:
+	jmp .LBB14_3
+.LBB14_4:
 	xor r13d, r13d
-.LBB5_19:
+.LBB14_19:
 	mov qword ptr [rdx + 8*r8], r13
 	inc r8
 	add r11, -64
 	add rcx, 64
 	add r10, 64
 	cmp r8, rax
-	je .LBB5_20
-.LBB5_3:
+	je .LBB14_20
+.LBB14_3:
 	cmp r11, 64
 	mov r12d, 64
 	cmovb r12, r11
@@ -51,21 +51,21 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	cmovae rsi, r15
 	mov r14, r9
 	sub r14, rbx
-	je .LBB5_4
+	je .LBB14_4
 	add rbx, rdi
 	cmp r14, 4
-	jae .LBB5_7
+	jae .LBB14_7
 	xor r13d, r13d
 	xor r14d, r14d
 	mov rbp, rbx
-	jmp .LBB5_17
-.LBB5_7:
+	jmp .LBB14_17
+.LBB14_7:
 	cmp r14, 16
-	jae .LBB5_12
+	jae .LBB14_12
 	xor r14d, r14d
 	xor r13d, r13d
-	jmp .LBB5_9
-.LBB5_12:
+	jmp .LBB14_9
+.LBB14_12:
 	mov r13d, r12d
 	and r13d, 112
 	mov r14d, esi
@@ -76,7 +76,7 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	vpxor xmm11, xmm11, xmm11
 	vpxor xmm12, xmm12, xmm12
 	vmovdqa ymm13, ymm0
-.LBB5_13:
+.LBB14_13:
 	vmovd xmm14, dword ptr [rcx + rbp - 12]
 	vpcmpeqb xmm14, xmm14, xmm1
 	vpxor xmm14, xmm14, xmm2
@@ -115,7 +115,7 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	add rbp, 16
 	vpaddq ymm13, ymm13, ymm8
 	cmp r13, rbp
-	jne .LBB5_13
+	jne .LBB14_13
 	vpor ymm9, ymm10, ymm9
 	vpor ymm9, ymm11, ymm9
 	vpor ymm9, ymm12, ymm9
@@ -125,10 +125,10 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	vpor xmm9, xmm9, xmm10
 	vmovq r13, xmm9
 	cmp rsi, r14
-	je .LBB5_19
+	je .LBB14_19
 	test sil, 12
-	je .LBB5_16
-.LBB5_9:
+	je .LBB14_16
+.LBB14_9:
 	mov r15, r14
 	and r12d, 124
 	mov r14d, esi
@@ -138,7 +138,7 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	vmovq xmm10, r15
 	vpbroadcastq ymm10, xmm10
 	vpor ymm10, ymm10, ymm0
-.LBB5_10:
+.LBB14_10:
 	vmovd xmm11, dword ptr [r10 + r15]
 	vpcmpeqb xmm11, xmm11, xmm1
 	vpxor xmm11, xmm11, xmm2
@@ -150,7 +150,7 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	add r15, 4
 	vpaddq ymm10, ymm10, ymm5
 	cmp r12, r15
-	jne .LBB5_10
+	jne .LBB14_10
 	vextracti128 xmm10, ymm9, 1
 	vpor xmm9, xmm9, xmm10
 	vpshufd xmm10, xmm9, 238
@@ -158,10 +158,10 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	vmovq r13, xmm9
 	cmp rsi, r14
 	mov r15d, 64
-	je .LBB5_19
-.LBB5_17:
+	je .LBB14_19
+.LBB14_17:
 	add rbx, rsi
-.LBB5_18:
+.LBB14_18:
 	xor esi, esi
 	cmp byte ptr [rbp], 0
 	setne sil
@@ -170,18 +170,18 @@ bitpacking::byte_to_bit::bytes_to_bits_scalar:
 	inc rbp
 	or r13, rsi
 	cmp rbp, rbx
-	jne .LBB5_18
-	jmp .LBB5_19
-.LBB5_16:
+	jne .LBB14_18
+	jmp .LBB14_19
+.LBB14_16:
 	lea rbp, [rbx + r14]
-	jmp .LBB5_17
-.LBB5_20:
+	jmp .LBB14_17
+.LBB14_20:
 	pop rbx
 	pop r12
 	pop r13
 	pop r14
 	pop r15
 	pop rbp
-.LBB5_21:
+.LBB14_21:
 	vzeroupper
 	ret

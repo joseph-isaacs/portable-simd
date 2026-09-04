@@ -51,6 +51,42 @@ pub fn popcount_portable_u8(words: &[u64]) -> usize {
     total + popcount_scalar(rem)
 }
 
+/// Per-u64-lane popcount of one ymm via the nibble LUT + `vpsadbw` (shared with rank_index).
+#[cfg(target_feature = "avx2")]
+#[inline(always)]
+pub(crate) unsafe fn popcount_epi64_avx2(v: core::arch::x86_64::__m256i) -> core::arch::x86_64::__m256i {
+    use core::arch::x86_64::*;
+    // SAFETY: caller guarantees avx2.
+    unsafe {
+        #[rustfmt::skip]
+        let lookup = _mm256_setr_epi8(
+            0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+            0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        );
+        let low_mask = _mm256_set1_epi8(0x0f);
+        let lo = _mm256_and_si256(v, low_mask);
+        let hi = _mm256_and_si256(_mm256_srli_epi16::<4>(v), low_mask);
+        let cnt = _mm256_add_epi8(_mm256_shuffle_epi8(lookup, lo), _mm256_shuffle_epi8(lookup, hi));
+        _mm256_sad_epu8(cnt, _mm256_setzero_si256())
+    }
+}
+
+/// Per-u64-lane popcount of one zmm via the nibble LUT + `vpsadbw`.
+#[cfg(target_feature = "avx512bw")]
+#[inline(always)]
+pub(crate) unsafe fn popcount_epi64_avx512(v: core::arch::x86_64::__m512i) -> core::arch::x86_64::__m512i {
+    use core::arch::x86_64::*;
+    // SAFETY: caller guarantees avx512bw.
+    unsafe {
+        let lookup = _mm512_set4_epi32(0x0403_0302, 0x0302_0201, 0x0302_0201, 0x0201_0100);
+        let low_mask = _mm512_set1_epi8(0x0f);
+        let lo = _mm512_and_si512(v, low_mask);
+        let hi = _mm512_and_si512(_mm512_srli_epi16::<4>(v), low_mask);
+        let cnt = _mm512_add_epi8(_mm512_shuffle_epi8(lookup, lo), _mm512_shuffle_epi8(lookup, hi));
+        _mm512_sad_epu8(cnt, _mm512_setzero_si512())
+    }
+}
+
 /// AVX2 nibble-LUT popcount (Muła, Kurz, Lemire 2017), 32 bytes per step.
 #[cfg(target_feature = "avx2")]
 pub fn popcount_avx2(words: &[u64]) -> usize {

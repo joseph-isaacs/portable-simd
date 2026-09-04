@@ -12,24 +12,24 @@ bitpacking::filter::filter_byte_lut:
 	mov qword ptr [rsp + 40], rsi
 	mov qword ptr [rsp + 48], rcx
 	cmp rsi, rcx
-	jne .LBB18_15
+	jne .LBB31_15
 	mov rbx, rsi
 	xor eax, eax
 	test rsi, rsi
-	je .LBB18_2
+	je .LBB31_2
 	mov qword ptr [rsp + 8], r9
 	xor ecx, ecx
 	mov qword ptr [rsp], 0
 	xor eax, eax
 	xor ebp, ebp
 	xor r12d, r12d
-	jmp .LBB18_4
-.LBB18_7:
+	jmp .LBB31_4
+.LBB31_7:
 	inc r12
 	mov rbp, rdx
 	cmp rbx, r12
-	je .LBB18_8
-.LBB18_4:
+	je .LBB31_8
+.LBB31_4:
 	mov r13, rax
 	mov r14d, ecx
 	mov rax, qword ptr [rsp + 24]
@@ -52,10 +52,10 @@ bitpacking::filter::filter_byte_lut:
 	or rax, r13
 	add ecx, r14d
 	cmp ecx, 63
-	jbe .LBB18_7
+	jbe .LBB31_7
 	mov rdi, qword ptr [rsp]
 	cmp rdi, qword ptr [rsp + 8]
-	jae .LBB18_14
+	jae .LBB31_14
 	mov rsi, qword ptr [rsp + 16]
 	mov qword ptr [rsi + 8*rdi], rax
 	inc rdi
@@ -63,25 +63,25 @@ bitpacking::filter::filter_byte_lut:
 	add ecx, -64
 	mov rax, rdx
 	xor edx, edx
-	jmp .LBB18_7
-.LBB18_8:
+	jmp .LBB31_7
+.LBB31_8:
 	test ecx, ecx
-	je .LBB18_9
+	je .LBB31_9
 	mov rsi, qword ptr [rsp + 8]
 	mov rdi, qword ptr [rsp]
 	cmp rdi, rsi
-	jae .LBB18_13
+	jae .LBB31_13
 	mov rdx, qword ptr [rsp + 16]
 	mov qword ptr [rdx + 8*rdi], rax
 	mov eax, ecx
-	jmp .LBB18_12
-.LBB18_2:
+	jmp .LBB31_12
+.LBB31_2:
 	xor edi, edi
-	jmp .LBB18_12
-.LBB18_9:
+	jmp .LBB31_12
+.LBB31_9:
 	xor eax, eax
 	mov rdi, qword ptr [rsp]
-.LBB18_12:
+.LBB31_12:
 	shl rdi, 6
 	add rdi, rax
 	mov rax, rdi
@@ -93,17 +93,17 @@ bitpacking::filter::filter_byte_lut:
 	pop r15
 	pop rbp
 	ret
-.LBB18_15:
-	lea r9, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.1]
+.LBB31_15:
+	lea r9, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.4]
 	lea rsi, [rsp + 40]
 	lea rdx, [rsp + 48]
 	xor edi, edi
 	xor ecx, ecx
 	call qword ptr [rip + core::panicking::assert_failed::<usize, usize>@GOTPCREL]
-.LBB18_14:
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.3]
+.LBB31_14:
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.6]
 	mov rsi, qword ptr [rsp + 8]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
-.LBB18_13:
-	lea rdx, [rip + .Lanon.304d81c3d1ee12b02a4bfe6c59582894.2]
+.LBB31_13:
+	lea rdx, [rip + .Lanon.9d0b7dd9e45d7c2ebe49315d8fa047ce.5]
 	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
