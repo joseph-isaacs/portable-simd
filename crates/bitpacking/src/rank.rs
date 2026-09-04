@@ -73,6 +73,7 @@ pub(crate) unsafe fn popcount_epi64_avx2(v: core::arch::x86_64::__m256i) -> core
 
 /// Per-u64-lane popcount of one zmm via the nibble LUT + `vpsadbw`.
 #[cfg(target_feature = "avx512bw")]
+#[allow(dead_code)] // unused when avx512vpopcntdq is enabled
 #[inline(always)]
 pub(crate) unsafe fn popcount_epi64_avx512(v: core::arch::x86_64::__m512i) -> core::arch::x86_64::__m512i {
     use core::arch::x86_64::*;
