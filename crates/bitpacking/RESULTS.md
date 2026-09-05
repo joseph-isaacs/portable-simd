@@ -500,6 +500,27 @@ across >16 lanes on AArch64 (LLVM, `vectorToScalarBitmask`), (4) `extract_dyn` /
 API in portable-simd. The two AArch64 lowering holes found under the pinned nightly are already
 gone with LLVM 23 (`asm/a64-llvm23/` has the kernels rebuilt with `rustc 1.100.0-nightly`).
 
+### After llvm/llvm-project#203420 (merged 2026-09-03; measured with `llc` from upstream `main`)
+
+`ir/mask_to_bitmask*.ll` through `llc -O2 -mtriple=aarch64` (`*.main.s` next to them):
+
+| case | LLVM 23.1.1 | upstream main | note |
+|---|---|---|---|
+| `Mask<i64,8>` (`u64x8` compare, select scan) | 18, stack `str`/`ldr` | 13, in registers | fixed by #203420 (lane narrowing) |
+| `Mask<i32,8>` | 13 | 9 | fixed by #203420 |
+| `Mask<i32,16>` / `Mask<i16,16>` | 20 / 15 | 15 / 11 | fixed by #203420 |
+| `Mask<i16,32>` | 24 | 20 | narrowing helps; still split into two 16-lane reductions + `bfi` |
+| `Mask<i8,32>` | 16 | 16 | **open**: 2 x (3 self-`addp`) + `umov` x2 + `bfi`; target 9 |
+| `Mask<i8,64>` | 30 | 30 | **open**: 4 x (3 self-`addp`) + `umov` x4 + `bfi` x2 + `orr`; target 15 |
+| `first_set()` on 32 lanes | – | 15 (`shrn` pack + `rbit`/`clz`) | `performCTTZCombine` |
+| `first_set()` on 64 lanes | – | 32 | **open**: full bitmask + `rbit`/`clz`; the cttz combine stops at 32 lanes |
+| store `<64 x i1>` | – | 27 (12 `addp`, 4 `str`) | **open**: same split as `m64`, written as four 2-byte stores |
+
+The remaining cases are all the same shape: the generic type legaliser splits `<32|64 x i1>` in
+`SplitVecOp_BITCAST` before `vectorToScalarBitmask` runs, so the fix is a pre-legalisation
+`ISD::BITCAST` combine (as `performCTTZCombine` does) that emits the `addp` tree across the
+16-lane pieces; see the sketch in the session notes and `ir/mask_to_bitmask.ideal.s`.
+
 ## Comparison with vortex's bit filter
 
 `vortex-data/vortex` (`vortex-array/src/arrays/bool/compute/filter.rs`, commit 265b705) filters a
