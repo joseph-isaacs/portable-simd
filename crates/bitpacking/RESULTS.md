@@ -513,8 +513,8 @@ gone with LLVM 23 (`asm/a64-llvm23/` has the kernels rebuilt with `rustc 1.100.0
 | `Mask<i8,32>` | 16 | 16 | **open**: 2 x (3 self-`addp`) + `umov` x2 + `bfi`; target 9 |
 | `Mask<i8,64>` | 30 | 30 | **open**: 4 x (3 self-`addp`) + `umov` x4 + `bfi` x2 + `orr`; target 15 |
 | `first_set()` on 32 lanes | – | 15 (`shrn` pack + `rbit`/`clz`) | `performCTTZCombine` |
-| `first_set()` on 64 lanes | – | 32 | **open**: full bitmask + `rbit`/`clz`; the cttz combine stops at 32 lanes |
-| store `<64 x i1>` | – | 27 (12 `addp`, 4 `str`) | **open**: same split as `m64`, written as four 2-byte stores |
+| `first_set()` on 64 lanes | – | 32 (LLVM repro: cttz of bitmask) / 28 (what portable-simd emits on aarch64: `select` + `reduce_min`, `orr` x4 + `umin` x3 + `uminv`) | **open, Rust side**: `Mask::first_set` only takes the bitmask route under `cfg!(target_feature = "sse")`; with the `addp` tree a cttz-of-bitmask is ~16 instrs |
+| `*out = mask.to_bitmask()` (the loop body of `bytes_to_bits_portable`) | – | 29: LLVM folds bitcast+store into `store <64 x i1>`, then 12 self-`addp` + four 2-byte `str` | **open**: same split as `m64`; target is the `addp` tree + one `str d` |
 
 The remaining cases are all the same shape: the generic type legaliser splits `<32|64 x i1>` in
 `SplitVecOp_BITCAST` before `vectorToScalarBitmask` runs, so the fix is a pre-legalisation
