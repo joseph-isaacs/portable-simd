@@ -521,6 +521,31 @@ The remaining cases are all the same shape: the generic type legaliser splits `<
 `ISD::BITCAST` combine (as `performCTTZCombine` does) that emits the `addp` tree across the
 16-lane pieces; see the sketch in the session notes and `ir/mask_to_bitmask.ideal.s`.
 
+### Implemented: cross-piece `addp` tree (llvm fork branch `claude/bitpacking-operations-tzucsy`, commit 0730faf770)
+
+`AArch64ISelLowering.cpp`: `wideBoolVectorToBitmask` + a pre-legalisation `BITCAST` combine and a
+`STORE` combine for `<32|64 x i1>` compare results (the BITCAST combine is now registered without
+SVE). Tests added to `vec-combine-compare-to-bitmask.ll`; `cttz-of-bool-vector-bitcast.ll` and
+`sve-fixed-length-masked-expandloads.ll` regenerated (both shrink). 200k random inputs checked
+against a scalar reference under qemu; AArch64 CodeGen lit suite: only tool-availability failures.
+
+| case (`llc -O2`, patched) | before | after |
+|---|---|---|
+| `Mask<i8,64>::to_bitmask()` | 30 | 15 |
+| `Mask<i8,32>::to_bitmask()` | 16 | 9 |
+| `Mask<i16,32>::to_bitmask()` | 20 | 12 |
+| `*out = mask.to_bitmask()` loop body (64 lanes) | 29, four `str h` | 17, one `st1 {v.d}[0]`; identical to `bytes_to_bits_neon` |
+| `<64 x i1>` store | 27 | 16 |
+| `cttz_v64i8_too_many_lanes` (LLVM test) | 12 `addp` + 7 glue | 4 `addp` + `fmov` |
+
+portable-simd side (`crates/core_simd/src/masks.rs`): `first_set`/`last_set` now take the bitmask
+route on aarch64 NEON too, and test `trailing_zeros() < N` / `63 - leading_zeros() < N` instead of
+`bitmask == 0`, because InstCombine turns the zero test into a second vector reduction of the same
+mask (`orr` x3 + `cmtst` + `umaxv` next to the `addp` tree). With both changes
+`Mask::<i8,64>::first_set()` is `cmeq` x4, `bic` x4, `addp` x4, `fmov`, `rbit`, `clz`, `cmp`, `cset`
+(22 instrs incl. loads) instead of the `select` + `umin` x3 + `uminv` path (28); `last_set` likewise.
+x86 codegen is unchanged apart from `tzcnt` + `cmp` replacing `test` + branch.
+
 ## Comparison with vortex's bit filter
 
 `vortex-data/vortex` (`vortex-array/src/arrays/bool/compute/filter.rs`, commit 265b705) filters a

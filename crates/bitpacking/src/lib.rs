@@ -26,6 +26,7 @@ pub mod expand;
 pub mod filter;
 pub mod indices;
 pub mod rank;
+pub mod probes;
 pub mod rank_index;
 pub mod select;
 pub mod unpack;

@@ -363,8 +363,18 @@ where
     #[must_use = "method returns the index and does not mutate the original value"]
     pub fn first_set(self) -> Option<usize> {
         // If bitmasks are efficient, using them is better
-        if cfg!(target_feature = "sse") && N <= 64 {
-            return self.to_bitmask().lowest_one().map(|i| i as usize);
+        // x86 has movemask; on AArch64 NEON the bitmask is an `addp` tree (LLVM 23+),
+        // cheaper than the index-min reduction below.
+        if cfg!(any(
+            target_feature = "sse",
+            all(target_arch = "aarch64", target_feature = "neon")
+        )) && N <= 64
+        {
+            // `trailing_zeros` is N (64 for an empty u64 bitmask) when nothing is set;
+            // testing that instead of `bitmask == 0` keeps InstCombine from turning the
+            // zero test into a second, separate vector reduction of the mask.
+            let tz = self.to_bitmask().trailing_zeros() as usize;
+            return (tz < N).then_some(tz);
         }
 
         // To find the first set index:
@@ -431,8 +441,17 @@ where
     #[must_use = "method returns the index and does not mutate the original value"]
     pub fn last_set(self) -> Option<usize> {
         // If bitmasks are efficient, using them is better
-        if cfg!(target_feature = "sse") && N <= 64 {
-            return self.to_bitmask().highest_one().map(|i| i as usize);
+        // x86 has movemask; on AArch64 NEON the bitmask is an `addp` tree (LLVM 23+),
+        // cheaper than the index-min reduction below.
+        if cfg!(any(
+            target_feature = "sse",
+            all(target_arch = "aarch64", target_feature = "neon")
+        )) && N <= 64
+        {
+            // Same idea as `first_set`: 63 - 64 wraps for an empty mask, so the range test
+            // covers "nothing set" without a separate zero test on the bitmask.
+            let idx = 63usize.wrapping_sub(self.to_bitmask().leading_zeros() as usize);
+            return (idx < N).then_some(idx);
         }
 
         // To find the first set index:
