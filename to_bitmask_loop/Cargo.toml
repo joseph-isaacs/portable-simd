@@ -1,0 +1,11 @@
+[package]
+name = "to_bitmask_loop"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[profile.release]
+codegen-units = 1
+debug = 1
